@@ -13,13 +13,17 @@ Extras para o Odysseus (o teu chat de IA self-hosted): ferramentas dentro do cha
 | **Tradução** | pt/en/es/fr/de/…, voz, tradução por foto, sugestão de resposta a hóspedes | DeepL e/ou Groq |
 | **Finanças** | movimentos, dívidas com avisos, metas, recibos por foto, despesas mensais | Groq (recibos) |
 | **Gym + Treino+** | plano, séries, descanso, peso, fotos de progresso, técnica por IA, relatórios médicos | Groq/Gemini |
-| **Estudo** | trabalhos, etapas, fontes com citação APA, resumo de links/PDF, notas por cadeira | Groq |
+| **Estudo** | trabalhos, etapas, fontes com citação APA (exportar para Word), resumo de links/PDF com OCR para PDFs digitalizados, notas por cadeira, avisos de prazos e um separador **Planeador** de 14 dias | Groq |
 | **Notícias** | feed por fontes e temas de cada pessoa + resumo do dia | Groq |
 | **Compor** | rascunho de email/WhatsApp e botão para escolher a app de envio | Groq |
 | **Voos** | guarda voos, abre no Flightradar24, atrasos com chave AirLabs | AirLabs (opcional) |
 | **Glicose** | gráfico do LibreLinkUp e histórico. A calculadora de insulina vem **desligada** | LibreLinkUp |
 | **Canva** | criar designs e exportar PNG | conta de developer Canva |
 | **Caixa de ideias** | utilizadores enviam ideias/bugs, a IA organiza em tarefas | Groq |
+| **Emails** | liga contas IMAP/SMTP (Gmail, Outlook, Yahoo, iCloud, outras) com os servidores já preenchidos e teste de ligação | palavras-passe de aplicação do fornecedor |
+| **Setup** | o assistente passo a passo: chaves, serviços, ativar/saltar cada ferramenta (só administradores, abre na primeira vez) | — |
+| **Abas das Tools** | ordenar e esconder as abas em *Settings → Appearance*; a ordem fica no servidor e vale para o browser e a app | — |
+| **Idioma** | English / Português (Appearance e primeiro ecrã da app) | — |
 | **Tema Ryoku** | tema extra para o Odysseus (arte GPL-3.0 do projeto ryoku.dev) | — |
 | **App Android** | widgets, lembretes com ações, tradutor, calendário, bloqueio por impressão digital | Android Studio/SDK |
 

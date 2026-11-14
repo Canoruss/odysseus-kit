@@ -20,6 +20,10 @@ Extras for Odysseus (your self-hosted AI chat): in-chat tools, an Android app, a
 | **Glucose** | LibreLinkUp chart and history. The insulin calculator comes **disabled** | LibreLinkUp |
 | **Canva** | create designs and export PNG | Canva developer account |
 | **Idea Box** | users submit ideas/bugs, AI organizes them into tasks | Groq |
+| **Emails** | connect IMAP/SMTP accounts (Gmail, Outlook, Yahoo, iCloud, custom) with the right servers pre-filled and a connection test | app passwords from your provider |
+| **Setup** | the step-by-step wizard: keys, services, enable/skip each tool (admins only, opens on first use) | — |
+| **Tool tabs** | reorder and hide the tabs under *Settings → Appearance*; the order is saved on the server and shared by browser and app | — |
+| **Language** | English / Português switch (Appearance and the app's first screen) | — |
 | **Ryoku Theme** | extra theme for Odysseus (GPL-3.0 art from the ryoku.dev project) | — |
 | **Android App** | widgets, reminders with actions, translator, calendar, fingerprint lock | Android Studio/SDK |
 
