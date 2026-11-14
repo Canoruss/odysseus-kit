@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#282c34">
+<title>Odysseus — sem ligação</title>
+<style>
+  html,body{margin:0;height:100%;background:#282c34;color:#e6e6e6;font-family:system-ui,-apple-system,Roboto,sans-serif}
+  main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center}
+  svg{width:72px;height:72px;margin-bottom:16px}
+  h1{font-size:1.3rem;margin:0 0 8px}
+  p{color:#a9adb5;margin:0 0 24px;line-height:1.5;max-width:320px}
+  button{display:block;width:240px;margin:8px auto;padding:13px;border:0;border-radius:12px;font-size:1rem;font-weight:600}
+  .primary{background:#e06c75;color:#fff}
+  .secondary{background:#3a3f4b;color:#e6e6e6}
+</style>
+</head>
+<body>
+<main>
+  <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12 L76 70 L24 70 Z" fill="#e06c75"/><path d="M14 80 Q50 68 86 80" stroke="#e06c75" stroke-width="7" fill="none" stroke-linecap="round"/></svg>
+  <h1>Sem ligação ao Odysseus</h1>
+  <p>Confirma que o Tailscale está ligado e que tens internet. A app tenta de novo sozinha a cada 10 segundos.</p>
+  <button class="primary" onclick="retry()">Tentar de novo</button>
+  <button class="secondary" onclick="window.OdysseusNative && OdysseusNative.openTailscale()">Abrir Tailscale</button>
+</main>
+<script>
+  function retry(){ if (window.OdysseusNative) OdysseusNative.reload(); else location.href = 'https://YOUR-SERVER.YOUR-TAILNET.ts.net/'; }
+  setInterval(retry, 10000);
+</script>
+</body>
+</html>

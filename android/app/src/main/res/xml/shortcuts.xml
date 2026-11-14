@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="new_chat" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_new_chat">
+        <intent android:action="org.odysseuskit.app.NEW_CHAT" android:targetPackage="org.odysseuskit.app"
+            android:targetClass="org.odysseuskit.app.MainActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="new_task" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_new_task">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
+            android:targetClass="org.odysseuskit.app.QuickTaskActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="translate" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_translate">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
+            android:targetClass="org.odysseuskit.app.TranslateActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="gemini" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_gemini">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
+            android:targetClass="org.odysseuskit.app.GeminiLauncher" />
+    </shortcut>
+    <shortcut android:shortcutId="settings" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_settings">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
+            android:targetClass="org.odysseuskit.app.SettingsActivity" />
+    </shortcut>
+</shortcuts>

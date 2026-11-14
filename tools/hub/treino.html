@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Treino+</title>
+<style>
+:root{--bg:#0f1115;--card:#181b22;--line:#2a2f3a;--txt:#e8eaf0;--mut:#8b93a5;--ac:#3ddc97;--ac2:#4aa3ff;--bad:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--txt);padding:14px;max-width:760px;margin:auto}
+h1{font-size:22px;margin:4px 0 12px}h2{font-size:16px;margin:0 0 10px;color:var(--ac)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--mut);font-size:15px}
+.tabs button.on{background:var(--ac);color:#06210f;border-color:var(--ac);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+input,select{background:#0c0e12;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px;font-size:15px;width:100%}
+.row{display:flex;gap:8px;margin-bottom:8px}.row>*{flex:1}
+.btn{background:var(--ac);color:#06210f;border:0;border-radius:10px;padding:10px 14px;font-size:15px;font-weight:600;cursor:pointer}
+.btn.alt{background:var(--card);color:var(--txt);border:1px solid var(--line)}.btn.bad{background:none;color:var(--bad);border:1px solid var(--bad);padding:4px 9px;font-size:13px}
+.item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.item:last-child{border:0}
+.mut{color:var(--mut);font-size:13px}.big{font-size:44px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:8px}.stat{flex:1;background:#0c0e12;border-radius:10px;padding:10px;text-align:center}.stat b{display:block;font-size:20px;color:var(--ac2)}
+canvas{width:100%;height:180px;background:#0c0e12;border-radius:10px}.hide{display:none}
+</style></head><body>
+<h1>💪 Treino+</h1><div id='gl' class=mut style='margin-bottom:6px'></div><div class=mut style='margin-bottom:8px'>Guardado no servidor, ligado ao peso do Gym.</div>
+<div class="tabs"><button data-t="log" class="on">Treino</button><button data-t="timer">Descanso</button><button data-t="peso">Peso</button><button data-t="hist">Histórico</button></div>
+
+<section id="log"><div class="card"><h2>Registar série</h2>
+<div class="row"><select id="plan"></select><select id="ex"></select></div>
+<div class="row"><input id="kg" type="number" step="0.5" placeholder="Carga (kg)"><input id="reps" type="number" placeholder="Repetições"><input id="rpe" type="number" min="1" max="10" placeholder="Esforço 1-10"></div>
+<button class="btn" id="add">Adicionar série</button> <span class="mut" id="msg"></span></div>
+<div class="card"><h2>Hoje</h2><div id="today"></div></div></section>
+
+<section id="timer" class="hide"><div class="card"><h2>Descanso entre séries</h2><div class="big" id="clock">01:30</div>
+<div class="row"><button class="btn alt" data-s="60">1:00</button><button class="btn alt" data-s="90">1:30</button><button class="btn alt" data-s="120">2:00</button><button class="btn alt" data-s="180">3:00</button></div>
+<div class="row"><button class="btn" id="go">Iniciar</button><button class="btn alt" id="stop">Parar</button></div></div></section>
+
+<section id="peso" class="hide"><div class="card"><h2>Peso corporal</h2>
+<div class="row"><input id="w" type="number" step="0.1" placeholder="kg"><input id="wd" type="date"><button class="btn" id="addw" style="flex:0 0 110px">Guardar</button></div>
+<div class="row"><input id="goal" type="number" placeholder="Meta (kg)"></div><canvas id="cv" width="700" height="180"></canvas>
+<div class="stats" style="margin-top:10px"><div class="stat"><span class="mut">Atual</span><b id="s1">–</b></div><div class="stat"><span class="mut">Meta</span><b id="s2">–</b></div><div class="stat"><span class="mut">Faltam</span><b id="s3">–</b></div></div></div></section>
+
+<section id="hist" class="hide"><div class="card"><h2>Resumo</h2><div class="stats"><div class="stat"><span class="mut">Treinos</span><b id="h1">0</b></div><div class="stat"><span class="mut">Séries</span><b id="h2">0</b></div><div class="stat"><span class="mut">Volume (kg)</span><b id="h3">0</b></div></div></div>
+<div class="card"><h2>Últimos treinos</h2><div id="hl"></div><br><button class="btn alt" id="exp">Exportar JSON</button> <button class="btn bad" id="clr">Apagar tudo</button></div></section>
+
+<script>
+const PLANS=__PLANS__;
+fetch('/finance/glucose/now').then(r=>r.json()).then(j=>{if(j&&j.v)document.getElementById('gl').textContent='Glicose '+Math.round(j.v)+' mg/dL'+(j.age<5400?'':' (leitura antiga)')+(j.v<100?' · come hidratos antes de treinar':j.v>250?' · convém adiar o treino intenso':'')}).catch(()=>{});let D={sets:[],weights:[],goal:null};const API='__API__';
+const store={set(d){D=d;clearTimeout(store.t);store.t=setTimeout(()=>fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)}).catch(()=>{}),300)}};
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toISOString().slice(0,10);
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+ ['log','timer','peso','hist'].forEach(s=>$(s).classList.toggle('hide',s!==b.dataset.t));render()});
+Object.keys(PLANS).forEach(p=>$('plan').add(new Option(p,p)));
+function fillEx(){$('ex').innerHTML='';PLANS[$('plan').value].forEach(e=>$('ex').add(new Option(e,e)))}$('plan').onchange=fillEx;fillEx();
+$('add').onclick=()=>{const kg=+$('kg').value,reps=+$('reps').value;if(!reps){$('msg').textContent='Indica as repetições.';return}
+ D.sets.push({d:today(),t:Date.now(),plan:$('plan').value,ex:$('ex').value,kg,reps,rpe:+$('rpe').value||null});store.set(D);$('msg').textContent='Guardado ✔';$('reps').value='';render();startTimer(90)};
+function sets(d){return D.sets.filter(s=>s.d===d)}
+function render(){
+ $('today').innerHTML=sets(today()).map((s,i)=>`<div class="item"><span><b>${s.ex}</b> · ${s.kg} kg × ${s.reps}${s.rpe?' · RPE '+s.rpe:''}</span><button class="btn bad" onclick="del(${s.t})">✕</button></div>`).join('')||'<span class="mut">Ainda sem séries hoje.</span>';
+ const days=[...new Set(D.sets.map(s=>s.d))].sort().reverse();
+ $('h1').textContent=days.length;$('h2').textContent=D.sets.length;$('h3').textContent=Math.round(D.sets.reduce((a,s)=>a+s.kg*s.reps,0));
+ $('hl').innerHTML=days.slice(0,10).map(d=>{const x=sets(d);return `<div class="item"><span><b>${d}</b><br><span class="mut">${[...new Set(x.map(s=>s.ex))].join(', ')}</span></span><span class="mut">${x.length} séries</span></div>`}).join('')||'<span class="mut">Sem histórico.</span>';
+ const w=D.weights.slice().sort((a,b)=>a.d<b.d?-1:1),last=w.length?w[w.length-1].w:null;
+ $('s1').textContent=last?last+' kg':'–';$('s2').textContent=D.goal?D.goal+' kg':'–';$('s3').textContent=last&&D.goal?(Math.abs(D.goal-last)).toFixed(1)+' kg':'–';
+ if(D.goal)$('goal').value=D.goal;draw(w)}
+window.del=t=>{D.sets=D.sets.filter(s=>s.t!==t);store.set(D);render()};
+$('addw').onclick=()=>{const w=+$('w').value;if(!w)return;D.weights=D.weights.filter(x=>x.d!==($('wd').value||today()));D.weights.push({d:$('wd').value||today(),w});store.set(D);$('w').value='';render()};
+$('goal').onchange=()=>{D.goal=+$('goal').value||null;store.set(D);render()};
+function draw(w){const c=$('cv'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);if(w.length<1)return;
+ const vals=w.map(x=>x.w).concat(D.goal?[D.goal]:[]),mn=Math.min(...vals)-1,mx=Math.max(...vals)+1,X=i=>30+i*(c.width-50)/Math.max(1,w.length-1),Y=v=>c.height-20-(v-mn)/(mx-mn)*(c.height-40);
+ g.strokeStyle='#2a2f3a';g.fillStyle='#8b93a5';g.font='12px sans-serif';for(let k=0;k<=3;k++){const v=mn+(mx-mn)*k/3,y=Y(v);g.beginPath();g.moveTo(28,y);g.lineTo(c.width,y);g.stroke();g.fillText(v.toFixed(0),2,y+4)}
+ if(D.goal){g.strokeStyle='#ffb84a';g.setLineDash([6,5]);g.beginPath();g.moveTo(28,Y(D.goal));g.lineTo(c.width,Y(D.goal));g.stroke();g.setLineDash([])}
+ g.strokeStyle='#3ddc97';g.lineWidth=2.5;g.beginPath();w.forEach((p,i)=>i?g.lineTo(X(i),Y(p.w)):g.moveTo(X(i),Y(p.w)));g.stroke();
+ g.fillStyle='#3ddc97';w.forEach((p,i)=>{g.beginPath();g.arc(X(i),Y(p.w),4,0,7);g.fill()})}
+let left=90,iv=null;const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function startTimer(s){left=s;clearInterval(iv);$('clock').textContent=fmt(left);iv=setInterval(()=>{left--;$('clock').textContent=fmt(Math.max(0,left));
+ if(left<=0){clearInterval(iv);$('clock').textContent='Pronto! 💪';try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}},1000)}
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{left=+b.dataset.s;$('clock').textContent=fmt(left)});
+$('go').onclick=()=>startTimer(left>0?left:90);$('stop').onclick=()=>{clearInterval(iv)};
+$('exp').onclick=()=>{const t=JSON.stringify(D,null,1);navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>alert('Copiado.'),()=>alert(t))};
+$('clr').onclick=()=>{if(confirm('Apagar todos os dados?')){D={sets:[],weights:[],goal:null};store.set(D);render()}};
+$('wd').value=today();render();fetch(API).then(r=>r.json()).then(j=>{D={sets:j.sets||[],weights:j.weights||[],goal:j.goal||null};render()}).catch(()=>{});
+</script></body></html>

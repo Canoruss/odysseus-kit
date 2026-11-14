@@ -1,0 +1,17 @@
+# segredos e dados locais: nunca no repositorio
+*.env
+*.keystore
+*.jks
+keystore.properties
+local.properties
+tools/hub/*.json
+tools/hub/inbox-img/
+tools/hub/*.pid
+*.log
+__pycache__/
+*.pyc
+node_modules/
+android/**/build/
+android/.gradle/
+*.apk
+tts-cache/

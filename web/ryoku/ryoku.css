@@ -1,0 +1,120 @@
+/* Ryoku look for Odysseus: near-black paper, warm ink, burnt-orange accent,
+ * Fraunces / Space Grotesk / Space Mono. Palette and type taken from ryoku.dev
+ * (design tokens only, written here from scratch). Loaded after style.css.
+ * !important is needed: theme.js sets the same variables inline on <html>.
+ * Only active when the 'Ryoku' theme is selected (html.theme-ryoku). To revert: remove the <link> to ryoku.css from static/index.html. */
+
+@font-face { font-family: "Fraunces Variable"; src: url(/static/ryoku/fonts/fraunces.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Space Grotesk Variable"; src: url(/static/ryoku/fonts/space-grotesk.woff2) format("woff2"); font-weight: 300 700; font-display: swap; }
+@font-face { font-family: "Space Mono"; src: url(/static/ryoku/fonts/space-mono-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Space Mono"; src: url(/static/ryoku/fonts/space-mono-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+
+html.theme-ryoku {
+  --bg: #000 !important;
+  --fg: #cdc4ba !important;
+  --fg-dim: #b0a9a0 !important;
+  --fg-muted: #958f87 !important;
+  --panel: #0a0a0a !important;
+  --border: rgba(205, 196, 186, 0.26) !important;
+  --red: #ce5e32 !important;
+  --accent: #ce5e32 !important;
+  --accent-primary: #ce5e32 !important;
+  --accent-error: #ce5e32 !important;
+  --brand-color: #cdc4ba !important;
+  --sidebar-bg: #000 !important;
+  --user-bubble-bg: #141414 !important;
+  --ai-bubble-bg: transparent !important;
+  --bubble-border: rgba(205, 196, 186, 0.13) !important;
+  --input-bg: #0a0a0a !important;
+  --input-border: rgba(205, 196, 186, 0.26) !important;
+  --send-btn-bg: #cdc4ba !important;
+  --send-btn-hover: #b0a9a0 !important;
+  --toggle-active: #ce5e32 !important;
+  --code-bg: #050505 !important;
+  --code-fg: #cdc4ba !important;
+  --hl-bg: #050505 !important;
+  --hl-fg: #cdc4ba !important;
+  --hl-keyword: #ce5e32 !important;
+  --hl-string: #6daf8c !important;
+  --hl-comment: #807a73 !important;
+  --hl-function: #6ea5cf !important;
+  --hl-number: #9299d3 !important;
+  --hl-builtin: #6ea5cf !important;
+  --hl-variable: #cdc4ba !important;
+  --hl-params: #b0a9a0 !important;
+  --green: #6daf8c !important;
+  --color-success: #6daf8c !important;
+  --warn: #ce5e32 !important;
+  --color-warning: #ce5e32 !important;
+  --color-accent: #6ea5cf !important;
+  --accent-warm: #ce5e32 !important;
+  --f-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif !important;
+  --font-family: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif !important;
+  --mono: "Space Mono", ui-monospace, monospace !important;
+}
+
+html.theme-ryoku,
+html.theme-ryoku body {
+  background: var(--bg) !important;
+  color: var(--fg);
+  font-family: var(--font-family);
+}
+
+/* Subtle paper grain over the whole app (pointer-events off, so it never blocks clicks). */
+html.theme-ryoku body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url(/static/ryoku/grain.png);
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Editorial serif for titles and brand text, mono for code. */
+html.theme-ryoku :is(h1, h2, h3, .modal-header h4, .brand, .logo-text) {
+  font-family: var(--f-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+html.theme-ryoku :is(code, pre, kbd, .mono) {
+  font-family: var(--mono);
+}
+
+/* Square corners, like the Ryoku site (2px). Only on boxes that are not pills. */
+html.theme-ryoku :is(.modal-content, pre, textarea, select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {
+  border-radius: 2px !important;
+}
+
+
+/* ---- Arte (marmore "dithered", de ryoku.dev, GPL-3.0; uso privado). So no tema Ryoku. ----
+ * Camadas fixas, sem cliques, misturadas em "screen" sobre o preto: ficam como marcas de agua. */
+html.theme-ryoku body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url(/static/ryoku/art/torii.png) center bottom / cover no-repeat;
+  opacity: 0.09;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 9990;
+}
+html.theme-ryoku::after {
+  content: "";
+  position: fixed;
+  right: 1vw;
+  bottom: 0;
+  width: min(34vw, 460px);
+  height: 88vh;
+  background: url(/static/ryoku/art/hero.png) right bottom / contain no-repeat;
+  opacity: 0.13;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 9991;
+}
+@media (max-width: 800px) {
+  html.theme-ryoku::after { width: 80vw; height: 60vh; right: -10vw; opacity: 0.10; }
+  html.theme-ryoku body::before { opacity: 0.07; background-position: center top; }
+}
