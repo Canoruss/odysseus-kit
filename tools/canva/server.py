@@ -129,12 +129,15 @@ _RYOKU_CSS = ("<style>@font-face{font-family:'Space Grotesk Variable';src:url(/s
               "@font-face{font-family:'Fraunces Variable';src:url(/static/ryoku/fonts/fraunces.woff2) format('woff2');font-weight:100 900}"
               "</style>")
 def ryoku_skin(html):
-    if html.lstrip()[:1] in "{[": return html   # JSON (AJAX): nao mexer
+    head = html[:300].lower()
+    if "<!doctype" not in head and "<html" not in head: return html   # so documentos HTML (nao JSON, texto ou fragmentos AJAX)
     import re as _r
     html = _r.sub(r"border-radius:\s*(\d+)px", lambda m: "border-radius:%dpx" % (2 if int(m.group(1)) < 999 else int(m.group(1))), html)
     html = _r.sub(r"linear-gradient\(90deg,\s*var\(--ac\),\s*var\(--ac2\)\)", "var(--ac)", html)
     html = _r.sub(r"#([0-9a-fA-F]{6})\b", lambda m: _RYOKU.get(m.group(1).lower(), m.group(0)), html)
-    return html.replace("</head>", _RYOKU_CSS + "</head>", 1) if "</head>" in html else _RYOKU_CSS + html
+    if "</head>" in html: return html.replace("</head>", _RYOKU_CSS + "</head>", 1)
+    m = _r.match(r"\s*<!doctype[^>]*>", html, _r.I)
+    return html[:m.end()] + _RYOKU_CSS + html[m.end():] if m else _RYOKU_CSS + html
 
 
 class Hd(BaseHTTPRequestHandler):

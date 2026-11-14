@@ -9,6 +9,7 @@ ROOT = os.path.dirname(_TOOLS)
 DICT_PATH = os.environ.get("KIT_I18N_FILE", os.path.join(ROOT, "i18n", "en.json"))
 SUPPORTED = ("en", "pt")
 SOURCE = "pt"
+_LOOKS_CODE = re.compile(r"getElementById|=>|\bfunction\b|\.textContent|;\s*(return|if|const|let)\b|\bawait\b|document\.|\{\{")
 _PH = re.compile(r"\{[^{}]*\}")
 _cache = {"mtime": None, "exact": None, "pats": None}
 
@@ -37,13 +38,20 @@ def _load():
     d = json.load(open(DICT_PATH, encoding="utf-8")).get("web", {})
     exact, pats = {}, []
     for k, v in d.items():
+        if _LOOKS_CODE.search(k): continue      # entradas com codigo JS partem os <script>
         if not v or v.strip() == k.strip():
             continue
         if _PH.search(k):
             parts, toks = _PH.split(k), _PH.findall(k)
             tokmap, pieces = {}, []
+            fixed = "".join(parts).strip()
+            if len(re.findall(r"[^\W\d_]", fixed)) < 6:      # padroes com pouco texto fixo apanham pedacos de outras frases
+                continue
             for i, p in enumerate(parts):
-                pieces.append(re.escape(p).replace(r"\ ", r"\s+"))
+                piece = re.escape(p).replace(r"\ ", r"\s+")
+                if i == 0 and re.match(r"\w", p): piece = r"(?<![\w])" + piece
+                if i == len(parts) - 1 and re.search(r"\w$", p): piece = piece + r"(?![\w])"
+                pieces.append(piece)
                 if i < len(parts) - 1:
                     tokmap.setdefault(toks[i], i)
                     pieces.append(r"(?P<g%d>[^<>\n]{0,120}?)" % i)
@@ -81,8 +89,13 @@ def _tr_chunk(text, big_exact, pats, mode):
     big, exact = big_exact if big_exact else (None, {})
     for rx, v, tokmap in pats:
         def rep(m, v=v, tokmap=tokmap):
-            res = _PH.sub(lambda t: m.group("g%d" % tokmap[t.group(0)]) if t.group(0) in tokmap else "", v)
-            return _esc(res, mode)
+            # escapar so o texto traduzido; o que foi capturado ({x}) ja esta no formato da origem e fica intacto
+            parts, toks, out = _PH.split(v), _PH.findall(v), []
+            for i, p in enumerate(parts):
+                out.append(_esc(p, mode))
+                if i < len(toks):
+                    out.append(m.group("g%d" % tokmap[toks[i]]) if toks[i] in tokmap else "")
+            return "".join(out)
         text = rx.sub(rep, text)
     if big:
         def rep2(m):

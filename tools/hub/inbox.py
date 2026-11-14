@@ -118,15 +118,20 @@ def _task_html(it, owner, who):
     dele = f'<button class="alt" onclick="if(confirm(\'Apagar?\'))act(\'del\',\'{it["id"]}\')">Apagar</button>' if owner else ""
     return (f'<div class="task {"done" if it["done"] else ""}">{chk}<div class="b"><div class="t">{html.escape(it["title"])}</div>'
             f'<div>{who_tag}<span class="tag">{CATS.get(it.get("category"), "💡 Ideia")}</span><span class="tag {"alta" if pr=="alta" else ""}">{html.escape(pr)}</span>'
-            f'<span class="tag">{time.strftime("%d/%m", time.localtime(it["ts"]))}</span></div>'
+            f'<span class="tag">{time.strftime("%d/%m", time.localtime(_num(it.get("ts"))))}</span></div>'
             f'<div class="d">{html.escape(it.get("details", ""))}</div><div class="timg">{imgs}</div></div>{dele}</div>')
+
+
+def _num(x):
+    try: return float(x or 0)
+    except (TypeError, ValueError): return 0.0
 
 
 def render(user):
     owner = user == OWNER
     items = [i for i in _load()["items"] if owner or i["author"] == user]
-    open_ = sorted([i for i in items if not i["done"]], key=lambda i: (PRIO.get(i.get("priority"), 1), -i["ts"]))
-    done = sorted([i for i in items if i["done"]], key=lambda i: -(i.get("done_ts") or 0))
+    open_ = sorted([i for i in items if not i["done"]], key=lambda i: (PRIO.get(i.get("priority"), 1), -_num(i.get("ts"))))
+    done = sorted([i for i in items if i["done"]], key=lambda i: -_num(i.get("done_ts")))
     sub = ("Tudo o que o membro e tu enviam. Marca como feito quando estiver corrigido." if owner
            else "Escreve aqui ideias, problemas ou dúvidas sobre a app e o servidor, com fotos se ajudar. O administrador vê tudo organizado e o que ficar resolvido aparece na lista de feitos.")
     o_html = "".join(_task_html(i, owner, user) for i in open_) or '<div style="color:#8b93a5;padding:8px">Nada pendente. 🎉</div>'

@@ -67,12 +67,27 @@ def xml_strings(text):
     return out
 
 
+_CODE = re.compile(r"getElementById|=>|\bfunction\b|\.textContent|;\s*(return|if|const|let)\b|\bawait\b|document\.|\{\{")
+
+
+def clean_segments(segs):
+    """Tira segmentos que sao codigo JS e guarda so os textos (literais) que estao la dentro."""
+    out = set()
+    for s in segs:
+        if not _CODE.search(s):
+            out.add(s); continue
+        for l in lits(s):
+            l = l.strip()
+            if len(l) > 2 and re.search(r"[A-Za-zÀ-ÿ]{3}", l) and (" " in l or re.search(r"[À-ÿ]", l)) and not _CODE.search(l) and not re.search(r"[{}();=]|^[\w./-]+$", l):
+                out.add(l)
+    return out
+
 def collect():
     web, java = set(), set()
     for pat in ("tools/hub/*.py", "tools/hub/*.html", "tools/translate/*.py", "tools/canva/*.py", "tools/jobs/*.py", "web/ody-extras.js", "setup/wizard.py"):
         for f in glob.glob(os.path.join(ROOT, pat)):
             txt = open(f, encoding="utf-8").read()
-            web |= html_segments(txt) | raw_html_segments(txt)
+            web |= clean_segments(html_segments(txt) | raw_html_segments(txt))
     for f in glob.glob(os.path.join(ROOT, "android/app/src/main/java/**/*.java"), recursive=True):
         java |= java_literals(open(f, encoding="utf-8").read())
     for f in glob.glob(os.path.join(ROOT, "android/app/src/main/res/**/*.xml"), recursive=True) + [os.path.join(ROOT, "android/app/src/main/AndroidManifest.xml")]:
