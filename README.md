@@ -2,69 +2,127 @@
 
 **English** · [Português](README.pt.md)
 
-Extras for Odysseus (your self-hosted AI chat): in-chat tools, an Android app, and a step-by-step setup assistant. Everything is optional: each person enables only what they want, and can disable the rest in **Appearance**.
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Canoruss/odysseus-kit?include_prereleases)](../../releases/latest)
+![Status](https://img.shields.io/badge/status-pre--release-orange)
+![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Portugu%C3%AAs-lightgrey)
 
-> Status: **pre-release**. It was extracted from a personal installation and has not yet been tested by third parties. Open an issue if something fails.
+**A toolbox for Odysseus (your self-hosted AI chat).** It adds in-chat tools (translation, finance, gym, study, news, flights, …), a signed Android app, and a step-by-step setup assistant, so you can go from a bare Odysseus to a personal assistant in one evening.
+
+- **Everything is optional.** Enable what you want; hide the rest in *Settings → Appearance*. Skipped tools keep their settings, so you can switch them on later.
+- **Bring your own keys.** You pick the AI providers (Groq, Gemini, DeepL, Claude…) and paste your own keys. Nothing is shared with the author.
+- **Private by design.** Keys stay on your server. Each person who logs in gets their own data.
+
+> **Status: pre-release.** Extracted from a personal installation and not yet tested by third parties. If something fails, please [open an issue](../../issues).
+
+## Contents
+
+[What's included](#whats-included) · [How it fits together](#how-it-fits-together) · [Quick start](#quick-start) · [Android app](#download-the-android-app) · [Security and privacy](#security-and-privacy) · [Troubleshooting](#troubleshooting) · [Contributing](#contributing) · [License](#license)
 
 ## What's included
 
+### Assistant tools
+
 | Tool | What it does | Requires |
 |---|---|---|
-| **Translation** | pt/en/es/fr/de/…, voice, photo translation, response suggestions for guests | DeepL and/or Groq |
-| **Finance** | transactions, debts with alerts, goals, photo receipts, monthly expenses | Groq (receipts) |
-| **Gym + Training+** | plan, sets, rest, weight, progress photos, AI technique analysis, medical reports | Groq/Gemini |
-| **Study** | assignments, steps, sources with APA citation, link/PDF summary, notes by subject | Groq |
-| **News** | feed by sources and topics for each person + daily summary | Groq |
-| **Compose** | email/WhatsApp draft and button to choose the sending app | Groq |
+| **Translation** | pt/en/es/fr/de/…, voice, photo translation, conversation mode, reply suggestions for guests | DeepL and/or Groq |
+| **Compose** | email/WhatsApp draft with a button to pick the sending app | Groq |
 | **Prompts** | describe what you want in your language and get a ready-to-paste English prompt (chat, image, code, video, music, agent), with a warning when important details are missing | Groq (Claude Haiku as fallback) |
-| **Usage bar** | slim bar above your name showing Claude session/weekly limits, Groq, DeepL and AirLabs usage | none (reads each service's own usage data) |
-| **Choice buttons** | when the assistant needs a decision it ends the reply with `[[opcoes: Yes \| No]]` and the chat shows tap-able buttons | none |
-| **Flights** | saves flights, opens in Flightradar24, delays with AirLabs key | AirLabs (optional) |
-| **Glucose** | LibreLinkUp chart and history. The insulin calculator comes **disabled** | LibreLinkUp |
+| **News** | feed by sources and topics for each person, topic boosts, muted words, daily summary | Groq |
+| **Study** | assignments with steps, sources with APA citation, link/PDF summary (with OCR for scans), Word export of references, deadline reminders, 14-day planner | Groq |
+| **Emails** | connect IMAP/SMTP accounts (Gmail, Outlook, Yahoo, iCloud, custom) with servers pre-filled and a connection test | app passwords from your provider |
+| **Flights** | saved flights, Flightradar24 links, live status and delay alerts | AirLabs key (optional) |
 | **Canva** | create designs and export PNG | Canva developer account |
 | **Idea Box** | users submit ideas/bugs, AI organizes them into tasks | Groq |
-| **Emails** | connect IMAP/SMTP accounts (Gmail, Outlook, Yahoo, iCloud, custom) with the right servers pre-filled and a connection test | app passwords from your provider |
-| **Setup** | the step-by-step wizard: keys, services, enable/skip each tool (admins only, opens on first use) | — |
-| **Tool tabs** | reorder and hide the tabs under *Settings → Appearance*; the order is saved on the server and shared by browser and app | — |
-| **Language** | English / Português switch (Appearance and the app's first screen) | — |
-| **Ryoku Theme** | extra theme for Odysseus (GPL-3.0 art from the ryoku.dev project) | — |
-| **Android App** | widgets, reminders with actions, translator, calendar, fingerprint lock | Android Studio/SDK |
+
+### Personal tracking
+
+| Tool | What it does | Requires |
+|---|---|---|
+| **Finance** | transactions, debts with alerts, goals, photo receipts, monthly expenses | Groq (receipts) |
+| **Gym + Training+** | plan, sets, rest, weight, progress photos, AI technique analysis, medical reports | Groq/Gemini |
+| **Glucose** | LibreLinkUp chart and history, manual and editable log. The insulin calculator ships **disabled** | LibreLinkUp |
+
+### Interface and platform
+
+| Feature | What it does |
+|---|---|
+| **Usage bar** | slim bar above your name with Claude session/weekly limits and Groq, DeepL and AirLabs usage |
+| **Choice buttons** | when the assistant needs a decision it ends its reply with `[[opcoes: Yes \| No]]` and the chat shows tap-able buttons (the `opcoes` keyword is fixed) |
+| **Tool tabs** | reorder and hide tabs in *Settings → Appearance*; saved on the server, shared by browser and app |
+| **Language** | English / Português switch for the tools and the app |
+| **Ryoku theme** | extra theme for Odysseus and all tool pages (GPL-3.0 art from the ryoku.dev project) |
+| **Setup assistant** | step-by-step wizard for keys and services, with *Test* and *Skip* on every step (admins only) |
+| **Android app** | widgets, reminders with actions, native translator, calendar, quick voice task, fingerprint lock |
+
+## How it fits together
+
+```
+ Phone / browser ──HTTPS──▶ your proxy (Tailscale Serve, Caddy, nginx)
+                                 │
+                 ┌───────────────┼────────────────┐
+                 ▼               ▼                ▼
+            Odysseus       KIT tools (127.0.0.1)   Scheduled jobs
+        + ody-extras.js    Hub :8792 · Translate   reminders, flights,
+        (tabs, theme, bar)   :8791 · Canva :8793   study deadlines
+```
+
+The Android app is a shell around **your** Odysseus: it shows whatever your server serves. The KIT tabs appear once `ody-extras.js` and the tools are installed on that server.
 
 ## Quick start
 
+**You need:** Linux, Python 3.11+, Odysseus running in Docker, and a way to reach it over HTTPS (for example [Tailscale](https://tailscale.com)). Details in [docs/INSTALL.md](docs/INSTALL.md).
+
 ```bash
-git clone <this repository> ~/odysseus-kit && cd ~/odysseus-kit
+git clone https://github.com/Canoruss/odysseus-kit.git ~/odysseus-kit && cd ~/odysseus-kit
 python3 -I setup/wizard.py        # opens http://127.0.0.1:8790 and guides you step by step
 bash scripts/start.sh             # starts the tools
 ```
 
-The assistant explains each service, tells you where to get the keys, has a **Test** button, and lets you **skip** what you don't want. What you skip remains disabled but is not lost: you can come back and enable it with the same instructions.
+For each service the wizard explains what it is, where to get the key, offers a **Test** button, and lets you **skip** it. Afterwards, load `ody-extras.js` into Odysseus as described in the install guide. Inside Odysseus the same wizard lives under **Tools → Setup**.
 
-Full guide: [docs/INSTALL.md](docs/INSTALL.md). Android app: [docs/APK.md](docs/APK.md). Languages (English/Portuguese): [docs/I18N.md](docs/I18N.md).
-
-Inside Odysseus there is also **Tools → Setup**, the same assistant, which opens automatically the first time; and the Android app starts with a language and server screen.
+| Guide | Topic |
+|---|---|
+| [docs/INSTALL.md](docs/INSTALL.md) | full installation, ports, proxy, `ody-extras.js` |
+| [docs/APK.md](docs/APK.md) | install or build the Android app |
+| [docs/I18N.md](docs/I18N.md) | languages and adding translations |
+| [docs/GLUCOSE.md](docs/GLUCOSE.md) | glucose tool and insulin calculator setup |
 
 ## Download the Android app
 
-You don't need to compile: the signed APK is in **[Releases](../../releases/latest)** (`Odysseus-KIT-<version>.apk`).
+No compiling needed: the signed APK is in **[Releases](../../releases/latest)** (`Odysseus-KIT-<version>.apk`).
 
-1. Download it to your phone and install it (enable "install from unknown sources" when Android asks).
-2. When opening, choose the language and enter your Odysseus address; click **Test connection**.
-3. Log in to Odysseus and follow the assistant in **Tools → Setup**.
+1. Download it on your phone and install it (allow "install unknown apps" when Android asks).
+2. Open it, choose a language, enter your Odysseus address and tap **Test connection**.
+3. Log in and follow **Tools → Setup**.
 
-Always verify the certificate fingerprint before installing. The release indicates the `SHA-256` of the file and the signing certificate, and you can verify them with `sha256sum` and `apksigner verify --print-certs`. The APK requires your own Odysseus server: the app only shows what your server serves it.
+Verify the download first: the release notes list the file's `SHA-256` and the signing certificate fingerprint (`sha256sum`, `apksigner verify --print-certs`). The app requires your own Odysseus server.
 
 ## Security and privacy
 
-- Keys are stored only in `~/.config/odysseus-kit/*.env` (mode 600), never in the repository.
-- Tools listen only on `127.0.0.1` and should be published behind your proxy (Tailscale Serve, Caddy, nginx) **with the same authentication as Odysseus**.
-- Features that use AI send text, audio, or photos to the provider you choose (Groq, Gemini, DeepL…). Read their policies.
-- `python3 scripts/scan.py` searches for secrets and personal data before you publish changes.
+- Keys live only in `~/.config/odysseus-kit/*.env` (mode 600), never in the repository.
+- Tools listen on `127.0.0.1` only. Publish them behind your proxy **with the same authentication as Odysseus**.
+- AI features send text, audio or photos to the provider you choose (Groq, Gemini, DeepL…). Read their policies.
+- Run `python3 scripts/scan.py` before publishing changes: it looks for secrets and personal data.
 
 ## Health disclaimer
 
-Glucose, Gym, and medical reports are **support tools**, not medical advice. The insulin calculator does not include values: it only works if you set your doctor's values, and it is at your own risk. See [docs/GLUCOSE.md](docs/GLUCOSE.md).
+Glucose, Gym and medical reports are **support tools, not medical advice**. The insulin calculator ships without values and only works if you enter your doctor's values, at your own risk. See [docs/GLUCOSE.md](docs/GLUCOSE.md).
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| Tool tabs don't show in Odysseus | `ody-extras.js` is loaded in `index.html`; hard-refresh (Ctrl+F5 twice); in the app, close and reopen it |
+| Tab opens blank or shows 502 | the tool isn't running: `bash scripts/start.sh`, then check the port table in the install guide |
+| A tool says a key is missing | open **Tools → Setup**, enter the key and press **Test** |
+| App can't connect | the address must be HTTPS and reachable from the phone (is Tailscale on?) |
+| Page text is in the wrong language | *Settings → Appearance → Tools language* |
+
+## Contributing
+
+Issues and pull requests are welcome. Please run `python3 scripts/scan.py` before opening a PR, keep personal data out of commits, and add both English and Portuguese strings (see [docs/I18N.md](docs/I18N.md)).
 
 ## License
 
-[AGPL-3.0](LICENSE), the same as Odysseus, of which this project is a derivative work. If you modify and provide the service over a network, you must share the code. Attributions in [NOTICE.md](NOTICE.md).
+[AGPL-3.0](LICENSE), the same as Odysseus, of which this project is a derivative work. If you modify it and offer it as a service over a network, you must share your code. Attributions in [NOTICE.md](NOTICE.md).

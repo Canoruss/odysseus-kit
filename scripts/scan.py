@@ -42,8 +42,10 @@ for dp, dn, fn in os.walk(ROOT):
                         continue
                     print(f"{rel}:{i}: [{name}] {line.strip()[:110]}")
                     hits += 1
+            # o endereco publico do proprio repositorio e permitido
+            chk = line.replace("Canoruss/odysseus-kit", "")
             for term in priv:
-                if term.lower() in line.lower():
+                if term.lower() in chk.lower():
                     print(f"{rel}:{i}: [termo privado] {line.strip()[:110]}")
                     hits += 1
 print(f"\n{hits} problema(s) encontrado(s)." if hits else "\nLimpo: nada encontrado.")
