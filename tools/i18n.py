@@ -85,8 +85,24 @@ def _esc(s, mode):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
+# Frases com numeros/variaveis que o dicionario nao apanha (tempos relativos, etc.). Aplicadas antes do dicionario.
+_RULES = [
+    (re.compile(r"'há '\s*\+\s*(.+?)\s*\+\s*' (min|h|d)'"), r"\1+' \2 ago'"),      # JS: 'há '+x+' min'
+    (re.compile(r"\bhá (\d+) (min|h|d)\b"), r"\1 \2 ago"),
+    (re.compile(r"\bhá (\{[^{}]*\}) (min|h|d)\b"), r"\1 \2 ago"),
+    (re.compile(r"\bhá (\d+) dias?\b"), r"\1 d ago"),
+    (re.compile(r"(\d[\d.,]*) g de hidratos"), r"\1 g of carbs"),
+    (re.compile(r"\(editado\)"), "(edited)"),
+    (re.compile(r"(?<=>)agora(?=<)"), "now"),
+    (re.compile(r"(?<=<h1>)Rotina(?= <span)"), "Routine"),
+    (re.compile(r"(?<=>)Rotina(?= <)"), "Routine"),
+]
+
+
 def _tr_chunk(text, big_exact, pats, mode):
     big, exact = big_exact if big_exact else (None, {})
+    for rx, rv in _RULES:
+        text = rx.sub(rv, text)
     for rx, v, tokmap in pats:
         def rep(m, v=v, tokmap=tokmap):
             # escapar so o texto traduzido; o que foi capturado ({x}) ja esta no formato da origem e fica intacto

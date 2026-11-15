@@ -417,3 +417,82 @@ def prefs_set(base, u, body):
     with open(t, "w", encoding="utf-8") as f: _j.dump(d, f)
     _o.chmod(t, 0o600); _o.replace(t, prefs_file(base))
     return {"ok": True, "order": order, "hidden": hidden}
+
+# ---------- Prompts (gerador de prompts em ingles) ----------
+PROMPT_KINDS = {
+    "chat": "a prompt for a general AI assistant (ChatGPT, Claude, Gemini). Structure it with: role, context, task, constraints, output format. Use clear sections.",
+    "image": "a prompt for an image generator (Stable Diffusion XL / Midjourney / Gemini). One dense descriptive paragraph: subject, setting, composition, lighting, style, camera/lens, colour palette, quality tags. Also give a negative prompt.",
+    "code": "a prompt for an AI coding assistant (Claude Code, Copilot, Cursor). Include: goal, tech stack, files or inputs, requirements, edge cases, acceptance criteria, what NOT to change.",
+    "video": "a prompt for an AI video generator (Veo, Sora, Runway). Describe: subject, action over time, camera movement, shot type, setting, lighting, mood, duration and style.",
+    "system": "a system prompt for a custom AI agent or GPT. Include: identity, goals, tone, rules, what to refuse, tools usage, output format, and 2 short example exchanges.",
+    "music": "a prompt for an AI music generator (Suno, Udio). Include: genre, mood, tempo/BPM, instruments, vocal style, song structure, and lyrics themes.",
+}
+
+def _bridge_key():
+    from kitconfig import secret_file
+    try:
+        for l in open(secret_file("bridge")):
+            for k in ("BRIDGE_API_KEY=", "API_KEY=", "BRIDGE_TOKEN="):
+                if l.startswith(k): return l.split("=", 1)[1].strip().strip("'\"")
+    except OSError:
+        pass
+    return ""
+
+def _haiku(system, user, timeout=60):
+    msg = (system + "\nDo not use any tools. Answer directly with the JSON only.\n\nUSER REQUEST:\n<<<\n" + user + "\n>>>")
+    body = {"model": "claude-code-haiku", "messages": [{"role": "user", "content": msg}]}
+    rq = urllib.request.Request("http://127.0.0.1:8787/v1/chat/completions", json.dumps(body).encode(),
+                                {"Content-Type": "application/json", "Authorization": "Bearer " + _bridge_key()})
+    out = json.load(urllib.request.urlopen(rq, timeout=timeout))["choices"][0]["message"]["content"]
+    return out[out.find("{"): out.rfind("}") + 1]
+
+def prompt_gen(j):
+    what = str(j.get("text") or "").strip()[:3000]
+    if not what: raise ValueError("escreve o que queres")
+    kind = j.get("kind") if j.get("kind") in PROMPT_KINDS else "chat"
+    detail = "concise (under 120 words)" if j.get("detail") == "short" else "detailed and thorough"
+    sysm = ("You are an expert prompt engineer. The user describes, usually in Portuguese, what they want an AI to do. "
+            f"Write {PROMPT_KINDS[kind]} The prompt must be in English, {detail}, ready to copy and paste, and must not invent personal facts; "
+            "use [placeholders in brackets] for details the user did not give. "
+            "Then judge what IMPORTANT information is missing for a good result (audience, goal, format, length, style, platform, key facts...). "
+            "Only list things that really change the result; if nothing important is missing, return an empty list. "
+            "Reply ONLY with JSON: {\"prompt\": \"the English prompt\", \"negative\": \"negative prompt (only for image/video, else empty)\", "
+            "\"missing\": [\"short question in European Portuguese about each important missing detail (max 5)\"], "
+            "\"tips\": \"1 short tip in European Portuguese\"}.")
+    engine = "Groq"
+    try:
+        r = json.loads(study.ai(sysm, what, js=True))
+    except Exception:
+        engine = "Claude Haiku (reserva)"
+        r = json.loads(_haiku(sysm, what))
+    miss = [str(x).strip()[:200] for x in (r.get("missing") or []) if str(x).strip()][:5]
+    return {"prompt": str(r.get("prompt", "")).strip()[:6000], "negative": str(r.get("negative", "")).strip()[:1500] if kind in ("image", "video") else "",
+            "missing": miss, "tips": str(r.get("tips", "")).strip()[:500], "engine": engine}
+
+PROMPT = """<h1>Prompts</h1><p class='mut'>Diz o que queres, em português, e eu escrevo um prompt em inglês pronto a colar no ChatGPT, Claude, Gemini, gerador de imagens, vídeo ou música.</p>
+<div class='card'><select id='k'><option value='chat'>Assistente (ChatGPT/Claude/Gemini)</option><option value='image'>Imagem</option><option value='code'>Código</option>
+<option value='video'>Vídeo</option><option value='music'>Música</option><option value='system'>Agente / system prompt</option></select>
+<select id='dt'><option value=''>detalhado</option><option value='short'>curto</option></select>
+<textarea id='tx' placeholder='ex: uma imagem de um gato astronauta em Lisboa ao pôr do sol, estilo aguarela'></textarea>
+<p><button onclick='go(this)'>Gerar prompt</button> <span id='st' class='mut'></span></p></div>
+<div id='out' class='card' style='display:none;margin-top:10px'><b>Prompt</b><textarea id='pr' style='min-height:200px;margin-top:6px'></textarea>
+<p><button type='button' onclick='cp("pr",this)'>Copiar</button> <button type='button' onclick='sh()'>Partilhar</button></p>
+<div id='ngw' style='display:none'><b>Negative prompt</b><textarea id='ng' style='min-height:70px;margin-top:6px'></textarea><p><button type='button' onclick='cp("ng",this)'>Copiar</button></p></div>
+<div id='ms' style='display:none;margin-top:8px;padding:8px 10px;border-left:3px solid #d9a441;background:rgba(217,164,65,.08)'><b>⚠ Falta informação importante</b><ul id='msl' style='margin:6px 0 4px 18px;padding:0'></ul><span class='mut'>Acrescenta estes detalhes ao pedido e gera outra vez, ou preenche os [campos] no prompt.</span></div>
+<div class='mut' id='tp'></div></div>
+<div id='hw' style='margin-top:14px'></div>
+<script>
+const $=id=>document.getElementById(id);const HK='kit-prompt-hist';
+function hist(){try{return JSON.parse(localStorage.getItem(HK)||'[]')}catch(e){return[]}}
+function drawH(){const h=hist();$('hw').innerHTML=h.length?'<h2>Recentes</h2>':'';h.forEach((x,i)=>{const d=document.createElement('div');d.className='card';d.style.margin='6px 0';d.style.cursor='pointer';
+d.textContent=x.q.slice(0,90);d.title='abrir';d.onclick=()=>show(x.r,x.k);$('hw').appendChild(d)})}
+function show(r,k){$('out').style.display='';$('pr').value=r.prompt||'';$('ng').value=r.negative||'';$('ngw').style.display=r.negative?'':'none';const m=r.missing||[];$('ms').style.display=m.length?'':'none';$('msl').innerHTML='';m.forEach(q=>{const li=document.createElement('li');li.textContent=q;$('msl').appendChild(li)});$('tp').textContent=(r.tips?('Dica: '+r.tips+' '):'')+(r.engine?('· '+r.engine):'')}
+async function go(b){const t=$('tx').value.trim();if(!t){$('st').textContent='Escreve o que queres.';return}b.disabled=true;$('st').textContent='A escrever…';
+try{const r=await (await fetch('/finance/prompt/gen',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,kind:$('k').value,detail:$('dt').value})})).json();
+if(r.error){$('st').textContent=r.error}else{$('st').textContent='';show(r,$('k').value);const h=hist();h.unshift({q:t,k:$('k').value,r:r});localStorage.setItem(HK,JSON.stringify(h.slice(0,12)));drawH()}}
+catch(e){$('st').textContent='Erro. Tenta outra vez.'}b.disabled=false}
+async function cp(id,b){const v=$(id).value;try{await navigator.clipboard.writeText(v)}catch(e){$(id).select();document.execCommand('copy')}const o=b.textContent;b.textContent='Copiado ✓';setTimeout(()=>b.textContent=o,1500)}
+function sh(){const v=$('pr').value;try{if(window.parent&&window.parent.OdysseusNative&&window.parent.OdysseusNative.shareText){window.parent.OdysseusNative.shareText('Prompt',v);return}}catch(e){}
+if(navigator.share)navigator.share({text:v}).catch(()=>{});else cp('pr',document.querySelector('[onclick="sh()"]'))}
+drawH();
+</script>"""

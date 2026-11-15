@@ -18,7 +18,7 @@ import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
 import inbox
 import routine
-import study, extras
+import study, extras, usage
 import reports, media
 IDLE = 180
 LAST = [0.0]
@@ -926,6 +926,9 @@ class H(BaseHTTPRequestHandler):
         if self.path.split("?")[0].rstrip("/") == "/prefs":
             if not u: return self.send(403, json.dumps({"error": "sem acesso"}))
             return self.send(200, json.dumps(extras.prefs_get(HUB, u), ensure_ascii=False))
+        if self.path.split("?")[0].rstrip("/") == "/usage":          # barra de uso (todos os utilizadores com sessao)
+            if not u: return self.send(403, json.dumps({"error": "sem acesso"}))
+            return self.send(200, json.dumps(usage.get(), ensure_ascii=False))
         if self.path.split("?")[0].startswith("/setup"):
             return self.setup_proxy("GET")
         if self.path.split("?")[0].rstrip("/") == "/i18n.json":     # dicionario para o front-end (publico, sem dados pessoais)
@@ -943,13 +946,14 @@ class H(BaseHTTPRequestHandler):
             return self.redirect(nxt, {"Set-Cookie": i18n.cookie_header(l)})
         if self.path.startswith("/inbox") and u in (OWNER,) + MLIKE:
             return inbox.get(self, u)
-        if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") in ("/news", "/compose", "/flight", "/emails"):
+        if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") in ("/news", "/compose", "/flight", "/emails", "/prompt"):
             pth = self.path.split("?")[0].rstrip("/"); qq = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             if pth == "/news": return self.send(200, page(extras.news_page(u, qq), "Notícias"))
             if pth == "/emails":
                 sug = () if u == MEMBER else ()
                 return self.send(200, page(extras.emails_page(self.headers.get("Cookie", ""), sug), "Emails"))
             if pth == "/compose": return self.send(200, page(study.CSS + extras.COMPOSE, "Compor"))
+            if pth == "/prompt": return self.send(200, page(study.CSS + extras.PROMPT, "Prompts"))
             fq = re.sub(r"\s", "", (qq.get("q") or [""])[0]).upper()
             if fq and extras.FN.match(fq): return self.redirect(extras.flight_links(fq)[0][1])
             return self.send(200, page(extras.flight_page(u, "Número de voo inválido (ex: TP1234)." if fq else (qq.get("m") or [""])[0][:100]), "Voos"))
@@ -1031,12 +1035,14 @@ class H(BaseHTTPRequestHandler):
             return self.setup_proxy("POST")
         if self.path.startswith("/inbox") and u in (OWNER,) + MLIKE:
             return inbox.post(self, u)
-        if u in (OWNER,) + MLIKE and self.path.split("?")[0] in ("/news/save", "/news/digest", "/compose/draft", "/flight/add", "/flight/del", "/flight/status", "/emails/add", "/emails/del"):
+        if u in (OWNER,) + MLIKE and self.path.split("?")[0] in ("/news/save", "/news/digest", "/compose/draft", "/prompt/gen", "/flight/add", "/flight/del", "/flight/status", "/emails/add", "/emails/del"):
             pth = self.path.split("?")[0]
             try:
                 if pth in ("/emails/add", "/emails/del"):
                     j = self.read_json(4000); ck = self.headers.get("Cookie", "")
                     return self.send(200, json.dumps(extras.emails_add(ck, j) if pth == "/emails/add" else extras.emails_del(ck, j)))
+                if pth == "/prompt/gen":
+                    return self.send(200, json.dumps(extras.prompt_gen(self.read_json(6000)), ensure_ascii=False))
                 if pth in ("/news/digest", "/compose/draft"):
                     j = self.read_json(4000)
                     return self.send(200, json.dumps(extras.news_digest(u) if pth == "/news/digest" else extras.compose_draft(j)))

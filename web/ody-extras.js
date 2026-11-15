@@ -33,6 +33,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   ];
   const SPEECH = { pt: 'pt-PT', en: 'en-GB', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT', zh: 'zh-CN', ja: 'ja-JP' };
   const ICON = {
+    spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
     fin: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6v2m0 8v2"/>',
     news: '<path d="M4 5h13a2 2 0 0 1 2 2v12H6a2 2 0 0 1-2-2z"/><path d="M19 9h1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1M7 9h8M7 13h8M7 16h5"/>',
     compose: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
@@ -81,6 +82,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     const cp = toolItem('tool-compose-btn', 'Compor', ICON.compose); cp.addEventListener('click', () => openFrame('Compor', '/finance/compose'));
     const em2 = toolItem('tool-emails-btn', 'Emails', ICON.mail); em2.addEventListener('click', () => openFrame('Emails', '/finance/emails'));
     const fl = toolItem('tool-flight-btn', 'Voos', ICON.plane); fl.addEventListener('click', () => openFrame('Voos', '/finance/flight'));
+    const pg = toolItem('tool-prompt-btn', 'Prompts', ICON.spark); pg.addEventListener('click', () => openFrame('Prompts', '/finance/prompt'));
     const im = toolItem('tool-gemini-images-btn', 'Imagens (Gemini)', ICON.img);
     tr.addEventListener('click', openTranslator);
     im.addEventListener('click', openGeminiImages);
@@ -94,14 +96,14 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     sec.appendChild(glu);
     sec.appendChild(cv);
     sec.appendChild(ib);
-    sec.appendChild(nw); sec.appendChild(cp); sec.appendChild(fl); sec.appendChild(em2);
+    sec.appendChild(nw); sec.appendChild(cp); sec.appendChild(pg); sec.appendChild(fl); sec.appendChild(em2);
     orderTools(sec);
     return true;
   }
 
   // Ordem da barra Tools: primeiro as usadas no dia a dia, depois o resto.
   const TOOL_ORDER = ['tool-email-btn', 'tool-calendar-btn', 'tool-tasks-btn', 'tool-notes-btn',
-    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
+    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-prompt-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
 
   // ---- Idioma (i18n) ----
   // Dicionario PT -> EN servido pelo hub (/finance/i18n.json). O idioma escolhido fica em localStorage + cookie 'kitlang' (as paginas do hub seguem o cookie).
@@ -118,13 +120,20 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   let I18N = null;
   const norm = x => String(x).replace(/\s+/g, ' ').trim();
   function tr(x) { if (!I18N || kitLang() === 'pt') return x; const v = I18N[norm(x)]; return v ? v : x; }
-  const KIT_OWNED = '[id^="tool-"],#ody-tr,#ody-frame-modal,.ody-menu,[data-ody-tool],.ody-lang-row,.ody-order-box';
+  const UMAP = [[/Uso dos modelos \(carrega para ver tudo\)/g, 'Model usage (tap to see all)'], [/uso dos modelos…/g, 'model usage…'], [/repõe/g, 'resets'], [/(^|\s)às(?=\s|$)/g, '$1at'],
+    [/\bsáb\b/g, 'Sat'], [/\bseg\b/g, 'Mon'], [/\bter\b/g, 'Tue'], [/\bqua\b/g, 'Wed'], [/\bqui\b/g, 'Thu'], [/\bsex\b/g, 'Fri'], [/\bdom\b/g, 'Sun'],
+    [/Sessão \(5 h\)/g, 'Session (5 h)'], [/Semana · todos/g, 'Week · all'], [/Semana · /g, 'Week · '], [/sem\./g, 'wk'], [/indisponível/g, 'unavailable'], [/sem acesso/g, 'no access'],
+    [/atualizado/g, 'updated'], [/créditos extra/g, 'extra credits'], [/o plano grátis não tem API de uso/g, 'the free plan has no usage API'],
+    [/Caracteres\/mês/g, 'Characters/month'], [/Consultas\/mês/g, 'Queries/month'], [/Pedidos\/dia/g, 'Requests/day'], [/(\d+) mil de (\d+) mil/g, '$1k of $2k'],
+    [/(\d+) de (\d+) livres/g, '$1 of $2 free'], [/(\d+) de (\d+)/g, '$1 of $2']];
+  function trU(x) { x = String(x == null ? '' : x); if (kitLang() === 'pt') return x; UMAP.forEach(([a, b]) => { x = x.replace(a, b); }); return x; }
+  const KIT_OWNED = '.ody-kit-row,#ody-usage-bar,[id^="tool-"],#ody-tr,#ody-frame-modal,.ody-menu,[data-ody-tool],.ody-lang-row,.ody-order-box';
   function trNode(root) {
     if (!I18N || kitLang() === 'pt' || !root) return;
     const walker = document.createTreeWalker(root.nodeType === 1 ? root : root.parentNode || document.body, NodeFilter.SHOW_TEXT);
     let n; const nodes = [];
     while ((n = walker.nextNode())) nodes.push(n);
-    nodes.forEach(t => { const k = norm(t.nodeValue); if (k.length > 2 && I18N[k]) t.nodeValue = t.nodeValue.replace(t.nodeValue.trim(), I18N[k]); });
+    nodes.forEach(t => { if (t.parentNode && t.parentNode.closest && t.parentNode.closest('[data-ody-lang]')) return; const k = norm(t.nodeValue); if (k.length > 2 && I18N[k]) t.nodeValue = t.nodeValue.replace(t.nodeValue.trim(), I18N[k]); });
     if (root.querySelectorAll) root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el => {
       ['placeholder', 'title', 'aria-label'].forEach(a => { const v = el.getAttribute(a); if (v && I18N[norm(v)]) el.setAttribute(a, I18N[norm(v)]); });
     });
@@ -140,9 +149,56 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     }))).observe(document.body || document.documentElement, { childList: true, subtree: true });
   }).catch(() => { });
 
+  // ---- Barra de uso dos modelos (junto ao utilizador). Esconde-se em Appearance -> "Barra de uso dos modelos". ----
+  (function usageBar() {
+    if (window.top !== window) return;
+    const css = document.createElement('style');
+    css.textContent = '#ody-usage-bar{margin:4px 10px 6px;padding:6px 8px;font-size:11px;line-height:1.25;color:var(--text-secondary,var(--fg,#bbb));opacity:.85;cursor:pointer;border-top:1px solid var(--border,rgba(127,127,127,.25));user-select:none}' +
+      '#ody-usage-bar:hover{opacity:1}#ody-usage-bar .u-r{display:flex;align-items:center;gap:6px;margin:3px 0}#ody-usage-bar .u-l{flex:0 0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:58%}' +
+      '#ody-usage-bar .u-b{flex:1;height:3px;background:rgba(127,127,127,.25);border-radius:2px;overflow:hidden}#ody-usage-bar .u-f{height:100%;background:var(--accent-primary,var(--accent,#6ea5cf))}' +
+      '#ody-usage-bar .u-f.hi{background:#d9a441}#ody-usage-bar .u-f.cr{background:#d9534f}#ody-usage-bar .u-p{flex:0 0 30px;text-align:right;font-variant-numeric:tabular-nums}' +
+      '#ody-usage-bar .u-h{font-weight:600;margin-top:6px;opacity:.9}#ody-usage-bar .u-s{opacity:.6;font-size:10px;margin:-1px 0 2px}#ody-usage-bar .u-x{display:none}#ody-usage-bar.open .u-x{display:block}' +
+      'html[data-theme="ryoku"] #ody-usage-bar,body.theme-ryoku #ody-usage-bar{border-radius:0;font-family:var(--mono,inherit);letter-spacing:.02em}';
+    document.head.appendChild(css);
+    let data = null;
+    const esc = t => trU(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const row = (label, pct, sub) => { const c = pct >= 90 ? ' cr' : pct >= 70 ? ' hi' : '';
+      return '<div class="u-r" title="' + esc(sub || '') + '"><span class="u-l">' + esc(label) + '</span><span class="u-b"><span class="u-f' + c + '" style="width:' + Math.min(100, Math.max(0, pct)) + '%"></span></span><span class="u-p">' + pct + '%</span></div>' + (sub ? '<div class="u-s u-x">' + esc(sub) + '</div>' : ''); };
+    function render() {
+      const ub = document.getElementById('sidebar-user-bar');
+      if (!ub || !ub.parentNode) return;
+      let el = document.getElementById('ody-usage-bar');
+      if (!el) { el = document.createElement('div'); el.id = 'ody-usage-bar'; el.title = trU('Uso dos modelos (carrega para ver tudo)');
+        el.addEventListener('click', () => { el.classList.toggle('open'); try { localStorage.setItem('ody-usage-open', el.classList.contains('open') ? '1' : ''); } catch (_) { } });
+        if (localStorage.getItem('ody-usage-open')) el.classList.add('open'); }
+      if (el.nextSibling !== ub) ub.parentNode.insertBefore(el, ub);
+      if (!data) { el.innerHTML = '<div class="u-s">uso dos modelos…</div>'; return; }
+      let h = '';
+      const cl = (data.items || []).find(x => x.name === 'Claude');
+      if (cl && cl.rows) cl.rows.slice(0, 2).forEach(r => { h += row('Claude · ' + r.label.replace('Sessão (5 h)', '5 h').replace('Semana · todos', 'sem.'), r.pct, r.reset ? 'repõe ' + r.reset : ''); });
+      else if (cl) h += '<div class="u-s">Claude: ' + esc(cl.error || 'indisponível') + '</div>';
+      let x = '';
+      (data.items || []).forEach(it => {
+        const rows = it.name === 'Claude' ? (it.rows || []).slice(2) : (it.rows || []);
+        if (it.name !== 'Claude') x += '<div class="u-h">' + esc(it.name) + '</div>';
+        rows.forEach(r => { x += row(it.name === 'Claude' ? 'Claude · ' + r.label.replace('Semana · ', '') + ' (sem.)' : r.label, r.pct, r.reset); });
+        if (it.error) x += '<div class="u-s">' + esc(it.error) + '</div>';
+        if (it.note) x += '<div class="u-s">' + esc(it.note) + '</div>';
+      });
+      x += '<div class="u-s" style="margin-top:4px">atualizado ' + esc(data.updated || '') + '</div>';
+      el.innerHTML = h + '<div class="u-x">' + x + '</div>';
+      try { applyExtraTools(); } catch (_) { }
+    }
+    function load() { _origFetch('/finance/usage', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(d => { if (d && d.items) { data = d; render(); } }).catch(() => { }); }
+    load(); setInterval(load, 5 * 60 * 1000);
+    new MutationObserver(() => { if (!document.getElementById('ody-usage-bar') && document.getElementById('sidebar-user-bar')) render(); })
+      .observe(document.body || document.documentElement, { childList: true, subtree: true });
+    render();
+  })();
+
   // ---- Appearance: mostrar/esconder as tools extra ----
   const EXTRA_TOOLS = [['tool-email-btn', 'Email (atalho)'], ['tool-finance-btn', 'Finanças'], ['tool-translate-btn', 'Tradução'],
-    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
+    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-prompt-btn', 'Prompts'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
   const XT_KEY = 'ody-extra-tools-hidden';
   function xtHidden() { try { return JSON.parse(localStorage.getItem(XT_KEY) || '{}'); } catch (_) { return {}; } }
   function applyExtraTools() {
@@ -296,9 +352,9 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   <select class="tgt" aria-label="Idioma de destino"></select></div>
  <div class="panes">
   <div class="pane"><textarea class="in" placeholder="Escreve ou cola o texto…" maxlength="15000"></textarea>
-   <div class="bar"><button class="mic" title="Ditar">🎤 Ditar</button><button class="clr" title="Limpar">✕ Limpar</button><span class="info cnt"></span></div></div>
+   <div class="bar"><button class="pst" title="Colar">📋 Colar</button><button class="mic" title="Ditar">🎤 Ditar</button><button class="clr" title="Limpar">✕ Limpar</button><span class="info cnt"></span></div></div>
   <div class="pane"><div class="out ph">Tradução</div>
-   <div class="bar"><button class="cp" title="Copiar">⧉ Copiar</button><button class="ed" title="Editar a tradução">✎ Editar</button><button class="say" title="Ouvir">🔊 Ouvir</button><span class="info st"></span></div></div>
+   <div class="bar"><button class="cp" title="Copiar">⧉ Copiar</button><button class="ed" title="Editar a tradução">✎ Editar</button><button class="say" title="Ouvir">🔊 Ouvir</button><button class="shr" title="Partilhar">↗ Partilhar</button><span class="info st"></span></div></div>
  </div></div>`;
     const $ = s => m.querySelector(s);
     const src = $('.src'), tgt = $('.tgt'), inp = $('.in'), out = $('.out'), st = $('.st'), cnt = $('.cnt');
@@ -343,6 +399,18 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
       if (res) inp.value = res;
       localStorage.setItem(LS('src'), src.value); localStorage.setItem(LS('tgt'), tgt.value);
       run(true);
+    });
+    $('.pst').addEventListener('click', async () => {
+      try { const t = await navigator.clipboard.readText(); if (t) { inp.value = t.slice(0, 15000); run(true); } }
+      catch (_) { st.textContent = 'Cola com toque longo na caixa de texto'; inp.focus(); }
+    });
+    $('.shr').addEventListener('click', async () => {
+      if (out.classList.contains('ph')) return; const t = out.textContent;
+      try {
+        if (window.OdysseusNative && OdysseusNative.shareText) OdysseusNative.shareText('', t);
+        else if (navigator.share) await navigator.share({ text: t });
+        else { await navigator.clipboard.writeText(t); st.textContent = 'Copiado ✓'; }
+      } catch (_) { }
     });
     $('.clr').addEventListener('click', () => { inp.value = ''; run(true); inp.focus(); });
     $('.cp').addEventListener('click', async () => {
@@ -548,7 +616,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
       '<div class="row"><input class="ct" placeholder="…ou escreve aqui e toca num dos botões" style="flex:1;min-width:140px;padding:8px;border-radius:8px;border:1px solid var(--border,#424242);background:var(--bg,#212121);color:inherit"></div>' +
       '<div class="log"></div>';
     const cl = conv.querySelector('.cl'); opts(cl, false, localStorage.getItem(LS('conv')) || 'en');
-    const updCb = () => { const nm = (LANGS.find(l => l[0] === cl.value) || [0, cl.value])[1]; conv.querySelector('.cb').textContent = '🎤 ' + nm; };
+    const updCb = () => { const nm = (LANGS.find(l => l[0] === cl.value) || [0, cl.value])[1]; conv.querySelector('.cb').textContent = '🎤 ' + tr(nm); };
     cl.addEventListener('change', () => { localStorage.setItem(LS('conv'), cl.value); updCb(); }); updCb();
     ex.querySelector('.b-conv').addEventListener('click', () => { conv.style.display = conv.style.display === 'none' ? 'block' : 'none'; });
     const talk = async (from, to) => {
@@ -596,6 +664,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     const apply = () => {
       const r = html.classList.contains('theme-ryoku');
       document.cookie = 'kittheme=' + (r ? 'ryoku' : '') + ';path=/;max-age=31536000;SameSite=Lax';
+      try { if (window.OdysseusNative && OdysseusNative.setTheme) OdysseusNative.setTheme(r ? 'ryoku' : ''); } catch (_) { }
       const m = document.getElementById('ody-frame-modal');
       if (m) {
         const box = m.firstChild, fr = m.querySelector('iframe');
@@ -656,6 +725,49 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     try { const N = window.OdysseusNative; if (N && typeof N.stopSpeak === 'function') N.stopSpeak(); } catch (_) { } }
   window.odyOpenTranslator = openTranslator;
 
+
+  // ---- botões de escolha no chat: o Claude termina com [[opcoes: Sim | Não]] e aqui viram botões ----
+  (function choiceButtons() {
+    const RX = /\[\[\s*(?:opcoes|opções|options)\s*:\s*([^\]]+?)\s*\]\]/i;
+    function send(text) {
+      const inp = Array.from(document.querySelectorAll('textarea#message, #message-input')).find(x => x.offsetParent) || document.querySelector('textarea#message'); const btn = document.querySelector('.send-btn');
+      if (!inp || !btn) return;
+      const proto = inp.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      const set = Object.getOwnPropertyDescriptor(proto, 'value');
+      if (set && set.set) set.set.call(inp, text); else inp.value = text;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      setTimeout(() => btn.click(), 50);
+    }
+    function scan() {
+      const msgs = document.querySelectorAll('.msg-ai');
+      msgs.forEach((m, i) => {
+        const body = m.querySelector('.body') || m;
+        const last = !Array.from(document.querySelectorAll('.msg-user')).some(u => m.compareDocumentPosition(u) & Node.DOCUMENT_POSITION_FOLLOWING);
+        const old = m.querySelector(':scope .ody-choice-btns');
+        const t = body.textContent || '';
+        const mt = t.match(RX);
+        if (old) { if (!last) old.remove(); return; }
+        if (!mt) return;
+        // tirar o marcador do texto visível
+        const w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT); let n;
+        while ((n = w.nextNode())) { if (RX.test(n.nodeValue)) { n.nodeValue = n.nodeValue.replace(RX, '').trimEnd(); } }
+        if (!last) return;
+        const opts = mt[1].split('|').map(x => x.trim()).filter(Boolean).slice(0, 6);
+        if (!opts.length) return;
+        const box = document.createElement('div'); box.className = 'ody-choice-btns';
+        box.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin:10px 0';
+        opts.forEach((o, k) => {
+          const b = document.createElement('button'); b.type = 'button'; b.textContent = o;
+          const neg = /^(n[ãa]o|recusar|cancelar|no|decline)\b/i.test(o);
+          b.style.cssText = 'padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;border:1px solid ' + (neg ? 'rgba(220,90,90,.7)' : 'var(--accent,#5b8abf)') + ';background:' + (neg ? 'rgba(220,90,90,.12)' : 'var(--accent,#5b8abf)') + ';color:' + (neg ? 'inherit' : '#fff');
+          b.addEventListener('click', () => { box.querySelectorAll('button').forEach(x => { x.disabled = true; x.style.opacity = '.5'; }); b.style.opacity = '1'; send(o); });
+          box.appendChild(b);
+        });
+        body.appendChild(box);
+      });
+    }
+    let _ct; new MutationObserver(() => { clearTimeout(_ct); _ct = setTimeout(scan, 300); }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  })();
 
   // ---- botão "🌐" em cada resposta do chat: traduz para português de Portugal ----
   function addMsgBtns() {

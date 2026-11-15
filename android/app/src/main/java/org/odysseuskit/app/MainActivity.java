@@ -431,6 +431,10 @@ public class MainActivity extends BridgeActivity {
 
     private class NativeBridge {
         @JavascriptInterface
+        public void setTheme(String name) {
+            AppSettings.sp(MainActivity.this).edit().putString("ui_theme", "ryoku".equals(name) ? "ryoku" : "").apply();
+        }
+        @JavascriptInterface
         public void setBarColor(String css) {
             final Integer c = parseCssColor(css);
             if (c == null) return;

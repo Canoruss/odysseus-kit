@@ -16,6 +16,9 @@ Extras for Odysseus (your self-hosted AI chat): in-chat tools, an Android app, a
 | **Study** | assignments, steps, sources with APA citation, link/PDF summary, notes by subject | Groq |
 | **News** | feed by sources and topics for each person + daily summary | Groq |
 | **Compose** | email/WhatsApp draft and button to choose the sending app | Groq |
+| **Prompts** | describe what you want in your language and get a ready-to-paste English prompt (chat, image, code, video, music, agent), with a warning when important details are missing | Groq (Claude Haiku as fallback) |
+| **Usage bar** | slim bar above your name showing Claude session/weekly limits, Groq, DeepL and AirLabs usage | none (reads each service's own usage data) |
+| **Choice buttons** | when the assistant needs a decision it ends the reply with `[[opcoes: Yes \| No]]` and the chat shows tap-able buttons | none |
 | **Flights** | saves flights, opens in Flightradar24, delays with AirLabs key | AirLabs (optional) |
 | **Glucose** | LibreLinkUp chart and history. The insulin calculator comes **disabled** | LibreLinkUp |
 | **Canva** | create designs and export PNG | Canva developer account |
