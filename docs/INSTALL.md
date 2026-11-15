@@ -65,6 +65,15 @@ In `tools/jobs/`: installment and expense alerts, workout reminders, daily Click
 40 9 * * *  python3 -I ~/odysseus-kit/tools/jobs/installments.py
 ```
 
+
+## Check that it works
+
+After `bash scripts/start.sh`, each port should answer (`curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8792/login`). Expected on a fresh install, before the wizard:
+- Hub, Translation and Wizard answer `200`; Canva answers `403` (it is not configured yet).
+- The logs in `~/.local/share/odysseus-kit/logs/` show warnings such as "FINANCE_PASSWORD not set" and "Canva not configured". Run the wizard to clear them.
+
+This flow was tested on a clean Ubuntu 24.04 container (Python 3.12, only `git`, `python3` and `curl` installed).
+
 ## Troubleshooting
 
 - **Blank page when opening a tool:** the service is not running or the proxy is not pointing to the correct port (`ss -ltn | grep 879`).

@@ -65,6 +65,15 @@ Em `tools/jobs/`: avisos de prestações e despesas, lembretes de treino, lista 
 40 9 * * *  python3 -I ~/odysseus-kit/tools/jobs/installments.py
 ```
 
+
+## Verificar que funciona
+
+Depois de `bash scripts/start.sh`, cada porta deve responder (`curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8792/login`). Numa instalação nova, antes do assistente, é normal:
+- Hub, Tradução e assistente respondem `200`; o Canva responde `403` (ainda não está configurado).
+- Os registos em `~/.local/share/odysseus-kit/logs/` mostram avisos como "FINANCE_PASSWORD não definida" e "Canva não configurado". Corre o assistente para os resolver.
+
+Este fluxo foi testado num contentor Ubuntu 24.04 limpo (Python 3.12, só com `git`, `python3` e `curl`).
+
 ## Resolução de problemas
 
 - **Página em branco ao abrir uma ferramenta:** o serviço não está a correr ou o proxy não aponta para a porta certa (`ss -ltn | grep 879`).
