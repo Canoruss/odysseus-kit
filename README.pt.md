@@ -13,6 +13,11 @@
 - **Trazes as tuas chaves.** Escolhes os fornecedores de IA (Groq, Gemini, DeepL, Claude…) e colas as tuas chaves. Nada é partilhado com o autor.
 - **Privado por desenho.** As chaves ficam no teu servidor. Cada pessoa com sessão iniciada tem os seus dados.
 
+<p align="center">
+  <img src="docs/img/tools.png" alt="Odysseus com as ferramentas do KIT na barra lateral" width="62%">
+  <img src="docs/img/app-setup.png" alt="Primeiro ecrã da app Android" width="26%">
+</p>
+
 > **Estado: pré-lançamento.** Extraído de uma instalação pessoal e ainda não testado por terceiros. Se algo falhar, [abre uma issue](../../issues).
 
 ## Índice
@@ -55,6 +60,8 @@
 | **Assistente de configuração** | passo a passo para chaves e serviços, com *Testar* e *Saltar* em cada passo (só administradores) |
 | **App Android** | widgets, lembretes com ações, tradutor nativo, calendário, tarefa rápida por voz, bloqueio por impressão digital |
 
+<p align="center"><img src="docs/img/prompts.png" alt="A ferramenta Prompts" width="80%"></p>
+
 ## Como se liga tudo
 
 ```
@@ -81,6 +88,8 @@ bash scripts/start.sh             # arranca as ferramentas
 
 Para cada serviço o assistente explica o que é, onde obter a chave, tem um botão **Testar** e deixa-te **saltar**. Depois, liga o `ody-extras.js` ao Odysseus como descrito no guia de instalação. Dentro do Odysseus o mesmo assistente está em **Tools → Setup**.
 
+<p align="center"><img src="docs/img/wizard.png" alt="O assistente de configuração" width="70%"></p>
+
 | Guia | Tema |
 |---|---|
 | [docs/INSTALL.md](docs/INSTALL.pt.md) | instalação completa, portas, proxy, `ody-extras.js` |
@@ -104,6 +113,14 @@ Verifica primeiro o ficheiro: as notas da release indicam o `SHA-256` e a impres
 - As ferramentas escutam só em `127.0.0.1`. Publica-as atrás do teu proxy **com a mesma autenticação do Odysseus**.
 - As funções de IA enviam texto, áudio ou fotos ao fornecedor que escolheres (Groq, Gemini, DeepL…). Lê as políticas deles.
 - Corre `python3 scripts/scan.py` antes de publicar alterações: procura segredos e dados pessoais.
+
+## Limitações conhecidas
+
+- Pré-lançamento, vindo de uma única instalação: esperam-se arestas, sobretudo numa instalação nova.
+- Alguns textos e predefinições são primeiro em português (certas fontes de notícias, respostas em `pt-PT`; a leitura de SMS do SNS 24 só serve em Portugal).
+- A app Android só foi experimentada num telemóvel e num emulador. O ditado mais rápido usa o reconhecedor de voz da Google; sem ele, a app grava e o teu servidor transcreve.
+- As chaves introduzem-se no assistente, no servidor; a app nunca as pede.
+- Os planos gratuitos de IA têm limites e podem ser lentos ou dar erros nas horas de maior uso.
 
 ## Aviso de saúde
 

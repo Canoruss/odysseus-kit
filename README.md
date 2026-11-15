@@ -13,6 +13,11 @@
 - **Bring your own keys.** You pick the AI providers (Groq, Gemini, DeepL, Claude…) and paste your own keys. Nothing is shared with the author.
 - **Private by design.** Keys stay on your server. Each person who logs in gets their own data.
 
+<p align="center">
+  <img src="docs/img/tools.png" alt="Odysseus with the KIT tools in the sidebar" width="62%">
+  <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
+</p>
+
 > **Status: pre-release.** Extracted from a personal installation and not yet tested by third parties. If something fails, please [open an issue](../../issues).
 
 ## Contents
@@ -55,6 +60,8 @@
 | **Setup assistant** | step-by-step wizard for keys and services, with *Test* and *Skip* on every step (admins only) |
 | **Android app** | widgets, reminders with actions, native translator, calendar, quick voice task, fingerprint lock |
 
+<p align="center"><img src="docs/img/prompts.png" alt="The Prompts tool" width="80%"></p>
+
 ## How it fits together
 
 ```
@@ -81,6 +88,8 @@ bash scripts/start.sh             # starts the tools
 
 For each service the wizard explains what it is, where to get the key, offers a **Test** button, and lets you **skip** it. Afterwards, load `ody-extras.js` into Odysseus as described in the install guide. Inside Odysseus the same wizard lives under **Tools → Setup**.
 
+<p align="center"><img src="docs/img/wizard.png" alt="The setup wizard" width="70%"></p>
+
 | Guide | Topic |
 |---|---|
 | [docs/INSTALL.md](docs/INSTALL.md) | full installation, ports, proxy, `ody-extras.js` |
@@ -104,6 +113,14 @@ Verify the download first: the release notes list the file's `SHA-256` and the s
 - Tools listen on `127.0.0.1` only. Publish them behind your proxy **with the same authentication as Odysseus**.
 - AI features send text, audio or photos to the provider you choose (Groq, Gemini, DeepL…). Read their policies.
 - Run `python3 scripts/scan.py` before publishing changes: it looks for secrets and personal data.
+
+## Known limitations
+
+- Pre-release, from a single installation: expect rough edges, especially on a fresh install.
+- Some texts and defaults are Portuguese-first (certain news sources, `pt-PT` replies; reading SNS 24 SMS only works in Portugal).
+- The Android app has only been tried on one phone and an emulator. Fastest dictation uses Google's speech recognizer; without it the app records and your server transcribes.
+- Keys are entered in the wizard on the server; the app itself never asks for them.
+- Free AI tiers have limits and can be slow or return errors at busy times.
 
 ## Health disclaimer
 

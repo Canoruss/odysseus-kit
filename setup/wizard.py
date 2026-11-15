@@ -6,6 +6,9 @@ O que saltares fica desativado mas NAO se perde: podes voltar e ativar, e o que 
 Escreve:  ~/.config/odysseus-kit/config.json  (funcionalidades + nomes)   e   ~/.config/odysseus-kit/<nome>.env (chaves, modo 600)."""
 import base64, imaplib, json, os, smtplib, ssl, sys, urllib.error, urllib.parse, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import sys as _sys
+_sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+import i18n
 
 CONF_DIR = os.environ.get("KIT_CONF_DIR", os.path.join(os.path.expanduser("~"), ".config", "odysseus-kit"))
 CONF = os.path.join(CONF_DIR, "config.json")
@@ -248,7 +251,7 @@ button.pri{background:#2a8f63}button.ghost{background:transparent;border:1px sol
 .ok{color:#4cc38a}.bad{color:#ef6b6b}.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#262a33;color:#9aa3b2;margin-left:6px}
 .sw{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px}.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .nav button{padding:5px 10px;font-size:12px;background:#222630}.nav button.cur{background:#2a8f63}.nav button.off{opacity:.55}
-</style></head><body><div class="wrap"><h1>Odysseus KIT</h1><div class="sub">Configuração passo a passo. Podes saltar o que não precisas e voltar mais tarde; nada do que escreveres se perde.</div>
+</style></head><body><div class="wrap"><h1>Odysseus KIT</h1><div style="float:right;font-size:13px"><a href="lang?l=en" style="color:#9aa3b2">English</a> · <a href="lang?l=pt" style="color:#9aa3b2">Portugu&ecirc;s</a></div><div class="sub">Configuração passo a passo. Podes saltar o que não precisas e voltar mais tarde; nada do que escreveres se perde.</div>
 <div class="bar"><i id="pb"></i></div><div class="nav" id="nav"></div><div id="box"></div></div>
 <script>
 let S=[],cur=0;const $=s=>document.querySelector(s);
@@ -283,16 +286,27 @@ load();
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
-    def _send(self, code, body, ctype="application/json"):
+    def _send(self, code, body, ctype="application/json", extra=None):
+        import hmac as _h
+        direct = not _h.compare_digest(self.headers.get("X-Kit-Setup-Token", ""), TOKEN)    # acesso direto (nao via hub): traduzir aqui
+        lang = i18n.from_cookie(self.headers.get("Cookie", ""))
+        if direct and lang != i18n.SOURCE and isinstance(body, str) and self.path.split("?")[0] != "/status":
+            body = i18n.translate(body, lang, "json" if ctype == "application/json" else "html")
         b = body.encode() if isinstance(body, str) else body
         self.send_response(code)
         self.send_header("Content-Type", ctype + "; charset=utf-8")
         self.send_header("Content-Length", str(len(b)))
         self.send_header("Cache-Control", "no-store")
+        for k, v in (extra or {}).items(): self.send_header(k, v)
         self.end_headers()
         self.wfile.write(b)
 
     def do_GET(self):
+        if self.path.split("?")[0] == "/lang":      # /lang?l=en|pt  -> guarda o idioma e volta ao assistente
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query); l = (q.get("l") or ["en"])[0]
+            l = l if l in ("en", "pt") else "en"
+            self.send_response(302); self.send_header("Set-Cookie", i18n.cookie_header(l)); self.send_header("Location", "/"); self.send_header("Content-Length", "0"); self.end_headers()
+            return
         if self.path.split("?")[0] == "/status":
             return self._send(200, json.dumps({"done": "android" in load().get("visited", [])}))
         if self.path == "/":
