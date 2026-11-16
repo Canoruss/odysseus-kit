@@ -74,6 +74,12 @@ CSS = """<style>
 .cy .hero .tx p{margin:0;color:#ffffffd0;font-size:.85em;line-height:1.35}
 .cy .pic{width:44px;height:44px;flex:none}.cy details summary .pic{vertical-align:middle;margin-right:8px;width:30px;height:30px}
 .cy .syms label{background:#23272e;border-radius:10px;padding:7px 9px}
+.cy .chip{display:inline-block;margin-top:8px;padding:3px 11px;border-radius:12px;background:#ffffff26;color:#fff;font-size:.78em;font-weight:600}
+.cy .lg4{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:-4px 0 12px;font-size:.78em;color:#aab}
+.cy .lg4 i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.cy .cards .card{border-left:4px solid var(--c,#4a7bd0);display:flex;flex-direction:column;gap:2px}
+.cy .cards .card .ic{font-size:1.25em;line-height:1}
+.cy .hero:before{content:"";position:absolute;left:-30px;bottom:-40px;width:130px;height:130px;border-radius:50%;background:#ffffff14}
 </style>"""
 
 
@@ -136,7 +142,7 @@ def _ring(info, ph, day):
     for k, a, b in segs:
         x1, y1 = pt(a); x2, y2 = pt(b)
         out.append('<path d="M%.1f %.1f A%d %d 0 %d 1 %.1f %.1f" stroke="%s" stroke-width="12" fill="none" stroke-linecap="butt" stroke-opacity="%s"/>'
-                   % (x1, y1, R, R, 1 if (b - a) / n > .5 else 0, x2, y2, PH_COL[k][2], "1" if k == ph else ".35"))
+                   % (x1, y1, R, R, 1 if (b - a) / n > .5 else 0, x2, y2, PH_COL[k][2], "1" if k == ph else ".5"))
     mk = ""
     if day:
         x, y = pt(((day - 1) % n) + .5)
@@ -145,14 +151,25 @@ def _ring(info, ph, day):
     return '<svg class="rg" viewBox="0 0 132 132" aria-hidden="true">%s%s%s</svg>' % ("".join(out), mk, mid)
 
 
-def _hero(info, ph, lang):
+def _bars_icon():
+    return '<svg class="pic" width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="34" width="10" height="20" rx="3" fill="#c3bcff"/><rect x="27" y="20" width="10" height="34" rx="3" fill="#c3bcff"/><rect x="44" y="8" width="10" height="46" rx="3" fill="#c3bcff"/></svg>'
+
+
+def _legend(lang):
+    nm = {"menstrual": T(lang, "Menstrual", "Menstrual"), "folicular": T(lang, "Folicular", "Follicular"),
+          "ovulatoria": T(lang, "Ovulatória", "Ovulatory"), "lutea": T(lang, "Lútea", "Luteal")}
+    return '<div class="lg4">%s</div>' % "".join('<span><i style="background:%s"></i>%s</span>' % (PH_COL[k][2], nm[k]) for k in nm)
+
+
+def _hero(info, ph, lang, ch=""):
     if not ph[0]:
         return ""
     g1, g2, _ = PH_COL[ph[0]]
     pn = (PHASES_EN if lang == "en" else P.PHASES)[ph[0]]
     art = _icon(ph[0], 150).replace('class="pic"', 'class="art"')
-    return ('<div class="hero" style="--g1:%s;--g2:%s">%s%s<div class="tx"><small>%s</small><b>%s</b><p>%s</p></div></div>'
-            % (g1, g2, art, _ring(info, ph[0], ph[1]), T(lang, "Fase atual", "Current phase"), E(pn[0]), E(pn[1])))
+    return ('<div class="hero" style="--g1:%s;--g2:%s">%s%s<div class="tx"><small>%s</small><b>%s</b><p>%s</p>%s</div></div>%s'
+            % (g1, g2, art, _ring(info, ph[0], ph[1]), T(lang, "Fase atual", "Current phase"), E(pn[0]), E(pn[1]),
+               ('<span class="chip">%s</span>' % E(T(lang, "Probabilidade de gravidez: %s", "Chance of pregnancy: %s") % ch)) if ch else "", _legend(lang)))
 
 
 def _summary(info, goal, today, ph, lang="pt"):
@@ -168,20 +185,16 @@ def _summary(info, goal, today, ph, lang="pt"):
     ch = T(lang, P.chance(info, today), {"alta": "high", "média": "medium", "baixa": "low"}[P.chance(info, today)])
     fert = ("%s %s %s" % (_pt(info["fert"][0], lang), T(lang, "a", "to"), _pt(info["fert"][1], lang))) if info["fert"] else "—"
     ov = _pt(info["ov"], lang) if info["ov"] else "—"
-    c_period = '<div class="card">Próxima menstruação<b>%s</b></div>' % E(prox)
-    c_ov = '<div class="card">Ovulação estimada<b>%s</b></div>' % E(ov)
-    c_fert = '<div class="card">Janela fértil<b>%s</b></div>' % E(fert)
-    c_avg = ('<div class="card">%s<b>%s</b><span class="mut">%s</span></div>' % (
+    c_period = '<div class="card" style="--c:#e57373"><span class="ic">' + _icon("menstrual", 28) + '</span>%s<b>%s</b></div>' % (T(lang, "Próxima menstruação", "Next period"), E(prox))
+    c_ov = '<div class="card" style="--c:#ffd54f"><span class="ic">' + _icon("ovulatoria", 28) + '</span>%s<b>%s</b></div>' % (T(lang, "Ovulação estimada", "Estimated ovulation"), E(ov))
+    c_fert = '<div class="card" style="--c:#81c784"><span class="ic">' + _icon("folicular", 28) + '</span>%s<b>%s</b></div>' % (T(lang, "Janela fértil", "Fertile window"), E(fert))
+    c_avg = ('<div class="card" style="--c:#9575cd"><span class="ic">' + _bars_icon() + '</span>%s<b>%s</b><span class="mut">%s</span></div>' % (
         T(lang, "Ciclo / duração médios", "Average cycle / period length"),
         T(lang, "%d dias · %d dias", "%d days · %d days") % (info["cycle"], info["period"]),
         T(lang, "%d período(s) registado(s)", "%d period(s) logged") % info["n"]
         + ("" if info["known"] else T(lang, " · valores das definições", " · values from settings"))))
     pn = (PHASES_EN if lang == "en" else P.PHASES).get(ph[0]) if ph[0] else None
     big = ""
-    if pn:
-        big = ('<div class="card big">%s<b>%s</b></div>' % (
-            T(lang, "Hoje · dia %d do ciclo", "Today · cycle day %d") % ph[1],
-            T(lang, "Probabilidade de gravidez: %s", "Chance of pregnancy: %s") % ch))
     extra = ""
     if goal == "engravidar":
         if info["late"] >= 1:
@@ -335,7 +348,7 @@ def render(user, msg="", ym="", day="", cookie="", lang="pt"):
         hist = "<details><summary>Histórico de períodos</summary><table><tr><th>Início</th><th>Fim</th><th>Dias</th></tr>%s</table></details>" % "".join(
             "<tr><td>%s</td><td>%s</td><td>%d</td></tr>" % (_pt(a, lang), _pt(b, lang), (b - a).days + 1) for a, b in info["runs"])
     return (CSS + '<div class="cy"><h2>Ciclo</h2>' + ('<p class="green">%s</p>' % E(msg) if msg else "")
-            + _hero(info, ph, lang) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
+            + _hero(info, ph, lang, T(lang, P.chance(info, today), {"alta": "high", "média": "medium", "baixa": "low"}[P.chance(info, today)])) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
             + _tips(ph, today, lang) + '<div class="box">%s</div>' % _calendar(d, info, y, m, sel, today, lang)
             + '<h3>%s</h3>%s' % (T(lang, "Registar · %s", "Log · %s") % _pt(sel, lang), _form(d, sel, today, lang)) + _stats(d, today, lang) + hist + _settings(d, lang)
             + '<p class="aviso">Estimativas com base nos teus registos (ou nos valores das definições). '
