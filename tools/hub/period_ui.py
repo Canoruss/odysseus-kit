@@ -80,7 +80,38 @@ CSS = """<style>
 .cy .cards .card{border-left:4px solid var(--c,#4a7bd0);display:flex;flex-direction:column;gap:2px}
 .cy .cards .card .ic{font-size:1.25em;line-height:1}
 .cy .hero:before{content:"";position:absolute;left:-30px;bottom:-40px;width:130px;height:130px;border-radius:50%;background:#ffffff14}
-</style>"""
+
+.cy td.c{height:44px;border-radius:12px;transition:transform .1s}.cy td.c:hover{transform:scale(1.06)}
+.cy td.per{background:linear-gradient(#e57373,#c0392b)}.cy td.per a{color:#fff;font-weight:700}
+.cy td.ov a,.cy td.per a,.cy td.pred a{position:relative}
+.cy td.ov a:after{content:"";position:absolute;left:50%;bottom:3px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#ffd54f}
+.cy td.per a:after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:7px;margin-left:-2px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#ffffffcc}
+.cy td.fert{background:#1f4a35;box-shadow:inset 0 0 0 1px #2e8b5766}.cy td.today a{font-weight:800}
+.cy td.today{outline:2px solid #8ab4f8;outline-offset:-2px}
+.cy .bars{height:120px;gap:8px;padding-top:22px;box-sizing:border-box;justify-content:flex-start}.cy .bars div{flex:0 0 34px;background:linear-gradient(#9fb8ff,#4a7bd0);border-radius:8px 8px 0 0;min-width:0}.cy .bars span{top:-18px;font-weight:600}
+.cy .hb{display:flex;align-items:center;gap:8px;margin:5px 0;background:#23272e;border-radius:10px;padding:5px 9px;position:relative;overflow:hidden}
+.cy .hb i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#c3bcff55,#c3bcff22)}.cy .hb span{position:relative;font-size:.88em}.cy .hb b{position:relative;margin-left:auto}
+.cy .rg path{stroke-dasharray:1;stroke-dashoffset:1;animation:cyd .9s ease-out forwards}
+.cy .rg path:nth-of-type(2){animation-delay:.15s}.cy .rg path:nth-of-type(3){animation-delay:.3s}.cy .rg path:nth-of-type(4){animation-delay:.45s}
+.cy .rg .pl{fill:none;stroke:#fff;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:cyp 2.4s ease-out infinite}
+@keyframes cyd{to{stroke-dashoffset:0}}@keyframes cyp{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.1);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cy .rg path{animation:none;stroke-dashoffset:0}.cy .rg .pl{animation:none;opacity:0}}
+.cy.pal-rosa .hero{background:linear-gradient(135deg,#7b2d55,#d4608f)!important}
+.cy.pal-oceano .hero{background:linear-gradient(135deg,#12395e,#2a8fbd)!important}
+.cy.pal-lavanda .hero{background:linear-gradient(135deg,#3b2d6b,#8f7be0)!important}
+body:has(.cy.th-claro){background:#f6f1f4!important;color:#2b2030!important}
+@media (prefers-color-scheme:light){body:has(.cy.th-auto){background:#f6f1f4!important;color:#2b2030!important}}
+.cy.th-claro{color:#2b2030}
+.cy.th-claro .card,.cy.th-claro details,.cy.th-claro .syms label,.cy.th-claro td.c,.cy.th-claro .hd a,.cy.th-claro .lnk,.cy.th-claro .box{background:#fff;color:#2b2030;box-shadow:0 1px 3px #0001}
+.cy.th-claro .mut,.cy.th-claro .leg,.cy.th-claro .aviso,.cy.th-claro .lg4,.cy.th-claro table.cal th{color:#6d6272}.cy.th-claro td.c a{color:#2b2030}.cy.th-claro td.out a{color:#bbb}
+.cy.th-claro td.per{background:linear-gradient(#ef9a9a,#e57373)}.cy.th-claro td.per a{color:#fff}.cy.th-claro td.fert{background:#d6f1de}.cy.th-claro td.pms{background:#e6def8}.cy.th-claro td.ov{background:#ffe9a8}.cy.th-claro td.pred{background:#fde6e6;border-color:#e57373}
+.cy.th-claro input,.cy.th-claro select,.cy.th-claro textarea{background:#fff;color:#222;border:1px solid #cfc6d2}.cy.th-claro .bars div{background:linear-gradient(#b39ddb,#7e57c2)}.cy.th-claro .hb{background:#eee6f3}
+@media (prefers-color-scheme:light){.cy.th-auto{color:#2b2030}
+.cy.th-auto .card,.cy.th-auto details,.cy.th-auto .syms label,.cy.th-auto td.c,.cy.th-auto .hd a,.cy.th-auto .lnk,.cy.th-auto .box{background:#fff;color:#2b2030;box-shadow:0 1px 3px #0001}
+.cy.th-auto .mut,.cy.th-auto .leg,.cy.th-auto .aviso,.cy.th-auto .lg4,.cy.th-auto table.cal th{color:#6d6272}.cy.th-auto td.c a{color:#2b2030}.cy.th-auto td.out a{color:#bbb}
+.cy.th-auto td.per{background:linear-gradient(#ef9a9a,#e57373)}.cy.th-auto td.per a{color:#fff}.cy.th-auto td.fert{background:#d6f1de}.cy.th-auto td.pms{background:#e6def8}.cy.th-auto td.ov{background:#ffe9a8}.cy.th-auto td.pred{background:#fde6e6;border-color:#e57373}
+.cy.th-auto input,.cy.th-auto select,.cy.th-auto textarea{background:#fff;color:#222;border:1px solid #cfc6d2}.cy.th-auto .bars div{background:linear-gradient(#b39ddb,#7e57c2)}.cy.th-auto .hb{background:#eee6f3}
+}</style>"""
 
 
 def _pt(dt, lang="pt"):
@@ -141,12 +172,12 @@ def _ring(info, ph, day):
     out = []
     for k, a, b in segs:
         x1, y1 = pt(a); x2, y2 = pt(b)
-        out.append('<path d="M%.1f %.1f A%d %d 0 %d 1 %.1f %.1f" stroke="%s" stroke-width="12" fill="none" stroke-linecap="butt" stroke-opacity="%s"/>'
+        out.append('<path pathLength="1" d="M%.1f %.1f A%d %d 0 %d 1 %.1f %.1f" stroke="%s" stroke-width="12" fill="none" stroke-linecap="butt" stroke-opacity="%s"/>'
                    % (x1, y1, R, R, 1 if (b - a) / n > .5 else 0, x2, y2, PH_COL[k][2], "1" if k == ph else ".5"))
     mk = ""
     if day:
         x, y = pt(((day - 1) % n) + .5)
-        mk = '<circle cx="%.1f" cy="%.1f" r="9" fill="#fff"/><circle cx="%.1f" cy="%.1f" r="4" fill="%s"/>' % (x, y, x, y, PH_COL.get(ph, PH_COL["folicular"])[1])
+        mk = '<circle class="pl" cx="%.1f" cy="%.1f" r="9"/><circle cx="%.1f" cy="%.1f" r="9" fill="#fff"/><circle cx="%.1f" cy="%.1f" r="4" fill="%s"/>' % (x, y, x, y, x, y, PH_COL.get(ph, PH_COL["folicular"])[1])
     mid = ('<text x="66" y="68" text-anchor="middle" font-size="30" font-weight="700" fill="#fff">%d</text><text x="66" y="86" text-anchor="middle" font-size="10" fill="#ffffffb0">dia</text>' % day) if day else ""
     return '<svg class="rg" viewBox="0 0 132 132" aria-hidden="true">%s%s%s</svg>' % ("".join(out), mk, mid)
 
@@ -265,6 +296,14 @@ def _form(d, sel, today, lang="pt"):
     return f
 
 
+def _hbars(items, lang="pt"):
+    if not items:
+        return "<p class='mut'>—</p>"
+    mx = max(v for _, v in items) or 1
+    return "".join('<div class="hb"><i style="width:%d%%"></i><span>%s %s</span><b>%d</b></div>' % (
+        int(v * 100 / mx), SYM_EMO.get(k, ""), E(lab(k, lang)), v) for k, v in items)
+
+
 def _bars(vals, unit=""):
     if not vals:
         return '<p class="mut">Sem dados ainda.</p>'
@@ -283,12 +322,12 @@ def _stats(d, today, lang="pt"):
             T(lang, " · ciclos regulares", " · regular cycles") if s["regular"] else T(lang, " · ciclos variáveis", " · variable cycles"))
     else:
         avg = T(lang, "precisas de pelo menos 2 períodos", "you need at least 2 periods")
-    sym = ", ".join("%s (%d)" % (E(lab(k, lang)), v) for k, v in s["sym"]) or "—"
-    mood = ", ".join("%s (%d)" % (E(lab(k, lang)), v) for k, v in s["mood"]) or "—"
+    sym = _hbars(s["sym"], lang)
+    mood = _hbars(s["mood"], lang)
     st = s["streak"]
     return ('<details><summary>%s</summary><p>%s <b>%s</b></p>'
             '<div class="mut">%s</div>%s<div class="mut">%s</div>%s'
-            '<p>%s %s<br>%s %s<br>%s <b>%d %s</b> · %s %d</p></details>'
+            '<div class="mut">%s</div>%s<div class="mut" style="margin-top:8px">%s</div>%s<p>%s <b>%d %s</b> · %s %d</p></details>'
             % (T(lang, "Estatísticas", "Statistics"), T(lang, "Duração média do ciclo:", "Average cycle length:"), avg,
                T(lang, "Duração dos últimos ciclos (dias)", "Length of recent cycles (days)"), _bars(s["cycles"]),
                T(lang, "Duração dos últimos períodos (dias)", "Length of recent periods (days)"), _bars(s["lens"]),
@@ -296,6 +335,10 @@ def _stats(d, today, lang="pt"):
                T(lang, "Humor mais frequente:", "Most frequent mood:"), mood,
                T(lang, "Sequência de registo:", "Logging streak:"), st, T(lang, "dia" if st == 1 else "dias", "day" if st == 1 else "days"),
                T(lang, "dias registados:", "days logged:"), s["logged"]))
+
+def _opts(cur, items):
+    return "".join('<option value="%s"%s>%s</option>' % (v, " selected" if cur == v else "", l) for v, l in items)
+
 
 def _settings(d, lang="pt"):
     st, r = d["settings"], d["settings"]["remind"]
@@ -316,6 +359,7 @@ def _settings(d, lang="pt"):
             '<div class="row"><label>Ciclo habitual (dias) <input type="number" name="cycle" min="21" max="45" value="%d"></label>'
             '<label>Período habitual (dias) <input type="number" name="period" min="2" max="10" value="%d"></label></div>'
             '<div class="mut">Usados enquanto não houver 2 períodos registados.</div>'
+            '<div class="row"><label>Tema <select name="theme">%s</select></label><label>Cores <select name="palette">%s</select></label></div>'
             '<label><input type="checkbox" name="r_period" value="1"%s> Lembrete da menstruação</label>'
             '<label>Avisar quantos dias antes <input type="number" name="before" min="0" max="7" value="%d"></label>'
             '<label><input type="checkbox" name="r_ov" value="1"%s> Lembrete da janela fértil / ovulação</label>'
@@ -324,7 +368,8 @@ def _settings(d, lang="pt"):
             '<p><a class="lnk" href="/finance/period/export?fmt=csv">Exportar CSV</a> <a class="lnk" href="/finance/period/export?fmt=json">Exportar JSON</a>%s</p>'
             '<form method="post" action="/finance/period/wipe" class="box"><b>Apagar todos os registos</b>'
             '<input type="text" name="confirm" placeholder="Escreve APAGAR"><button style="background:#7a3030">Apagar tudo</button></form></details>'
-            % (goal, st["cycle"], st["period"], ck(r["period"]), r["before"], ck(r["ovulation"]), ck(r["late"]), pin,
+            % (goal, st["cycle"], st["period"], _opts(st.get("theme", "auto"), (("auto", "Automático"), ("escuro", "Escuro"), ("claro", "Claro"))),
+               _opts(st.get("palette", "natural"), (("natural", "Natural"), ("rosa", "Rosa"), ("oceano", "Oceano"), ("lavanda", "Lavanda"))), ck(r["period"]), r["before"], ck(r["ovulation"]), ck(r["late"]), pin,
                ' <form method="post" action="/finance/period/lock" style="display:inline"><button>Bloquear agora</button></form>' if P.has_pin(d) else ""))
     return out.replace("<label>Objetivo <select", "<label>Goal <select") if lang == "en" else out
 
@@ -347,7 +392,10 @@ def render(user, msg="", ym="", day="", cookie="", lang="pt"):
     if info["runs"]:
         hist = "<details><summary>Histórico de períodos</summary><table><tr><th>Início</th><th>Fim</th><th>Dias</th></tr>%s</table></details>" % "".join(
             "<tr><td>%s</td><td>%s</td><td>%d</td></tr>" % (_pt(a, lang), _pt(b, lang), (b - a).days + 1) for a, b in info["runs"])
-    return (CSS + '<div class="cy"><h2>Ciclo</h2>' + ('<p class="green">%s</p>' % E(msg) if msg else "")
+    stt = d["settings"]
+    th = stt.get("theme") if stt.get("theme") in ("auto", "escuro", "claro") else "auto"
+    pal = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda") else "natural"
+    return (CSS + '<div class="cy th-%s pal-%s"><h2>Ciclo</h2>' % (th, pal) + ('<p class="green">%s</p>' % E(msg) if msg else "")
             + _hero(info, ph, lang, T(lang, P.chance(info, today), {"alta": "high", "média": "medium", "baixa": "low"}[P.chance(info, today)])) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
             + _tips(ph, today, lang) + '<div class="box">%s</div>' % _calendar(d, info, y, m, sel, today, lang)
             + '<h3>%s</h3>%s' % (T(lang, "Registar · %s", "Log · %s") % _pt(sel, lang), _form(d, sel, today, lang)) + _stats(d, today, lang) + hist + _settings(d, lang)

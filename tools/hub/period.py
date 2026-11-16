@@ -318,6 +318,10 @@ def post(user, path, f, cookie=""):
             st = d["settings"]
             if f.get("goal") in ("acompanhar", "engravidar"):
                 st["goal"] = f["goal"]
+            if f.get("theme") in ("auto", "escuro", "claro"):
+                st["theme"] = f["theme"]
+            if f.get("palette") in ("natural", "rosa", "oceano", "lavanda"):
+                st["palette"] = f["palette"]
             st["cycle"] = max(21, min(45, int(f.get("cycle", st["cycle"]))))
             st["period"] = max(2, min(10, int(f.get("period", st["period"]))))
             st["remind"] = {"period": f.get("r_period") == "1", "ovulation": f.get("r_ov") == "1",
