@@ -1,0 +1,29 @@
+--- a/routes/model_routes.py
++++ b/routes/model_routes.py
+@@ -1456,2 +1456,26 @@
+ 
++        # Synthetic "Auto" picker entry -- backend-only routing (see
++        # src/auto_router.py), rendered by the existing picker with no
++        # frontend changes since it consumes items generically. endpoint_id
++        # is deliberately "" so PATCH /session/{sid} skips endpoint_id DB
++        # validation (routes/session_routes.py); "internal://auto" never
++        # matches a real ModelEndpoint.base_url, which is fine because
++        # _clear_orphaned_session_endpoint short-circuits on model=="auto"
++        # before it would otherwise wipe the session (routes/chat_routes.py).
++        if any(it.get("models") for it in items):
++            items.append({
++                "host": "custom",
++                "port": 0,
++                "url": "internal://auto",
++                "models": ["auto"],
++                "models_display": ["Auto"],
++                "models_extra": [],
++                "models_extra_display": [],
++                "endpoint_id": "",
++                "endpoint_name": "Auto",
++                "category": "api",
++                "endpoint_kind": "auto",
++                "model_type": "llm",
++            })
++
+         return {"hosts": [], "items": items}

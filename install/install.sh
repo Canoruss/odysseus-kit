@@ -60,7 +60,7 @@ echo "CPU: $(uname -m), RAM: ${MEM_MB} MB, free disk: ${DISK_GB} GB"
 say "Installing packages (Docker, Python, git, curl, openssl)"
 export DEBIAN_FRONTEND=noninteractive
 $SUDO apt-get update -y
-$SUDO apt-get install -y ca-certificates curl git openssl python3 >/dev/null
+$SUDO apt-get install -y ca-certificates curl git openssl patch python3 >/dev/null
 if ! command -v docker >/dev/null; then
   $SUDO apt-get install -y docker.io >/dev/null || die "Could not install Docker."
 fi
@@ -268,6 +268,45 @@ if "ody-extras.js" not in s:
     open(p, "w", encoding="utf-8").write(s)
 print("index.html ready")
 PY
+
+# Optional core patches (Auto model routing, sampling defaults, base persona, memory audit batching,
+# quieter email logs). Applied to a copy of the stock files; all-or-nothing, never blocks the install.
+if [ "${KIT_PATCHES:-1}" = "1" ] && [ -d "$KIT_DIR/patches" ] && command -v patch >/dev/null; then
+  say "Applying the KIT core patches"
+  PW="$SRV_DIR/patched"; rm -rf "$PW"; mkdir -p "$PW/app"
+  CID="$($D create "$ODY_IMAGE")"
+  OKP=1; MOUNTS=""
+  for pf in "$KIT_DIR"/patches/*.patch; do
+    rel="$(sed -n 's|^+++ b/||p' "$pf" | head -1 | cut -f1)"
+    mkdir -p "$PW/app/$(dirname "$rel")"
+    $D cp "$CID:/app/$rel" "$PW/app/$rel" 2>/dev/null || { OKP=0; break; }
+    MOUNTS="$MOUNTS $rel"
+  done
+  $D rm "$CID" >/dev/null
+  $SUDO chown -R "$MYUID:$MYGID" "$PW"
+  if [ "$OKP" = 1 ]; then
+    for pf in "$KIT_DIR"/patches/*.patch; do
+      ( cd "$PW/app" && patch -p1 --no-backup-if-mismatch -s < "$pf" ) >/dev/null 2>&1 || { OKP=0; break; }
+    done
+  fi
+  if [ "$OKP" = 1 ]; then
+    for f in auto_router.py llm_defaults.py; do cp "$KIT_DIR/patches/$f" "$PW/app/src/$f"; done
+    python3 -I - "$SRV_DIR/docker-compose.yml" "$PW/app" $MOUNTS src/auto_router.py src/llm_defaults.py <<'PY'
+import sys
+comp, root, files = sys.argv[1], sys.argv[2], sys.argv[3:]
+s = open(comp).read()
+anchor = "      - ./index.html:/app/static/index.html:ro\n"
+add = "".join("      - ./patched/app/%s:/app/%s:ro\n" % (f, f) for f in files)
+if "./patched/app/" not in s:
+    s = s.replace(anchor, anchor + add, 1)
+    open(comp, "w").write(s)
+print("patches mounted:", len(files))
+PY
+  else
+    warn "Core patches did not apply cleanly to this Odysseus version; continuing without them."
+    rm -rf "$PW"
+  fi
+fi
 
 # ---------------------------------------------------------------- 6. KIT config (the in-app Setup tool can change everything later)
 say "Writing the KIT configuration"

@@ -58,6 +58,7 @@
 | **Idioma** | seletor English / Português para as ferramentas e a app |
 | **Tema Ryoku** | tema extra para o Odysseus e todas as páginas das ferramentas (arte GPL-3.0 do projeto ryoku.dev) |
 | **Assistente de configuração** | passo a passo para chaves e serviços, com *Testar* e *Saltar* em cada passo (só administradores) |
+| **Patches ao núcleo** | opcionais: modelo **Auto** no seletor (rápido vs raciocínio), parâmetros por defeito, persona base, auditoria de memórias em lotes, menos ruído nos registos de email; aplicados pelo instalador, tudo ou nada, ver `patches/README.md` |
 | **App Android** | widgets, lembretes com ações, tradutor nativo, calendário, tarefa rápida por voz, bloqueio por impressão digital |
 
 <p align="center"><img src="docs/img/prompts.png" alt="A ferramenta Prompts" width="80%"></p>
@@ -92,7 +93,7 @@ Para cada serviço o assistente explica o que é, onde obter a chave, tem um bot
 
 | Guia | Tema |
 |---|---|
-| [docs/INSTALL.md](docs/INSTALL.pt.md) | instalação completa, portas, proxy, `ody-extras.js` |
+| [docs/INSTALL.pt.md](docs/INSTALL.pt.md) | instalação completa, portas, proxy, `ody-extras.js` |
 | [docs/ORACLE.pt.md](docs/ORACLE.pt.md) | servidor grátis no Oracle Cloud com um só comando (`install/install.sh`) |
 | [docs/APK.md](docs/APK.pt.md) | instalar ou compilar a app Android |
 | [docs/I18N.md](docs/I18N.pt.md) | idiomas e como acrescentar traduções |

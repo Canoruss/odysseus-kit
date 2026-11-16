@@ -1,0 +1,14 @@
+--- a/routes/email_routes.py
++++ b/routes/email_routes.py
+@@ -3225,2 +3225,5 @@
+             return payload
++        except EmailNotConfiguredError:
++            # [kit] conta sem IMAP (ex.: sem email ligado): lista vazia, sem erro nos registos
++            return {"folders": [], "sync": {"source": "not_configured"}}
+         except Exception as e:
+@@ -3942,3 +3945,4 @@
+                 except Exception as e:
+-                    logger.warning(f"Failed to append to Sent: {e}")
++                    # [kit] o Gmail guarda sozinho a copia dos enviados e recusa este APPEND: so debug
++                    (logger.debug if "gmail" in str(cfg.get("imap_host") or "").lower() else logger.warning)(f"Failed to append to Sent: {e}")
+                 _cleanup_compose_uploads(_atts)

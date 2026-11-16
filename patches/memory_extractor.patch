@@ -1,0 +1,107 @@
+--- a/services/memory/memory_extractor.py
++++ b/services/memory/memory_extractor.py
+@@ -536,27 +536,5 @@
+ 
+-        audit_messages = [
+-            {"role": "system", "content": AUDIT_SYSTEM_PROMPT},
+-            {"role": "user", "content": json.dumps(memory_payload, ensure_ascii=False)},
+-        ]
+-
+-        raw = await llm_call_async(
+-            endpoint_url,
+-            model,
+-            audit_messages,
+-            temperature=0.1,
+-            # 16384 (was 2000): the deduped list of all memories can be large,
+-            # and a reasoning model spends tokens thinking first — 2000 truncated
+-            # the JSON so it never parsed ("bad_json").
+-            max_tokens=16384,
+-            headers=headers,
+-            # Bound the call so the Tidy whirlpool can't spin indefinitely on a
+-            # slow/large generation.
+-            timeout=120,
+-        )
+-
+-        # Parse the JSON list, tolerating reasoning-model noise: <think> blocks,
+-        # markdown fences, leading prose, and trailing commas.
++        # Lotes pequenos: com ~190 memorias o modelo recusa devolver tudo numa resposta.
+         import re as _re
+-        text = (raw or "").strip()
+-        text = _re.sub(r'<think(?:ing)?>[\s\S]*?</think(?:ing)?>', '', text, flags=_re.I).strip()
++        AUDIT_BATCH = 40
+ 
+@@ -574,14 +552,63 @@
+ 
+-        cleaned = _loads_list(text)
+-        if cleaned is None:
+-            _m = _re.search(r'```(?:json)?\s*\n?([\s\S]*?)```', text)
+-            if _m:
+-                cleaned = _loads_list(_m.group(1).strip())
+-        if cleaned is None:
+-            _a, _b = text.find('['), text.rfind(']')
+-            if _a >= 0 and _b > _a:
+-                cleaned = _loads_list(text[_a:_b + 1])
+-        if cleaned is None:
++        async def _audit_chunk(chunk, depth=0):
++            """Audit one batch. If the model's reply is not parseable (often a
++            truncated or unescaped JSON array), split the batch in halves and
++            retry. Never salvage a partial array: entries the model skipped
++            are treated as removed by the caller, so partial output must not
++            be trusted. Returns None when a single entry still fails."""
++            # Some backends ignore system prompts, so the instructions ride in the user message too.
++            audit_messages = [
++                {"role": "system", "content": AUDIT_SYSTEM_PROMPT},
++                {"role": "user", "content": AUDIT_SYSTEM_PROMPT + "\n\n=== MEMORIES (JSON) ===\n" + json.dumps(chunk, ensure_ascii=False)},
++            ]
++            raw = await llm_call_async(
++                endpoint_url,
++                model,
++                audit_messages,
++                temperature=0.1,
++                max_tokens=16384,
++                headers=headers,
++                timeout=180,
++            )
++            text = (raw or "").strip()
++            text = _re.sub(r'<think(?:ing)?>[\s\S]*?</think(?:ing)?>', '', text, flags=_re.I).strip()
++            part = _loads_list(text)
++            if part is None:
++                _m = _re.search(r'```(?:json)?\s*\n?([\s\S]*?)```', text)
++                if _m:
++                    part = _loads_list(_m.group(1).strip())
++            if part is None:
++                _x, _y = text.find('['), text.rfind(']')
++                if _x >= 0 and _y > _x:
++                    part = _loads_list(text[_x:_y + 1])
++            if part is not None:
++                return part
++            if len(chunk) > 1 and depth < 4:
++                logger.warning(f"Memory audit: batch of {len(chunk)} unparseable, retrying in halves")
++                mid = len(chunk) // 2
++                left = await _audit_chunk(chunk[:mid], depth + 1)
++                if left is None:
++                    return None
++                right = await _audit_chunk(chunk[mid:], depth + 1)
++                if right is None:
++                    return None
++                return left + right
++            if len(chunk) == 1:
++                # A single entry the model cannot echo back as valid JSON (e.g.
++                # unescaped quotes in its text). Keep it exactly as stored
++                # instead of failing the whole audit — otherwise one bad entry
++                # makes every automatic tidy abort and burn LLM calls forever.
++                logger.warning(f"Memory audit: keeping unparseable entry {chunk[0].get('id')} unchanged")
++                return list(chunk)
+             logger.error(f"Memory audit returned non-JSON: {text[:300]}")
+-            return {"before": before_count, "after": before_count, "error": "bad_json"}
++            return None
++
++        cleaned = []
++        for _i in range(0, len(memory_payload), AUDIT_BATCH):
++            chunk = memory_payload[_i:_i + AUDIT_BATCH]
++            part = await _audit_chunk(chunk)
++            if part is None:
++                return {"before": before_count, "after": before_count, "error": "bad_json"}
++            # Entradas que o modelo nao devolveu no lote contam como removidas/fundidas (como antes).
++            cleaned.extend(part)
+ 

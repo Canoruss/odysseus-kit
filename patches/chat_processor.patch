@@ -1,0 +1,31 @@
+--- a/src/chat_processor.py
++++ b/src/chat_processor.py
+@@ -10,3 +10,3 @@
+ from src.search import comprehensive_web_search, fetch_webpage_content
+-from src.prompt_security import UNTRUSTED_CONTEXT_POLICY, untrusted_context_message
++from src.prompt_security import ODYSSEUS_PERSONA, UNTRUSTED_CONTEXT_POLICY, untrusted_context_message
+ 
+@@ -233,2 +233,10 @@
+ 
++        # Odysseus base persona: fixed, byte-identical every turn (see docstring
++        # above on KV-cache prefix reuse), always first so it can't be overridden
++        # by a preset's own system_prompt.
++        preface.append({
++            "role": "system",
++            "content": ODYSSEUS_PERSONA,
++        })
++
+         # Add preset system prompt if specified
+@@ -324,2 +332,12 @@
+                 t_url, t_model, t_headers = session.endpoint_url, session.model, session.headers
++                # KIT patch: "auto" is a routing sentinel, not a callable model; write
++                # the search query with Auto's fast (flash) model instead.
++                if t_model == "auto":
++                    try:
++                        from src.auto_router import _pick_pool_targets
++                        _flash = _pick_pool_targets(getattr(session, "owner", None)).get("flash")
++                        if _flash:
++                            t_url, t_model, t_headers = _flash
++                    except Exception as _e:
++                        logger.debug(f"auto search-query model lookup failed: {_e}")
+ 

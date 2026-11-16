@@ -1,0 +1,12 @@
+--- a/src/agent_loop.py
++++ b/src/agent_loop.py
+@@ -2545,3 +2545,4 @@
+     headers: Optional[Dict] = None,
+-    temperature: float = 0.3,
++    temperature: Optional[float] = 0.3,
++    top_p: Optional[float] = None,
+     max_tokens: int = 4096,
+@@ -3370,2 +3376,3 @@
+             temperature=temperature,
++            top_p=top_p,
+             max_tokens=max_tokens,

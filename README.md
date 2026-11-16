@@ -58,6 +58,7 @@
 | **Language** | English / Português switch for the tools and the app |
 | **Ryoku theme** | extra theme for Odysseus and all tool pages (GPL-3.0 art from the ryoku.dev project) |
 | **Setup assistant** | step-by-step wizard for keys and services, with *Test* and *Skip* on every step (admins only) |
+| **Core patches** | optional: an **Auto** model in the picker (fast vs thinking), sampling defaults, base persona, memory audit in batches, quieter email logs; applied by the installer, all-or-nothing, see `patches/README.md` |
 | **Android app** | widgets, reminders with actions, native translator, calendar, quick voice task, fingerprint lock |
 
 <p align="center"><img src="docs/img/prompts.png" alt="The Prompts tool" width="80%"></p>
@@ -93,7 +94,7 @@ For each service the wizard explains what it is, where to get the key, offers a 
 | Guide | Topic |
 |---|---|
 | [docs/INSTALL.md](docs/INSTALL.md) | full installation, ports, proxy, `ody-extras.js` |
-| [docs/ORACLE.pt.md](docs/ORACLE.pt.md) | free Oracle Cloud server with one command (`install/install.sh`), Portuguese guide |
+| [docs/ORACLE.md](docs/ORACLE.md) | free Oracle Cloud server with one command (`install/install.sh`) |
 | [docs/APK.md](docs/APK.md) | install or build the Android app |
 | [docs/I18N.md](docs/I18N.md) | languages and adding translations |
 | [docs/GLUCOSE.md](docs/GLUCOSE.md) | glucose tool and insulin calculator setup |

@@ -1,0 +1,47 @@
+--- a/src/llm_core.py
++++ b/src/llm_core.py
+@@ -1897,3 +1916,4 @@
+     messages: List[Dict],
+-    temperature: float = LLMConfig.DEFAULT_TEMPERATURE,
++    temperature: Optional[float] = LLMConfig.DEFAULT_TEMPERATURE,
++    top_p: Optional[float] = None,
+     max_tokens: int = LLMConfig.DEFAULT_MAX_TOKENS,
+@@ -1995,6 +2015,7 @@
+             "messages": messages_copy,
+-            "temperature": temperature,
+         }
+-        if _omit_temperature(provider, model):
+-            payload.pop("temperature", None)
++        if temperature is not None and not _omit_temperature(provider, model):
++            payload["temperature"] = temperature
++        if top_p is not None:
++            payload["top_p"] = top_p
+         if max_tokens and max_tokens > 0:
+@@ -2075,3 +2097,4 @@
+ 
+-async def stream_llm(url: str, model: str, messages: List[Dict], temperature: float = LLMConfig.DEFAULT_TEMPERATURE,
++async def stream_llm(url: str, model: str, messages: List[Dict], temperature: Optional[float] = LLMConfig.DEFAULT_TEMPERATURE,
++                     top_p: Optional[float] = None,
+                      max_tokens: int = LLMConfig.DEFAULT_MAX_TOKENS, headers: Optional[Dict] = None,
+@@ -2087,2 +2110,3 @@
+             temperature=temperature,
++            top_p=top_p,
+             max_tokens=max_tokens,
+@@ -2098,3 +2122,4 @@
+ 
+-async def _stream_llm_inner(url: str, model: str, messages: List[Dict], temperature: float = LLMConfig.DEFAULT_TEMPERATURE,
++async def _stream_llm_inner(url: str, model: str, messages: List[Dict], temperature: Optional[float] = LLMConfig.DEFAULT_TEMPERATURE,
++                            top_p: Optional[float] = None,
+                             max_tokens: int = LLMConfig.DEFAULT_MAX_TOKENS, headers: Optional[Dict] = None,
+@@ -2150,7 +2175,8 @@
+             "messages": messages_copy,
+-            "temperature": temperature,
+             "stream": True,
+         }
+-        if _omit_temperature(provider, model):
+-            payload.pop("temperature", None)
++        if temperature is not None and not _omit_temperature(provider, model):
++            payload["temperature"] = temperature
++        if top_p is not None:
++            payload["top_p"] = top_p
+         if provider not in {"openrouter", "groq"}:

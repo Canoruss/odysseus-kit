@@ -1,0 +1,113 @@
+--- a/routes/chat_routes.py
++++ b/routes/chat_routes.py
+@@ -18,2 +18,4 @@
+ from src.llm_core import llm_call_async, stream_llm, stream_llm_with_fallback
++from src.llm_defaults import resolve_params
++from src.auto_router import AUTO_MODEL_SENTINEL, resolve_auto_route
+ from src.agent_loop import stream_agent_loop
+@@ -185,2 +187,8 @@
+     """Clear a session model if its endpoint was deleted from ModelEndpoint."""
++    if getattr(sess, "model", None) == AUTO_MODEL_SENTINEL:
++        # "auto" sessions carry a sentinel endpoint_url that intentionally
++        # doesn't match any real ModelEndpoint.base_url (resolved dynamically
++        # per-message in auto_router.resolve_auto_route instead) -- leave them
++        # alone rather than have this wipe model/endpoint_url back to "".
++        return False
+     if not getattr(sess, "endpoint_url", ""):
+@@ -503,9 +511,23 @@
+ 
++        _call_url, _call_model, _call_headers = sess.endpoint_url, sess.model, sess.headers
++        if sess.model == AUTO_MODEL_SENTINEL:
++            _call_url, _call_model, _call_headers, _pool, _reason = resolve_auto_route(
++                ctx.messages, owner=owner
++            )
++            logger.info(
++                "[auto-route] session=%s pool=%s model=%s reason=%s",
++                session, _pool, _call_model, _reason,
++            )
++        _eff_temp, _eff_top_p, _eff_max_tokens = resolve_params(
++            _call_model, ctx.preset.temperature, ctx.preset.max_tokens,
++            is_custom_preset=preset_id in (None, "", "custom"),
++        )
+         reply = await llm_call_async(
+-            sess.endpoint_url,
+-            sess.model,
++            _call_url,
++            _call_model,
+             ctx.messages,
+-            headers=sess.headers,
+-            temperature=ctx.preset.temperature,
+-            max_tokens=ctx.preset.max_tokens,
++            headers=_call_headers,
++            temperature=_eff_temp,
++            top_p=_eff_top_p,
++            max_tokens=_eff_max_tokens,
+             prompt_type=preset_id,
+@@ -513,3 +535,3 @@
+         )
+-        _clean_reply, _clean_md = clean_thinking_for_save(reply, {"model": sess.model})
++        _clean_reply, _clean_md = clean_thinking_for_save(reply, {"model": _call_model})
+         sess.add_message(ChatMessage("assistant", _clean_reply, metadata=_clean_md))
+@@ -537,2 +559,4 @@
+         body = None
++        _explicit_web_intent = False  # defensive default: prevents NameError if an earlier
++        # exception path (e.g. doc-injection lookup) is hit before the real value is computed
+         try:
+@@ -1243,3 +1278,16 @@
+                 try:
+-                    _chat_candidates = [(sess.endpoint_url, sess.model, sess.headers)] + _fallback_candidates
++                    _call_url, _call_model, _call_headers = sess.endpoint_url, sess.model, sess.headers
++                    if sess.model == AUTO_MODEL_SENTINEL:
++                        _call_url, _call_model, _call_headers, _pool, _reason = resolve_auto_route(
++                            messages, owner=owner
++                        )
++                        logger.info(
++                            "[auto-route] session=%s pool=%s model=%s reason=%s",
++                            session, _pool, _call_model, _reason,
++                        )
++                    _chat_candidates = [(_call_url, _call_model, _call_headers)] + _fallback_candidates
++                    _eff_temp, _eff_top_p, _eff_max_tokens = resolve_params(
++                        _call_model, ctx.preset.temperature, ctx.preset.max_tokens,
++                        is_custom_preset=preset_id in (None, "", "custom"),
++                    )
+                     async for chunk in stream_llm_with_fallback(
+@@ -1247,3 +1295,4 @@
+                         messages,
+-                        temperature=ctx.preset.temperature,
++                        temperature=_eff_temp,
++                        top_p=_eff_top_p,
+                         # Respect the preset; 0/unset = let the server decide (no
+@@ -1253,3 +1302,3 @@
+                         # Compare on heavy generation prompts).
+-                        max_tokens=ctx.preset.max_tokens,
++                        max_tokens=_eff_max_tokens,
+                         prompt_type=preset_id,
+@@ -1408,9 +1457,23 @@
+ 
++                    _call_url, _call_model, _call_headers = sess.endpoint_url, sess.model, sess.headers
++                    if sess.model == AUTO_MODEL_SENTINEL:
++                        _call_url, _call_model, _call_headers, _pool, _reason = resolve_auto_route(
++                            messages, owner=owner
++                        )
++                        logger.info(
++                            "[auto-route] session=%s pool=%s model=%s reason=%s",
++                            session, _pool, _call_model, _reason,
++                        )
++                    _eff_temp, _eff_top_p, _eff_max_tokens = resolve_params(
++                        _call_model, ctx.preset.temperature, ctx.preset.max_tokens,
++                        is_custom_preset=preset_id in (None, "", "custom"),
++                    )
+                     async for chunk in stream_agent_loop(
+-                        sess.endpoint_url,
+-                        sess.model,
++                        _call_url,
++                        _call_model,
+                         messages,
+-                        headers=sess.headers,
+-                        temperature=ctx.preset.temperature,
+-                        max_tokens=ctx.preset.max_tokens,
++                        headers=_call_headers,
++                        temperature=_eff_temp,
++                        top_p=_eff_top_p,
++                        max_tokens=_eff_max_tokens,
+                         prompt_type=preset_id,

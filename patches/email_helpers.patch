@@ -1,0 +1,31 @@
+--- a/routes/email_helpers.py
++++ b/routes/email_helpers.py
+@@ -41,2 +41,12 @@
+ 
++# Background loops call the config resolver every minute; warn about a missing
++# SMTP/IMAP setup once per process instead of flooding the log.
++_CFG_WARNED: set[str] = set()
++
++
++def _warn_cfg_once(key: str, msg: str) -> None:
++    if key not in _CFG_WARNED:
++        _CFG_WARNED.add(key)
++        logger.warning(msg)
++
+ 
+@@ -967,5 +977,5 @@
+                 if not is_oauth and not (cfg["smtp_host"] and cfg["smtp_user"] and cfg["smtp_password"]):
+-                    logger.warning(f"SMTP not configured for account {row.name!r}")
++                    _warn_cfg_once(f"smtp:{row.name}", f"SMTP not configured for account {row.name!r}")
+                 if not is_oauth and not (cfg["imap_host"] and cfg["imap_user"] and cfg["imap_password"]):
+-                    logger.warning(f"IMAP not configured for account {row.name!r}")
++                    _warn_cfg_once(f"imap:{row.name}", f"IMAP not configured for account {row.name!r}")
+                 return cfg
+@@ -997,5 +1007,5 @@
+     if not (cfg["smtp_host"] and cfg["smtp_user"] and cfg["smtp_password"]):
+-        logger.warning("SMTP not configured — add an Email Account in Settings or set env vars")
++        _warn_cfg_once("smtp:legacy", "SMTP not configured — add an Email Account in Settings or set env vars")
+     if not (cfg["imap_host"] and cfg["imap_user"] and cfg["imap_password"]):
+-        logger.warning("IMAP not configured — add an Email Account in Settings or set env vars")
++        _warn_cfg_once("imap:legacy", "IMAP not configured — add an Email Account in Settings or set env vars")
+     return cfg
