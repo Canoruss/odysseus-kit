@@ -270,7 +270,7 @@ def tp_html(api, plans=None):
 
 def tp_get(st):
     t = st.get("tplus", {})
-    return {"sets": t.get("sets", []), "goal": t.get("goal"),
+    return {"sets": t.get("sets", []), "goal": t.get("goal"), "notes": t.get("notes", {}),
             "weights": [{"d": w["date"], "w": w["kg"]} for w in st.get("weights", []) if "date" in w and "kg" in w]}
 
 def tp_put(st, j):
@@ -295,7 +295,8 @@ def tp_put(st, j):
         if goal is not None and not 20 <= goal <= 250: goal = None
     except (ValueError, TypeError):
         goal = None
-    st["tplus"] = {"sets": sets, "goal": goal}
+    notes = {str(k)[:60]: str(v)[:300] for k, v in list((j.get("notes") or {}).items())[:80] if isinstance(v, str) and v.strip()} if isinstance(j.get("notes"), dict) else {}
+    st["tplus"] = {"sets": sets, "goal": goal, "notes": notes}
     st["weights"] = [{"date": k, "kg": v} for k, v in sorted(ws.items())]
 
 def rp_body(h):
