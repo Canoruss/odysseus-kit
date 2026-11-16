@@ -16,6 +16,7 @@ CATS = ["casa", "contas", "comida", "restaurantes", "transportes", "combustivel"
 import time, base64, re
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
+import period, period_ui
 import inbox
 import routine
 import study, extras, usage
@@ -961,6 +962,22 @@ class H(BaseHTTPRequestHandler):
             return study.apa_docx(self, u)
         if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/study":
             return study.get(self, u, page)
+        if u and self.path.split("?")[0].rstrip("/") == "/period/export":
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if not period.unlocked(u, period.load(u), self.headers.get("Cookie", "")):
+                return self.redirect("/finance/period")
+            fmt = "csv" if (q.get("fmt") or [""])[0] == "csv" else "json"
+            ctype, body = period.export(u, fmt)
+            b = body.encode()
+            self.send_response(200); self.send_header("Content-Type", ctype)
+            self.send_header("Content-Disposition", 'attachment; filename="ciclo.%s"' % fmt)
+            self.send_header("Content-Length", str(len(b))); self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff"); self.end_headers()
+            return self.wfile.write(b)
+        if u and self.path.split("?")[0].rstrip("/") == "/period":   # Ciclo: every user, separate data per account
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            g = lambda k, n: (q.get(k) or [""])[0][:n]
+            return self.send(200, page(period_ui.render(u, g("m", 200), g("ym", 7), g("day", 10), self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", ""))), "Ciclo"))
         if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/routine":
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(study.nav("plan") + routine.render(u, (q.get("m") or [""])[0][:200]), "Rotina"))
@@ -1059,6 +1076,9 @@ class H(BaseHTTPRequestHandler):
             return self.files_delete(re.sub(r"[^a-z0-9_-]", "", str(u).lower()))
         if u in (OWNER,) + MLIKE and self.path.startswith("/study/"):
             return study.post(self, u)
+        if u and self.path.startswith("/period/"):
+            msg, hdr = period.post(u, self.path.split("?")[0], self.form(), self.headers.get("Cookie", ""))
+            return self.redirect("/finance/period" + ("?m=" + urllib.parse.quote(msg) if msg else ""), hdr)
         if u in (OWNER,) + MLIKE and self.path.startswith("/routine/"):
             msg = routine.post(u, self.path.split("?")[0], self.form())
             return self.redirect("/finance/routine" + ("?m=" + urllib.parse.quote(msg) if msg else ""))

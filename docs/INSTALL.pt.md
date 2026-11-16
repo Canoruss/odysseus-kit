@@ -2,6 +2,14 @@
 
 Requisitos: Linux com Python 3.11+, o Odysseus a correr em Docker, e (para usar fora de casa) uma forma de o publicar com HTTPS, por exemplo [Tailscale](https://tailscale.com). Opcional: `poppler-utils` (`pdftotext`) para ler PDFs no Estudo.
 
+## Instalação rápida num servidor novo (Ubuntu/Debian, por exemplo Oracle Cloud Always Free)
+
+```bash
+git clone https://github.com/Canoruss/odysseus-kit && bash odysseus-kit/install/install.sh
+```
+
+Um só comando instala o Docker, o Odysseus (imagem oficial, versão fixa), o HTTPS (Caddy) e as ferramentas do KIT, e liga tudo. Corre tudo na tua máquina e não envia nada para fora. No fim mostra o endereço e a palavra-passe de administrador gerada. Opções: `--domain`, `--admin-user`, `--timezone` (ver `--help`). Remove com `install/uninstall.sh` (`--purge` apaga também os dados). No Oracle Cloud tens de abrir as portas 80 e 443 na Security List da VCN. Guia passo a passo: [ORACLE.pt.md](ORACLE.pt.md). Os passos manuais abaixo servem para instalações já existentes.
+
 ## 1. Configuração
 
 Há duas formas: o assistente no browser local (abaixo) ou, depois de a instalação estar de pé, **dentro do Odysseus**: Tools → **Setup** (só administradores; abre sozinho na primeira vez). O assistente também corre atrás do Hub em `/finance/setup/`, com a mesma autenticação do Odysseus.

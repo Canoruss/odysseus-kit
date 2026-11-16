@@ -93,6 +93,7 @@ Para cada serviço o assistente explica o que é, onde obter a chave, tem um bot
 | Guia | Tema |
 |---|---|
 | [docs/INSTALL.md](docs/INSTALL.pt.md) | instalação completa, portas, proxy, `ody-extras.js` |
+| [docs/ORACLE.pt.md](docs/ORACLE.pt.md) | servidor grátis no Oracle Cloud com um só comando (`install/install.sh`) |
 | [docs/APK.md](docs/APK.pt.md) | instalar ou compilar a app Android |
 | [docs/I18N.md](docs/I18N.pt.md) | idiomas e como acrescentar traduções |
 | [docs/GLUCOSE.md](docs/GLUCOSE.pt.md) | ferramenta de glicose e calculadora de insulina |

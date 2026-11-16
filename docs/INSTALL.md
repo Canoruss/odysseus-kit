@@ -2,6 +2,14 @@
 
 Requirements: Linux with Python 3.11+, Odysseus running in Docker, and (for use outside your home network) a way to publish it over HTTPS, for example [Tailscale](https://tailscale.com). Optional: `poppler-utils` (`pdftotext`) to read PDFs in Study.
 
+## Quick install on a fresh server (Ubuntu/Debian, e.g. Oracle Cloud Always Free)
+
+```bash
+git clone https://github.com/Canoruss/odysseus-kit && bash odysseus-kit/install/install.sh
+```
+
+One command installs Docker, Odysseus (official image, pinned), HTTPS (Caddy), and the KIT tools and wires everything together. Everything runs on your own machine and nothing is sent anywhere. At the end it prints the address and the generated admin password. Options: `--domain`, `--admin-user`, `--timezone` (see `--help`). Remove with `install/uninstall.sh` (`--purge` also deletes the data). On Oracle Cloud you must also open ports 80 and 443 in the VCN Security List. Step-by-step guide (Portuguese): [ORACLE.pt.md](ORACLE.pt.md). The manual steps below are for existing setups.
+
 ## 1. Configuration
 
 There are two ways: the local browser wizard (below) or, once the installation is up and running, **inside Odysseus**: Tools → **Setup** (administrators only; opens automatically on first use). The wizard also runs behind the Hub at `/finance/setup/`, using the same authentication as Odysseus.

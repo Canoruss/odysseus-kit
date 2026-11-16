@@ -93,6 +93,7 @@ For each service the wizard explains what it is, where to get the key, offers a 
 | Guide | Topic |
 |---|---|
 | [docs/INSTALL.md](docs/INSTALL.md) | full installation, ports, proxy, `ody-extras.js` |
+| [docs/ORACLE.pt.md](docs/ORACLE.pt.md) | free Oracle Cloud server with one command (`install/install.sh`), Portuguese guide |
 | [docs/APK.md](docs/APK.md) | install or build the Android app |
 | [docs/I18N.md](docs/I18N.md) | languages and adding translations |
 | [docs/GLUCOSE.md](docs/GLUCOSE.md) | glucose tool and insulin calculator setup |
