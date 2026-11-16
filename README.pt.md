@@ -7,7 +7,7 @@
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 ![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Portugu%C3%AAs-lightgrey)
 
-**Uma caixa de ferramentas para o Odysseus (o teu chat de IA self-hosted).** Acrescenta ferramentas dentro do chat (tradução, finanças, ginásio, estudo, notícias, voos, …), uma app Android assinada e um assistente de configuração passo a passo, para passares de um Odysseus simples a um assistente pessoal numa noite.
+**Uma caixa de ferramentas para o Odysseus (o teu chat de IA self-hosted).** Acrescenta ferramentas dentro do chat (tradução, finanças, ginásio, glicose, ciclo, estudo, notícias, voos, …), patches opcionais ao núcleo (um seletor de modelo **Auto** e mais), uma app Android assinada, um assistente de configuração passo a passo e um **instalador de um comando para um servidor Oracle Cloud gratuito**, para passares do zero a um assistente pessoal numa noite.
 
 - **Tudo é opcional.** Ativa o que queres e esconde o resto em *Settings → Appearance*. As ferramentas que saltares guardam a configuração, e podes ativá-las mais tarde.
 - **Trazes as tuas chaves.** Escolhes os fornecedores de IA (Groq, Gemini, DeepL, Claude…) e colas as tuas chaves. Nada é partilhado com o autor.
@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="Primeiro ecrã da app Android" width="26%">
 </p>
 
-> **Estado: pré-lançamento.** Extraído de uma instalação pessoal e ainda não testado por terceiros. Se algo falhar, [abre uma issue](../../issues).
+> **Estado: pré-lançamento (1.2.0).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
 
 ## Índice
 
@@ -33,10 +33,10 @@
 | **Tradução** | pt/en/es/fr/de/…, voz, tradução por foto, modo conversa, sugestões de resposta a hóspedes | DeepL and/or Groq |
 | **Compose** | rascunho de email/WhatsApp com botão para escolher a app de envio | Groq |
 | **Prompts** | descreves o que queres na tua língua e recebes um prompt em inglês pronto a colar (chat, imagem, código, vídeo, música, agente), com aviso quando faltam detalhes importantes | Groq (Claude Haiku de reserva) |
-| **Notícias** | feed por fontes e temas para cada pessoa, temas que sobem, palavras silenciadas, resumo diário | Groq |
+| **Notícias** | feed estilo revista (notícia em destaque + cartões com imagem), fontes e temas por pessoa, temas que sobem, palavras silenciadas, filtro «só críticas», resumo diário neutro | Groq |
 | **Estudo** | trabalhos com etapas, fontes com citação APA, resumo de links/PDF (com OCR para digitalizações), exportar referências para Word, avisos de prazos, planeador de 14 dias | Groq |
 | **Emails** | liga contas IMAP/SMTP (Gmail, Outlook, Yahoo, iCloud, outras) com os servidores preenchidos e teste de ligação | palavras-passe de aplicação do teu fornecedor |
-| **Voos** | voos guardados, ligações ao Flightradar24, estado em tempo real e avisos de atraso | chave AirLabs (opcional) |
+| **Voos** | voos guardados e agrupados em Hoje / Próximos / Passados, contagem decrescente até à partida, etiqueta de estado (atraso, aterrou, cancelado), ligações ao Flightradar24 / FlightAware, avisos de atraso e de porta, mensagem para copiar e enviar ao hóspede | chave AirLabs (opcional) |
 | **Canva** | criar designs e exportar PNG | conta de programador do Canva |
 | **Caixa de ideias** | os utilizadores enviam ideias/bugs e a IA organiza-os em tarefas | Groq |
 
@@ -45,8 +45,9 @@
 | Ferramenta | O que faz | Precisa de |
 |---|---|---|
 | **Finanças** | movimentos, dívidas com alertas, metas, talões por foto, despesas mensais | Groq (talões) |
-| **Gym + Treino+** | plano, séries, descanso, peso, fotos de progresso, análise de técnica por IA, relatórios médicos | Groq/Gemini |
-| **Glicose** | gráfico e histórico do LibreLinkUp, registo manual e editável. A calculadora de insulina vem **desativada** | LibreLinkUp |
+| **Gym + Treino+** | plano, séries com esforço (RPE), temporizador de descanso, peso corporal e meta, fotos de progresso, análise de técnica por IA, relatórios médicos. **Treino+**: recordes pessoais automáticos, sugestões de progressão (regra de +2,5%), séries por semana por grupo muscular (alvo 10–20), calculadora de discos, 1RM estimado, notas por exercício | Groq/Gemini |
+| **Glicose** | gráfico e histórico do LibreLinkUp, registo manual e editável. **Análise** a 7/14/30 dias: tempo no alvo (5 zonas com as metas internacionais), média, GMI, variabilidade (CV), perfil diário (AGP) com mediana e faixas de percentis, padrões por hora do dia, imprimir/PDF e copiar resumo para o médico. A calculadora de insulina vem **desativada** | LibreLinkUp |
+| **Ciclo** | período, fluxo, sintomas, humor, temperatura basal, testes de ovulação; previsões com janela fértil, ovulação e TPM; cartão da fase com anel do ciclo e ilustrações, dicas por fase, gráficos de estatísticas, lembretes, exportação CSV/JSON, PIN opcional, tema claro/escuro e paletas de cores, dados separados por conta | nada |
 
 ### Interface e plataforma
 
@@ -58,6 +59,7 @@
 | **Idioma** | seletor English / Português para as ferramentas e a app |
 | **Tema Ryoku** | tema extra para o Odysseus e todas as páginas das ferramentas (arte GPL-3.0 do projeto ryoku.dev) |
 | **Assistente de configuração** | passo a passo para chaves e serviços, com *Testar* e *Saltar* em cada passo (só administradores) |
+| **Lembretes e tarefas agendadas** | scripts agendados (cron) que criam lembretes no Odysseus: prestações e despesas, dívidas, prazos de estudo, atrasos de voos, período/ovulação, treinos, lista diária do ClickUp, sincronização da galeria |
 | **Patches ao núcleo** | opcionais: modelo **Auto** no seletor (rápido vs raciocínio), parâmetros por defeito, persona base, auditoria de memórias em lotes, menos ruído nos registos de email; aplicados pelo instalador, tudo ou nada, ver `patches/README.md` |
 | **App Android** | widgets, lembretes com ações, tradutor nativo, calendário, tarefa rápida por voz, bloqueio por impressão digital |
 
@@ -78,6 +80,18 @@
 A app Android é uma casca à volta do **teu** Odysseus: mostra o que o teu servidor servir. As abas do KIT aparecem depois de instalares o `ody-extras.js` e as ferramentas nesse servidor.
 
 ## Início rápido
+
+### Opção A: servidor gratuito com um comando (Oracle Cloud Always Free)
+
+Cria uma VM Ubuntu no plano gratuito da Oracle, abre as portas 80 e 443 e corre:
+
+```bash
+git clone https://github.com/Canoruss/odysseus-kit.git ~/odysseus-kit && bash ~/odysseus-kit/install/install.sh
+```
+
+Instala o Docker, o Odysseus 1.0.2, as ferramentas do KIT, os patches opcionais e o HTTPS (Caddy + sslip.io), e no fim mostra o teu endereço e a palavra-passe de administrador. O `uninstall.sh` remove tudo. Passo a passo com o que clicar: [docs/ORACLE.pt.md](docs/ORACLE.pt.md). O script nunca contacta o servidor do autor e não envia telemetria.
+
+### Opção B: já tens o Odysseus a correr
 
 **Precisas de:** Linux, Python 3.11+, Odysseus a correr em Docker e uma forma de lhe chegar por HTTPS (por exemplo [Tailscale](https://tailscale.com)). Detalhes em [docs/INSTALL.pt.md](docs/INSTALL.pt.md).
 

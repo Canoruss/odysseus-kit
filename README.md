@@ -7,7 +7,7 @@
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 ![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Portugu%C3%AAs-lightgrey)
 
-**A toolbox for Odysseus (your self-hosted AI chat).** It adds in-chat tools (translation, finance, gym, study, news, flights, …), a signed Android app, and a step-by-step setup assistant, so you can go from a bare Odysseus to a personal assistant in one evening.
+**A toolbox for Odysseus (your self-hosted AI chat).** It adds in-chat tools (translation, finance, gym, glucose, cycle, study, news, flights, …), optional core patches (an **Auto** model picker and more), a signed Android app, a step-by-step setup assistant and a **one-command installer for a free Oracle Cloud server**, so you can go from nothing to a personal assistant in one evening.
 
 - **Everything is optional.** Enable what you want; hide the rest in *Settings → Appearance*. Skipped tools keep their settings, so you can switch them on later.
 - **Bring your own keys.** You pick the AI providers (Groq, Gemini, DeepL, Claude…) and paste your own keys. Nothing is shared with the author.
@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
 </p>
 
-> **Status: pre-release.** Extracted from a personal installation and not yet tested by third parties. If something fails, please [open an issue](../../issues).
+> **Status: pre-release (1.2.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
 
 ## Contents
 
@@ -33,10 +33,10 @@
 | **Translation** | pt/en/es/fr/de/…, voice, photo translation, conversation mode, reply suggestions for guests | DeepL and/or Groq |
 | **Compose** | email/WhatsApp draft with a button to pick the sending app | Groq |
 | **Prompts** | describe what you want in your language and get a ready-to-paste English prompt (chat, image, code, video, music, agent), with a warning when important details are missing | Groq (Claude Haiku as fallback) |
-| **News** | feed by sources and topics for each person, topic boosts, muted words, daily summary | Groq |
+| **News** | magazine-style feed (lead story + card grid with images), sources and topics per person, topic boosts, muted words, only-critical filter, neutral daily summary | Groq |
 | **Study** | assignments with steps, sources with APA citation, link/PDF summary (with OCR for scans), Word export of references, deadline reminders, 14-day planner | Groq |
 | **Emails** | connect IMAP/SMTP accounts (Gmail, Outlook, Yahoo, iCloud, custom) with servers pre-filled and a connection test | app passwords from your provider |
-| **Flights** | saved flights, Flightradar24 links, live status and delay alerts | AirLabs key (optional) |
+| **Flights** | saved flights grouped by Today / Upcoming / Past, countdown to departure, status badge (delayed, landed, cancelled), Flightradar24 / FlightAware links, delay and gate alerts, one-tap message to copy for the guest | AirLabs key (optional) |
 | **Canva** | create designs and export PNG | Canva developer account |
 | **Idea Box** | users submit ideas/bugs, AI organizes them into tasks | Groq |
 
@@ -45,8 +45,9 @@
 | Tool | What it does | Requires |
 |---|---|---|
 | **Finance** | transactions, debts with alerts, goals, photo receipts, monthly expenses | Groq (receipts) |
-| **Gym + Training+** | plan, sets, rest, weight, progress photos, AI technique analysis, medical reports | Groq/Gemini |
-| **Glucose** | LibreLinkUp chart and history, manual and editable log. The insulin calculator ships **disabled** | LibreLinkUp |
+| **Gym + Training+** | plan, sets with effort (RPE), rest timer, body weight and goal, progress photos, AI technique analysis, medical reports. **Training+**: automatic personal records, progression suggestions (+2.5% rule), weekly sets per muscle group (target 10–20), plate calculator, estimated 1RM, per-exercise notes | Groq/Gemini |
+| **Glucose** | LibreLinkUp chart and history, manual and editable log. **Analysis** for 7/14/30 days: time in range (5 zones with international targets), mean, GMI, variability (CV), daily profile (AGP) with median and percentile bands, hour-of-day patterns, print/PDF and copy-summary for your doctor. The insulin calculator ships **disabled** | LibreLinkUp |
+| **Cycle** | period, flow, symptoms, mood, basal temperature, ovulation tests; predictions with fertile window, ovulation and PMS; phase card with cycle ring and illustrations, tips by phase, statistics charts, reminders, CSV/JSON export, optional PIN, light/dark theme and colour palettes, separate data per account | none |
 
 ### Interface and platform
 
@@ -58,6 +59,7 @@
 | **Language** | English / Português switch for the tools and the app |
 | **Ryoku theme** | extra theme for Odysseus and all tool pages (GPL-3.0 art from the ryoku.dev project) |
 | **Setup assistant** | step-by-step wizard for keys and services, with *Test* and *Skip* on every step (admins only) |
+| **Reminders and jobs** | scheduled scripts (cron) that create Odysseus reminders: instalments and expenses, debts, study deadlines, flight delays, period/ovulation, workouts, daily ClickUp list, gallery sync |
 | **Core patches** | optional: an **Auto** model in the picker (fast vs thinking), sampling defaults, base persona, memory audit in batches, quieter email logs; applied by the installer, all-or-nothing, see `patches/README.md` |
 | **Android app** | widgets, reminders with actions, native translator, calendar, quick voice task, fingerprint lock |
 
@@ -78,6 +80,18 @@
 The Android app is a shell around **your** Odysseus: it shows whatever your server serves. The KIT tabs appear once `ody-extras.js` and the tools are installed on that server.
 
 ## Quick start
+
+### Option A: free server in one command (Oracle Cloud Always Free)
+
+Create an Ubuntu VM on Oracle's free tier, open ports 80 and 443, then run:
+
+```bash
+git clone https://github.com/Canoruss/odysseus-kit.git ~/odysseus-kit && bash ~/odysseus-kit/install/install.sh
+```
+
+It installs Docker, Odysseus 1.0.2, the KIT tools, the optional core patches and HTTPS (Caddy + sslip.io), then prints your address and admin password. `uninstall.sh` removes it. Step-by-step with screenshots of what to click: [docs/ORACLE.md](docs/ORACLE.md). The script never contacts the author's server and sends no telemetry.
+
+### Option B: you already run Odysseus
 
 **You need:** Linux, Python 3.11+, Odysseus running in Docker, and a way to reach it over HTTPS (for example [Tailscale](https://tailscale.com)). Details in [docs/INSTALL.md](docs/INSTALL.md).
 
