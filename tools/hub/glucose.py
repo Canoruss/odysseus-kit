@@ -341,6 +341,8 @@ def chart_svg(d):
     band = f'<rect x="0" y="{Y(180):.1f}" width="{W}" height="{Y(70)-Y(180):.1f}" fill="#70d080" opacity=".12"/>'
     return f'<svg viewBox="0 0 {W} {Hh}" width="100%" style="background:#1d2026;border-radius:8px">{band}<polyline fill="none" stroke="#6aa0ff" stroke-width="2" points="{path}"/></svg>'
 
+import glucose_report as greport
+
 def render(page):
     d = load(); st = stats(d); bs = basal_suggestion(d, st)
     last = st["last"]
@@ -359,6 +361,7 @@ def render(page):
     if bs["new"]:
         basal += f'<form method="post" action="/finance/glucose/basal"><input type="hidden" name="v" value="{bs["new"]:g}"><button>Confirmar: passar a {bs["new"]:g} U</button></form>'
     basal += '<form method="post" action="/finance/glucose/basal" style="margin-top:6px"><input name="v" size="4" placeholder="U" inputmode="decimal"><button>Definir dose manualmente</button></form></div>'
+    rules_html = f'''<div class="box" style="color:#aaa;font-size:13px">Regras usadas: Fiasp abaixo de 150 mg/dL só hidratos (1 U por 10 g); a partir de 150, correção de 6 U + 1 U por cada 50 mg/dL acima (arredondada a 0,5), somada aos hidratos. Limite {MAX_DOSE:g} U. Abaixo de {HYPO} mg/dL não sugere insulina. Tresiba: sugere +{BASAL_STEP} U se a média de 2 dias passar de {BASAL_HIGH_AVG}. São sugestões; confirma sempre com o médico.</div>''' if (CALC_READY and BASAL_READY) else '<div class="box" style="color:#aaa;font-size:13px">A calculadora de insulina está desativada: define as regras do teu médico em Setup para a ativar. Aqui vês as leituras, o histórico e a análise.</div>'
     body = f'''<h1>Glicose</h1>
 <div class="box">{cur}<div>{src}</div>{chart_svg(d)}
 <div style="color:#aaa">Média 48 h: {"%.0f mg/dL" % st["avg2d"] if st["avg2d"] else "—"} ({st["n"]} leituras)</div>
@@ -371,8 +374,9 @@ def render(page):
 <div id="res" class="box"></div>
 <div>Dose tomada: <input id="du" size="4" inputmode="decimal"> U Fiasp <button type="button" onclick="logDose()">Registar dose tomada</button> <span id="lm"></span></div>
 <div style="margin-top:8px">Refeição antes do treino (sem insulina): <button type="button" onclick="logMeal()">Registar hidratos pré-treino</button> <span id="lmt"></span></div></div>
+{greport.card(d['readings'])}
 {MANUAL_BOX}<div class="box"><h2>Histórico (insulina e refeições)</h2>{history_html(d, 40, True)}</div>
 {basal}
-<div class="box" style="color:#aaa;font-size:13px">Regras usadas: Fiasp abaixo de 150 mg/dL só hidratos (1 U por 10 g); a partir de 150, correção de 6 U + 1 U por cada 50 mg/dL acima (arredondada a 0,5), somada aos hidratos. Limite {MAX_DOSE:g} U. Abaixo de {HYPO} mg/dL não sugere insulina. Tresiba: sugere +{BASAL_STEP} U se a média de 2 dias passar de {BASAL_HIGH_AVG}. São sugestões; confirma sempre com o médico.</div>
+{rules_html}
 <style>.big{{font-size:36px;font-weight:700}} small{{font-size:14px;color:#aaa}}</style><script>{PAGE_JS}</script>'''
     return page(body, "Glicose")
