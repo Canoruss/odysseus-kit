@@ -172,8 +172,24 @@ def ago(ts):
     m = int((time.time() - ts) / 60)
     return "agora" if m < 2 else f"há {m} min" if m < 90 else f"há {m // 60} h" if m < 2880 else f"há {m // 1440} d"
 
-CSS = study.CSS + """<style>.nw{display:flex;gap:10px;margin:8px 0;padding:10px;background:#262a31;border-radius:12px}.nw img{width:84px;height:84px;object-fit:cover;border-radius:8px;flex:none}
-.nw a.t{color:#e8eefc;font-weight:600;text-decoration:none;line-height:1.3}.nw a.t:hover{text-decoration:underline}.tg{background:#2f4a7a}.chk{display:inline-block;margin:3px 10px 3px 0}</style>"""
+CSS = study.CSS + """<style>
+.nchips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;position:sticky;top:0;background:#1d2026;z-index:5;scrollbar-width:none}.nchips::-webkit-scrollbar{display:none}
+.nchips a{flex:none;padding:6px 13px;border-radius:18px;background:#2a2e36;color:#ccc;text-decoration:none;font-size:13px}.nchips a.on{background:#4a7bd0;color:#fff}
+.hero{position:relative;display:block;border-radius:16px;overflow:hidden;min-height:210px;background:#262a31 center/cover no-repeat;margin:6px 0 14px;text-decoration:none}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,12,16,.92),rgba(10,12,16,.15) 70%)}
+.hero .in2{position:absolute;left:0;right:0;bottom:0;padding:16px;z-index:1}.hero b{display:block;color:#fff;font-size:20px;line-height:1.25;margin:6px 0 4px}.hero p{margin:0;color:#d6dbe6;font-size:13px}
+.ng{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.nc{display:flex;flex-direction:column;background:#262a31;border-radius:14px;overflow:hidden;text-decoration:none;transition:transform .12s,box-shadow .12s}.nc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.nc img{width:100%;height:150px;object-fit:cover;background:#1d2026}.nc .bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px;flex:1}
+.nc .tt{color:#e8eefc;font-weight:600;font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nc .ds{color:#aab2c0;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.nc .mt{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:#8e97a8;margin-top:auto}
+.sb{display:inline-block;padding:2px 9px;border-radius:10px;color:#fff;font-size:11px;font-weight:600}.tg{background:#2f4a7a;color:#dce8ff}.chk{display:inline-block;margin:3px 10px 3px 0}
+.dgc{background:linear-gradient(135deg,#2a3550,#262a31);border-radius:14px;padding:14px;margin:6px 0 14px}
+</style>"""
+
+def _col(sid):
+    return "hsl(%d,45%%,38%%)" % (sum(ord(c) for c in str(sid)) * 47 % 360)
 
 def nav_n(on):
     return CSS + "<div class='nav'>" + "".join(f"<a class='{'on' if k == on else ''}' href='{PFX}/news{q}'>{n}</a>" for k, n, q in
@@ -192,19 +208,31 @@ def news_page(u, query):
                 f"<p><button>Guardar</button></p></form>")
     only = (query.get("s") or [""])[0]
     p, items = build(u, only if only in CAT else None)
-    chips = "".join(f"<a class='pill' style='text-decoration:none;color:#ccc{';background:#4a7bd0;color:#fff' if only == s else ''}' href='{PFX}/news?s={s}'>{E(CAT[s][1])}</a>" for s in p["sources"] if s in CAT)
-    allc = f"<a class='pill' style='text-decoration:none;color:#ccc{';background:#4a7bd0;color:#fff' if not only else ''}' href='{PFX}/news'>Todas</a>"
+    allc = f"<a class='{'' if only else 'on'}' href='{PFX}/news'>Todas</a>"
+    chips = "".join(f"<a class='{'on' if only == s else ''}' href='{PFX}/news?s={s}'>{E(CAT[s][1])}</a>" for s in p["sources"] if s in CAT)
+    def meta(it):
+        tg = "".join(f"<span class='sb tg'>{E(t)}</span>" for t in it["hits"][:2])
+        return f"<span class='sb' style='background:{_col(it['src'])}'>{E(CAT[it['src']][1])}</span><span>{ago(it['ts'])}</span>{tg}"
     def card(it):
         img = f"<img src='{E(it['img'])}' loading='lazy' referrerpolicy='no-referrer' onerror='this.remove()'>" if it["img"] else ""
-        tg = "".join(f"<span class='pill tg'>{E(t)}</span>" for t in it["hits"][:3])
-        return (f"<div class='nw'>{img}<div><a class='t' href='{E(it['link'])}' target='_blank' rel='noopener noreferrer'>{E(it['title'])}</a>"
-                f"<div class='mut'>{E(CAT[it['src']][1])} · {ago(it['ts'])} {tg}</div><div style='font-size:13px;color:#bbb;margin-top:3px'>{E(it['desc'])}</div></div></div>")
+        return (f"<a class='nc' href='{E(it['link'])}' target='_blank' rel='noopener noreferrer'>{img}<div class='bd'><div class='tt'>{E(it['title'])}</div>"
+                f"<div class='ds'>{E(it['desc'])}</div><div class='mt'>{meta(it)}</div></div></a>")
+    def hero(it):
+        bg = f"background-image:url('{E(it['img'])}')" if it["img"] else f"background:{_col(it['src'])}"
+        return (f"<a class='hero' style=\"{bg}\" href='{E(it['link'])}' target='_blank' rel='noopener noreferrer'><div class='in2'><div class='mt' style='display:flex;gap:6px;align-items:center;font-size:12px;color:#cfd6e4'>{meta(it)}</div>"
+                f"<b>{E(it['title'])}</b><p>{E(it['desc'][:160])}</p></div></a>")
     mine = [i for i in items if i["hits"]][:15]; rest = [i for i in items if not i["hits"]][:45]
     body = nav_n("feed") + "<h1>Notícias</h1>"
     if not p["sources"]: body += "<p>Escolhe fontes em <a href='?tab=set'>Fontes e temas</a>.</p>"
-    body += f"<div>{allc}{chips}</div><div class='card' style='margin:10px 0'><button type='button' onclick='dg(this)'>✨ Resumo do dia</button> <span class='mut'>resumo neutro das principais notícias das tuas fontes</span><div id='dg' class='pre' style='display:none;margin-top:8px'></div></div>"
-    if mine: body += "<h2>Sobre os teus temas</h2>" + "".join(card(i) for i in mine)
-    body += "<h2>Mais recentes</h2>" + ("".join(card(i) for i in rest) or "<p class='mut'>Sem notícias de momento (as fontes podem estar indisponíveis).</p>")
+    body += f"<div class='nchips'>{allc}{chips}</div>"
+    body += ("<div class='dgc'><button type='button' onclick='dg(this)'>✨ Resumo do dia</button> <span class='mut'>resumo neutro das principais notícias das tuas fontes</span>"
+             "<div id='dg' class='pre' style='display:none;margin-top:10px'></div></div>")
+    lead = (mine or rest or [None])[0]
+    if lead:
+        body += hero(lead)
+        (mine if mine else rest).pop(0)
+    if mine: body += "<h2>Sobre os teus temas</h2><div class='ng'>" + "".join(card(i) for i in mine) + "</div>"
+    body += "<h2>Mais recentes</h2>" + (("<div class='ng'>" + "".join(card(i) for i in rest) + "</div>") if rest else "<p class='mut'>Sem notícias de momento (as fontes podem estar indisponíveis).</p>")
     body += (f"<script>async function dg(b){{b.disabled=true;const d=document.getElementById('dg');d.style.display='';d.textContent='A preparar…';"
              f"try{{const r=await (await fetch('{PFX}/news/digest',{{method:'POST',credentials:'same-origin',body:'{{}}'}})).json();d.textContent=r.text||r.error||'Erro.'}}catch(e){{d.textContent='Erro.'}}b.disabled=false}}</script>")
     return body
@@ -284,20 +312,57 @@ def flight_links(n, d=""):
             ("FlightAware", f"https://www.flightaware.com/live/flight/{n}"),
             ("Google", "https://www.google.com/search?q=" + urllib.parse.quote(f"{n} flight status {d}".strip()))]
 
+def _dep_dt(f, info):
+    """Melhor estimativa da hora de partida (datetime) ou None."""
+    for v in ((info or {}).get("dep_estimated"), (info or {}).get("dep_time")):
+        if v:
+            try: return datetime.datetime.fromisoformat(str(v)[:16].replace(" ", "T"))
+            except ValueError: pass
+    try: return datetime.datetime.fromisoformat(f["date"]) if f.get("date") else None
+    except ValueError: return None
+
+def _countdown(dt):
+    if not dt: return ""
+    m = int((dt - datetime.datetime.now()).total_seconds() / 60)
+    if abs(m) < 1: return "agora"
+    t = f"{abs(m) // 1440} d" if abs(m) >= 2880 else (f"{abs(m) // 60} h {abs(m) % 60:02d} min" if abs(m) >= 60 else f"{abs(m)} min")
+    return ("parte em " + t) if m > 0 else ("partiu há " + t)
+
+def _badge(info):
+    if not info: return ""
+    st = (info.get("status") or "").lower(); late = int(info.get("dep_delayed") or 0) or int(info.get("arr_delayed") or 0)
+    col, txt = (("#a33", "Cancelado") if st == "cancelled" else ("#2e7d4f", "Aterrou") if st == "landed" else ("#2a6f9a", "No ar") if st == "active" else ("#b9770e", "Atraso %d min" % late) if late else ("#3a7d44", "Dentro do horário"))
+    return f"<span class='sb' style='background:{col};color:#fff;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600'>{txt}</span>"
+
+def _guest_msg(f, info):
+    n = f["n"]; parts = [f"Voo {n}"]
+    if f.get("date"): parts.append("dia " + f["date"])
+    if info:
+        a = airlabs.describe(info)
+        if a: parts.append(a)
+    return " · ".join(parts)
+
 def flight_page(u, msg=""):
-    L = sorted(flights(u), key=lambda f: (f.get("date", ""), f.get("n", "")))
-    today = datetime.date.today().isoformat()
-    rows = ""
-    for i, f in enumerate(L):
-        past = f.get("date", "9999") < today
+    L = sorted(enumerate(flights(u)), key=lambda t: (t[1].get("date", ""), t[1].get("n", "")))
+    today = datetime.date.today().isoformat(); groups = {"Hoje": "", "Próximos": "", "Passados": ""}
+    for i, f in L:
+        d = f.get("date", "9999"); g = "Hoje" if d == today else "Passados" if d < today else "Próximos"
+        info = airlabs.cached_info(DIR, f["n"], f.get("date", ""))[0] if airlabs.configured() else None
+        cd = "" if g == "Passados" else _countdown(_dep_dt(f, info))
         lk = " · ".join(f"<a href='{E(h)}' target='_blank' rel='noopener noreferrer' style='color:#9bc'>{E(n)}</a>" for n, h in flight_links(f["n"], f.get("date", "")))
-        rows += (f"<div class='card' style='margin:6px 0;{'opacity:.55' if past else ''}'><b style='font-size:18px'>{E(f['n'])}</b> <span class='mut'>{E(f.get('date', ''))}</span> {E(f.get('note', ''))}<br>{lk}{_flight_status_html(u, f, i)}"
-                 f"<form method='post' action='{PFX}/flight/del' style='display:inline;float:right'><input type='hidden' name='i' value='{i}'><button class='xs' style='background:#6a3a3a;color:#fff;border:0;border-radius:6px'>apagar</button></form></div>")
-    return (study.CSS + f"<h1>Voos</h1><p class='mut'>Guarda os voos (os teus ou dos hóspedes) e abre o estado em tempo real no Flightradar24. O estado em tempo real vem do Flightradar24{(' e, com a AirLabs, o estado e os atrasos aparecem aqui (consultas este mês: ' + str(airlabs.usage(DIR)) + ' de ' + str(airlabs.MONTH_CAP) + ')') if airlabs.configured() else ''}.</p>{('<p>' + E(msg) + '</p>') if msg else ''}"
+        gm = E(json.dumps(_guest_msg(f, info), ensure_ascii=False), quote=True)
+        groups[g] += (f"<div class='card' style='margin:8px 0;{'opacity:.55;' if g == 'Passados' else ''}--c:{'#4a7bd0' if g != 'Hoje' else '#e0b050'}'>"
+                 f"<div style='display:flex;gap:8px;align-items:center;flex-wrap:wrap'><b style='font-size:19px'>{E(f['n'])}</b> {_badge(info)}"
+                 f"<span class='mut'>{E(f.get('date', ''))}</span><span style='color:#e0b050;font-size:13px'>{E(cd)}</span>"
+                 f"<form method='post' action='{PFX}/flight/del' style='margin-left:auto'><input type='hidden' name='i' value='{i}'><button class='xs' style='background:#6a3a3a;color:#fff;border:0;border-radius:6px'>apagar</button></form></div>"
+                 f"<div style='font-size:14px;margin:4px 0'>{E(f.get('note', ''))}</div><div class='mut'>{lk}</div>{_flight_status_html(u, f, i)}"
+                 f"<div style='margin-top:6px'><button type='button' class='xs' onclick='navigator.clipboard.writeText({gm}).then(()=>{{this.textContent=\"Copiado\"}})'>Copiar mensagem para o hóspede</button></div></div>")
+    secs = "".join(f"<h2>{k}</h2>{v}" for k, v in groups.items() if v) or "<p class=mut>Nenhum voo guardado.</p>"
+    return (study.CSS + f"<h1>Voos</h1><p class='mut'>Guarda os voos (os teus ou dos hóspedes). Cada voo mostra a contagem decrescente, o estado e links para o Flightradar24 e o FlightAware{(' e, com a AirLabs, os atrasos e as portas (consultas este mês: ' + str(airlabs.usage(DIR)) + ' de ' + str(airlabs.MONTH_CAP) + ')') if airlabs.configured() else ''}.</p>{('<p>' + E(msg) + '</p>') if msg else ''}"
             f"<form method='get' action='{PFX}/flight' class='card'><b>Ver um voo agora</b> <input class='in' name='q' placeholder='ex: TP1234' style='text-transform:uppercase;width:120px'><button>Abrir</button></form>"
             f"<form method='post' action='{PFX}/flight/add' class='card' style='margin-top:10px'><b>Guardar voo</b><br><input class='in' name='n' placeholder='Voo: TP1234' required style='text-transform:uppercase;width:120px'> "
             f"<input type='date' name='date'> <input class='in' name='note' placeholder='Hóspede / nota (ex: Apt 3, chega 22:10)' style='min-width:220px'> <button>Guardar</button></form>"
-            f"<h2>Voos guardados</h2>{rows or '<p class=mut>Nenhum voo guardado.</p>'}")
+            f"{secs}")
 
 def _flight_status_html(u, f, i):
     if not airlabs.configured(): return ""
@@ -307,7 +372,7 @@ def _flight_status_html(u, f, i):
     return f"<div style='margin-top:6px;font-size:13px;color:#cfd6e4'>{line}{btn}</div>"
 
 def flight_refresh(u, f):
-    L = sorted(flights(u), key=lambda x: (x.get("date", ""), x.get("n", "")))
+    L = flights(u)
     try: fl = L[int(f.get("i", ["-1"])[0])]
     except (ValueError, IndexError): return "Voo não encontrado."
     r = airlabs.lookup(DIR, fl["n"], fl.get("date", ""))
