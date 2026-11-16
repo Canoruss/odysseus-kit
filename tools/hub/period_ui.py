@@ -67,6 +67,13 @@ CSS = """<style>
 .cy .bars div{flex:1;background:#4a7bd0;border-radius:3px 3px 0 0;position:relative;min-width:8px}
 .cy .bars span{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:.7em;color:#bbb}
 .cy .aviso{font-size:.8em;color:#aaa;margin-top:12px}
+.cy .hero{display:flex;gap:14px;align-items:center;border-radius:18px;padding:14px 16px;margin:8px 0 12px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g1),var(--g2))}
+.cy .hero .art{position:absolute;right:-18px;top:-18px;width:150px;height:150px;opacity:.22;pointer-events:none}
+.cy .hero .rg{flex:none;width:132px;height:132px}.cy .hero .tx{position:relative;z-index:1;min-width:0}
+.cy .hero .tx small{color:#ffffffb0;font-size:.8em}.cy .hero .tx b{display:block;font-size:1.25em;margin:2px 0 4px;color:#fff}
+.cy .hero .tx p{margin:0;color:#ffffffd0;font-size:.85em;line-height:1.35}
+.cy .pic{width:44px;height:44px;flex:none}.cy details summary .pic{vertical-align:middle;margin-right:8px;width:30px;height:30px}
+.cy .syms label{background:#23272e;border-radius:10px;padding:7px 9px}
 </style>"""
 
 
@@ -98,6 +105,56 @@ def _tags(dt, days, info):
     return t
 
 
+PH_COL = {"menstrual": ("#7a1f2e", "#c0392b", "#ff8a80"), "folicular": ("#1d4d3a", "#2e8b57", "#9be3b4"),
+          "ovulatoria": ("#7a5a12", "#d99a1f", "#ffe08a"), "lutea": ("#2d2a5e", "#6a5acd", "#c3bcff")}
+SYM_EMO = {"Cólicas": "🌀", "Dor de cabeça": "🤕", "Seios sensíveis": "🌸", "Acne": "✨", "Inchaço": "🎈", "Cansaço": "😴",
+           "Irritabilidade": "⚡", "Dor nas costas": "🦴", "Mais apetite": "🍽️", "Náuseas": "🤢", "Insónias": "🌙",
+           "Desejo de doces": "🍫", "Tonturas": "💫", "Dores musculares": "💪", "Libido alta": "🔥"}
+
+
+def _icon(ph, size=44):
+    """Ilustração SVG da fase (gota, rebento, flor, lua). Sem ficheiros externos."""
+    c = PH_COL.get(ph, PH_COL["folicular"])[2]
+    g = {"menstrual": '<path d="M32 6C32 6 14 28 14 40a18 18 0 0 0 36 0C50 28 32 6 32 6z" fill="%s"/><path d="M24 40a8 8 0 0 0 8 8" stroke="#fff" stroke-opacity=".6" stroke-width="3" fill="none" stroke-linecap="round"/>' % c,
+         "folicular": '<path d="M32 58V30" stroke="%s" stroke-width="4" stroke-linecap="round"/><path d="M32 34C32 20 20 14 10 16c0 12 10 20 22 18z" fill="%s"/><path d="M32 28C32 16 42 8 54 10c0 12-10 20-22 18z" fill="%s" fill-opacity=".8"/>' % (c, c, c),
+         "ovulatoria": '<circle cx="32" cy="32" r="9" fill="%s"/>%s' % (c, "".join('<ellipse cx="32" cy="12" rx="6" ry="10" fill="%s" fill-opacity=".85" transform="rotate(%d 32 32)"/>' % (c, a) for a in range(0, 360, 45))),
+         "lutea": '<path d="M44 8a24 24 0 1 0 12 40A20 20 0 0 1 44 8z" fill="%s"/><circle cx="50" cy="14" r="2.5" fill="%s"/><circle cx="56" cy="26" r="1.8" fill="%s"/>' % (c, c, c)}.get(ph, "")
+    return '<svg class="pic" width="%d" height="%d" viewBox="0 0 64 64" aria-hidden="true">%s</svg>' % (size, size, g)
+
+
+def _ring(info, ph, day):
+    """Anel do ciclo: 4 fases coloridas e um marcador no dia de hoje."""
+    import math
+    n = max(21, min(45, int(info.get("cycle") or 28))); per = max(2, min(9, int(info.get("period") or 5)))
+    ov = max(per + 3, n - 14)
+    segs = [("menstrual", 0, per), ("folicular", per, ov - 1), ("ovulatoria", ov - 1, ov + 2), ("lutea", ov + 2, n)]
+    R, cx = 52, 66
+    def pt(a, r=R):
+        t = a / n * 2 * math.pi - math.pi / 2
+        return cx + r * math.cos(t), cx + r * math.sin(t)
+    out = []
+    for k, a, b in segs:
+        x1, y1 = pt(a); x2, y2 = pt(b)
+        out.append('<path d="M%.1f %.1f A%d %d 0 %d 1 %.1f %.1f" stroke="%s" stroke-width="12" fill="none" stroke-linecap="butt" stroke-opacity="%s"/>'
+                   % (x1, y1, R, R, 1 if (b - a) / n > .5 else 0, x2, y2, PH_COL[k][2], "1" if k == ph else ".35"))
+    mk = ""
+    if day:
+        x, y = pt(((day - 1) % n) + .5)
+        mk = '<circle cx="%.1f" cy="%.1f" r="9" fill="#fff"/><circle cx="%.1f" cy="%.1f" r="4" fill="%s"/>' % (x, y, x, y, PH_COL.get(ph, PH_COL["folicular"])[1])
+    mid = ('<text x="66" y="68" text-anchor="middle" font-size="30" font-weight="700" fill="#fff">%d</text><text x="66" y="86" text-anchor="middle" font-size="10" fill="#ffffffb0">dia</text>' % day) if day else ""
+    return '<svg class="rg" viewBox="0 0 132 132" aria-hidden="true">%s%s%s</svg>' % ("".join(out), mk, mid)
+
+
+def _hero(info, ph, lang):
+    if not ph[0]:
+        return ""
+    g1, g2, _ = PH_COL[ph[0]]
+    pn = (PHASES_EN if lang == "en" else P.PHASES)[ph[0]]
+    art = _icon(ph[0], 150).replace('class="pic"', 'class="art"')
+    return ('<div class="hero" style="--g1:%s;--g2:%s">%s%s<div class="tx"><small>%s</small><b>%s</b><p>%s</p></div></div>'
+            % (g1, g2, art, _ring(info, ph[0], ph[1]), T(lang, "Fase atual", "Current phase"), E(pn[0]), E(pn[1])))
+
+
 def _summary(info, goal, today, ph, lang="pt"):
     if info["ongoing"]:
         prox = T(lang, "Período em curso (dia %d)", "Period in progress (day %d)") % info["ongoing"]
@@ -122,9 +179,9 @@ def _summary(info, goal, today, ph, lang="pt"):
     pn = (PHASES_EN if lang == "en" else P.PHASES).get(ph[0]) if ph[0] else None
     big = ""
     if pn:
-        big = ('<div class="card big">%s<b>%s</b><span class="mut">%s</span></div>' % (
-            T(lang, "Hoje · dia %d do ciclo · fase %s", "Today · cycle day %d · %s phase") % (ph[1], E(pn[0].lower())),
-            T(lang, "Probabilidade de gravidez: %s", "Chance of pregnancy: %s") % ch, E(pn[1])))
+        big = ('<div class="card big">%s<b>%s</b></div>' % (
+            T(lang, "Hoje · dia %d do ciclo", "Today · cycle day %d") % ph[1],
+            T(lang, "Probabilidade de gravidez: %s", "Chance of pregnancy: %s") % ch))
     extra = ""
     if goal == "engravidar":
         if info["late"] >= 1:
@@ -138,7 +195,7 @@ def _tips(ph, today, lang="pt"):
         return ""
     name, resumo, tips = (PHASES_EN if lang == "en" else P.PHASES)[ph[0]]
     i = today.timetuple().tm_yday % len(tips)
-    return ('<details open><summary>%s</summary><p><b>%s</b></p>'
+    return ('<details open><summary>' + _icon(ph[0]) + '%s</summary><p><b>%s</b></p>'
             '<details><summary>%s</summary><ul class="tips">%s</ul></details></details>'
             % (T(lang, "Dica de hoje · fase %s", "Tip of the day · %s phase") % E(name.lower()), E(tips[i]),
                T(lang, "Todas as dicas desta fase", "All tips for this phase"), "".join("<li>%s</li>" % E(t) for t in tips)))
@@ -178,7 +235,7 @@ def _form(d, sel, today, lang="pt"):
     sel_opt = lambda items, cur: "".join('<option value="%s"%s>%s</option>' % (v, " selected" if cur == v else "", lab(l, lang)) for v, l in items)
     mood = "".join('<option value="%s"%s>%s</option>' % (v, " selected" if e.get("mood", "") == v else "", lab(v, lang) if v else "—") for v in P.MOODS)
     syms = "".join('<label><input type="checkbox" name="s%d" value="1"%s> %s</label>' % (
-        i, " checked" if s in e.get("sym", []) else "", E(lab(s, lang))) for i, s in enumerate(P.SYMPTOMS))
+        i, " checked" if s in e.get("sym", []) else "", (SYM_EMO.get(s, "") + " " + E(lab(s, lang))).strip()) for i, s in enumerate(P.SYMPTOMS))
     f = ('<form method="post" action="/finance/period/log" class="box">'
          '<label><span>Dia</span> <input type="date" name="date" value="%s" max="%s" required></label>'
          '<div class="row"><label><span>Fluxo</span> <select name="flow">%s</select></label><label><span>Humor</span> <select name="mood">%s</select></label></div>'
@@ -278,7 +335,7 @@ def render(user, msg="", ym="", day="", cookie="", lang="pt"):
         hist = "<details><summary>Histórico de períodos</summary><table><tr><th>Início</th><th>Fim</th><th>Dias</th></tr>%s</table></details>" % "".join(
             "<tr><td>%s</td><td>%s</td><td>%d</td></tr>" % (_pt(a, lang), _pt(b, lang), (b - a).days + 1) for a, b in info["runs"])
     return (CSS + '<div class="cy"><h2>Ciclo</h2>' + ('<p class="green">%s</p>' % E(msg) if msg else "")
-            + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
+            + _hero(info, ph, lang) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
             + _tips(ph, today, lang) + '<div class="box">%s</div>' % _calendar(d, info, y, m, sel, today, lang)
             + '<h3>%s</h3>%s' % (T(lang, "Registar · %s", "Log · %s") % _pt(sel, lang), _form(d, sel, today, lang)) + _stats(d, today, lang) + hist + _settings(d, lang)
             + '<p class="aviso">Estimativas com base nos teus registos (ou nos valores das definições). '
