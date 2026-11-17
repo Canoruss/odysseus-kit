@@ -38,7 +38,7 @@
 | **Emails** | liga contas IMAP/SMTP (Gmail, Outlook, Yahoo, iCloud, outras) com os servidores preenchidos e teste de ligação | palavras-passe de aplicação do teu fornecedor |
 | **Voos** | voos guardados e agrupados em Hoje / Próximos / Passados, contagem decrescente até à partida, etiqueta de estado (atraso, aterrou, cancelado), ligações ao Flightradar24 / FlightAware, avisos de atraso e de porta, mensagem para copiar e enviar ao hóspede | chave AirLabs (opcional) |
 | **Canva** | criar designs e exportar PNG | conta de programador do Canva |
-| **Caixa de ideias** | os utilizadores enviam ideias/bugs e a IA organiza-os em tarefas | Groq |
+| **Caixa de ideias** | os utilizadores enviam ideias/bugs (texto e capturas) e a IA organiza-os em tarefas | Groq (visão), Gemini de reserva |
 
 ### Acompanhamento pessoal
 
@@ -127,6 +127,7 @@ Verifica primeiro o ficheiro: as notas da release indicam o `SHA-256` e a impres
 
 - As chaves ficam só em `~/.config/odysseus-kit/*.env` (modo 600), nunca no repositório.
 - As ferramentas escutam só em `127.0.0.1`. Publica-as atrás do teu proxy **com a mesma autenticação do Odysseus**.
+- As funções com fotos (capturas da Caixa de ideias, fotos de progresso/técnica do Gym) tentam primeiro a visão da Groq e caem para o Gemini; o vídeo fica no Gemini.
 - As funções de IA enviam texto, áudio ou fotos ao fornecedor que escolheres (Groq, Gemini, DeepL…). Lê as políticas deles.
 - Corre `python3 scripts/scan.py` antes de publicar alterações: procura segredos e dados pessoais.
 

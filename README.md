@@ -38,7 +38,7 @@
 | **Emails** | connect IMAP/SMTP accounts (Gmail, Outlook, Yahoo, iCloud, custom) with servers pre-filled and a connection test | app passwords from your provider |
 | **Flights** | saved flights grouped by Today / Upcoming / Past, countdown to departure, status badge (delayed, landed, cancelled), Flightradar24 / FlightAware links, delay and gate alerts, one-tap message to copy for the guest | AirLabs key (optional) |
 | **Canva** | create designs and export PNG | Canva developer account |
-| **Idea Box** | users submit ideas/bugs, AI organizes them into tasks | Groq |
+| **Idea Box** | users submit ideas/bugs (text and screenshots), AI organizes them into tasks | Groq vision, Gemini fallback |
 
 ### Personal tracking
 
@@ -127,6 +127,7 @@ Verify the download first: the release notes list the file's `SHA-256` and the s
 
 - Keys live only in `~/.config/odysseus-kit/*.env` (mode 600), never in the repository.
 - Tools listen on `127.0.0.1` only. Publish them behind your proxy **with the same authentication as Odysseus**.
+- Photo features (Idea Box screenshots, Gym progress/technique photos) try Groq vision first and fall back to Gemini; video stays on Gemini.
 - AI features send text, audio or photos to the provider you choose (Groq, Gemini, DeepL…). Read their policies.
 - Run `python3 scripts/scan.py` before publishing changes: it looks for secrets and personal data.
 

@@ -48,6 +48,20 @@ def organize(text, images_b64):
     parts = [{"text": prompt}] + [{"inline_data": {"mime_type": "image/jpeg", "data": b}} for b in images_b64[:6]]
     key = _gemini_key()
     last = None
+    try:  # Groq primeiro; se falhar, Gemini
+        import groqv
+        o = json.loads(groqv.vision_multi(prompt + "\nResponde com um objeto JSON {\"tarefas\": [ ... ]}.", images_b64[:6], json_out=True))
+        if isinstance(o, dict): o = o.get("tarefas") or o.get("tasks") or [o]
+        out = []
+        for t in o[:12]:
+            title = str(t.get("title") or "").strip()[:90]
+            if title:
+                out.append({"title": title, "category": t.get("category") if t.get("category") in CATS else "ideia",
+                            "priority": t.get("priority") if t.get("priority") in PRIO else "média",
+                            "details": str(t.get("details") or "")[:1500]})
+        if out: return out
+    except Exception as e:
+        last = e
     for m in ("gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"):
         body = json.dumps({"contents": [{"parts": parts}], "generationConfig": {"responseMimeType": "application/json"}}).encode()
         rq = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent", body,

@@ -12,6 +12,13 @@ def _key():
 
 def _gem(parts, prompt, json_out=False):
     last = None
+    try:  # Groq primeiro (so imagens; video fica no Gemini)
+        imgs = [p["inline_data"] for p in parts if "inline_data" in p]
+        if imgs and all(i["mime_type"].startswith("image/") for i in imgs):
+            import groqv
+            return groqv.vision_multi(prompt, [i["data"] for i in imgs], json_out=json_out)
+    except Exception:
+        pass
     for m in ("gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"):
         gc = {"responseMimeType": "application/json"} if json_out else {}
         body = json.dumps({"contents": [{"parts": [{"text": prompt}] + parts}], "generationConfig": gc}).encode()
