@@ -353,7 +353,11 @@ $SUDO systemctl enable --now kit-hub kit-translate kit-canva kit-wizard >/dev/nu
 
 # daily reminders for the Cycle tab (only runs once you have created an agent token: see docs/INSTALL.md section 5)
 CRONLINE="47 9 * * *  [ -f $CONF_DIR/agent.env ] && python3 -I $KIT_DIR/tools/jobs/period_reminders.py >>\$HOME/.local/share/odysseus-kit/logs/period-reminders.log 2>&1"
-( crontab -l 2>/dev/null | grep -v 'period_reminders.py' || true; echo "$CRONLINE" ) | crontab - 2>/dev/null || warn "Could not install the daily reminder cron."
+LOGD="\$HOME/.local/share/odysseus-kit/logs"
+PILLLINE="*/10 * * * *  [ -f $CONF_DIR/agent.env ] && python3 -I $KIT_DIR/tools/jobs/period_reminders.py --pill >>$LOGD/pill-reminders.log 2>&1"
+GAMESLINE="17 */2 * * *  [ -f $CONF_DIR/agent.env ] && python3 -I $KIT_DIR/tools/jobs/games_alerts.py >>$LOGD/games-alerts.log 2>&1"
+SCANLINE="0 4 * * *  python3 -I $KIT_DIR/tools/jobs/nightly_scan.py --quiet >>$LOGD/nightly-scan.log 2>&1"
+( crontab -l 2>/dev/null | grep -v -e 'period_reminders.py' -e 'games_alerts.py' -e 'nightly_scan.py' || true; echo "$CRONLINE"; echo "$PILLLINE"; echo "$GAMESLINE"; echo "$SCANLINE" ) | crontab - 2>/dev/null || warn "Could not install the cron jobs (reminders, pill, free-game alerts, nightly scan)."
 
 # ---------------------------------------------------------------- 8. firewall (host level only)
 if [ "$FIREWALL" -eq 1 ] && command -v iptables >/dev/null && $SUDO iptables -S INPUT 2>/dev/null | grep -q -E 'REJECT|DROP|-P INPUT DROP'; then

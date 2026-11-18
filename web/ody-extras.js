@@ -33,6 +33,8 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   ];
   const SPEECH = { pt: 'pt-PT', en: 'en-GB', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT', zh: 'zh-CN', ja: 'ja-JP' };
   const ICON = {
+    games: '<rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11" r="1"/><circle cx="18.5" cy="13.5" r="1"/>',
+    focus: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
     cycle: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/><path d="M4 12h2M18 12h2"/>',
     spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
     fin: '<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1.1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6v2m0 8v2"/>',
@@ -58,6 +60,18 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     return d;
   }
 
+  // Jogos grátis e Foco: abas próprias (todos os utilizadores).
+  function addGamesFocusTools(sec) {
+    if (!sec) return;
+    [['tool-focus-btn', 'Foco', ICON.focus, '/finance/focus'], ['tool-games-btn', 'Jogos grátis', ICON.games, '/finance/games']].forEach(([id, label, ic, url]) => {
+      if (document.getElementById(id)) return;
+      const b = toolItem(id, label, ic);
+      b.addEventListener('click', () => openFrame(label, url));
+      const g = document.getElementById('tool-period-btn') || document.getElementById('tool-glucose-btn');
+      if (g && g.parentNode === sec) g.after(b); else sec.appendChild(b);
+    });
+  }
+
   // Ciclo: own tab (all users). Added even when the other tools already exist.
   function addPeriodTool(sec) {
     if (!sec || document.getElementById('tool-period-btn')) return;
@@ -70,6 +84,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   function addTools() {
     const sec = document.getElementById('tools-section');
     addPeriodTool(sec);
+    addGamesFocusTools(sec);
     if (!sec || (document.getElementById('tool-translate-btn') && document.getElementById('tool-finance-btn') && document.getElementById('tool-email-btn') && document.getElementById('tool-glucose-btn'))) { if (sec) orderTools(sec); return !!sec; }
     const mail = toolItem('tool-email-btn', 'Email', ICON.mail);
     mail.addEventListener('click', () => {
@@ -114,7 +129,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
 
   // Ordem da barra Tools: primeiro as usadas no dia a dia, depois o resto.
   const TOOL_ORDER = ['tool-email-btn', 'tool-calendar-btn', 'tool-tasks-btn', 'tool-notes-btn',
-    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-period-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-prompt-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
+    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-period-btn', 'tool-focus-btn', 'tool-games-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-prompt-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
 
   // ---- Idioma (i18n) ----
   // Dicionario PT -> EN servido pelo hub (/finance/i18n.json). O idioma escolhido fica em localStorage + cookie 'kitlang' (as paginas do hub seguem o cookie).
@@ -209,7 +224,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
 
   // ---- Appearance: mostrar/esconder as tools extra ----
   const EXTRA_TOOLS = [['tool-email-btn', 'Email (atalho)'], ['tool-finance-btn', 'Finanças'], ['tool-translate-btn', 'Tradução'],
-    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-period-btn', 'Ciclo'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-prompt-btn', 'Prompts'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
+    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-period-btn', 'Ciclo'], ['tool-focus-btn', 'Foco'], ['tool-games-btn', 'Jogos grátis'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-prompt-btn', 'Prompts'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
   const XT_KEY = 'ody-extra-tools-hidden';
   function xtHidden() { try { return JSON.parse(localStorage.getItem(XT_KEY) || '{}'); } catch (_) { return {}; } }
   function applyExtraTools() {

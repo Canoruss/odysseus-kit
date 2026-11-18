@@ -11,7 +11,7 @@ for n in kit-hub kit-translate kit-canva kit-wizard; do
   $SUDO systemctl disable --now "$n" >/dev/null 2>&1; $SUDO rm -f "/etc/systemd/system/$n.service"
 done
 $SUDO systemctl daemon-reload
-( crontab -l 2>/dev/null | grep -v 'period_reminders.py' ) | crontab - 2>/dev/null
+( crontab -l 2>/dev/null | grep -v -e 'period_reminders.py' -e 'games_alerts.py' -e 'nightly_scan.py' ) | crontab - 2>/dev/null
 
 if [ -f "$SRV_DIR/docker-compose.yml" ]; then
   echo "Stopping containers..."

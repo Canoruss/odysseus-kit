@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lembretes da aba Ciclo na conta de cada utilizador (período, janela fértil, atraso). Daily cron (e.g. 09:47).
+"""Lembretes da aba Ciclo na conta de cada utilizador (período, janela fértil, atraso). Daily cron (e.g. 09:47). With --pill (cron every 10 min): creates the pill reminder.
 Só avisa quem já registou pelo menos um período e não desligou o lembrete nas definições da aba.
 Uso: period_reminders.py [--dry]   (--dry só mostra o que criaria)"""
 import datetime, json, os, sys
@@ -12,6 +12,24 @@ import lib, users, period
 SENT = os.path.join(JOBS_STATE, "period-sent.json")
 os.makedirs(JOBS_STATE, exist_ok=True)
 DRY = "--dry" in sys.argv
+PILL = "--pill" in sys.argv   # cron 00:10: cria o lembrete da pílula de hoje à hora escolhida
+
+
+def pill_jobs(user, today):
+    """Cron de 10 em 10 min: perto da hora escolhida cria o lembrete, mas só se a pílula de hoje ainda não foi marcada."""
+    d = period.load(user)
+    r = d["settings"].get("remind", {})
+    if not r.get("pill") or not d["settings"].get("takes_pill"):
+        return []
+    if d["days"].get(today.isoformat(), {}).get("pill"):
+        return []   # já tomou
+    en = d["settings"].get("lang") == "en"
+    t = r.get("pill_time", "09:00")
+    when = datetime.datetime.combine(today, datetime.time(int(t[:2]), int(t[3:])))
+    now = lib.now().replace(tzinfo=None)
+    if not (when - datetime.timedelta(minutes=10) <= now < when + datetime.timedelta(hours=3)):
+        return []
+    return [("pill", today.toordinal(), "Take your pill 💊" if en else "Tomar a pílula 💊", max(when, now + datetime.timedelta(minutes=1)))]
 
 
 def jobs_for(user, today):
@@ -55,16 +73,16 @@ def main():
     n = 0
     for user in users.USERS:
         try:
-            jobs = jobs_for(user, today)
+            jobs = [j + (None,) for j in jobs_for(user, today)] if not PILL else pill_jobs(user, today)
         except Exception as e:
             print("erro", user, repr(e)[:100]); continue
-        for kind, key, title in jobs:
+        for kind, key, title, when in jobs:
             k = "%s|%s|%s" % (user, kind, key)
             if k in sent:
                 continue
             if DRY:
                 print("[dry]", user, "->", title); continue
-            ok, msg = users.add_reminder(user, title)
+            ok, msg = users.add_reminder(user, title, when)
             print(user, ok, title, msg[:60])
             if ok:
                 sent[k] = today.isoformat(); n += 1

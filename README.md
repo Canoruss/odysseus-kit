@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
 </p>
 
-> **Status: pre-release (1.2.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
+> **Status: pre-release (1.3.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
 
 ## Contents
 
@@ -47,7 +47,9 @@
 | **Finance** | transactions, debts with alerts, goals, photo receipts, monthly expenses | Groq (receipts) |
 | **Gym + Training+** | plan, sets with effort (RPE), rest timer, body weight and goal, progress photos, AI technique analysis, medical reports. **Training+**: automatic personal records, progression suggestions (+2.5% rule), weekly sets per muscle group (target 10–20), plate calculator, estimated 1RM, per-exercise notes | Groq/Gemini |
 | **Glucose** | LibreLinkUp chart and history, manual and editable log. **Analysis** for 7/14/30 days: time in range (5 zones with international targets), mean, GMI, variability (CV), daily profile (AGP) with median and percentile bands, hour-of-day patterns, print/PDF and copy-summary for your doctor. The insulin calculator ships **disabled** | LibreLinkUp |
-| **Cycle** | period, flow, symptoms, mood, basal temperature, ovulation tests; predictions with fertile window, ovulation and PMS; phase card with cycle ring and illustrations, tips by phase, statistics charts, reminders, CSV/JSON export, optional PIN, light/dark theme and colour palettes, separate data per account | none |
+| **Cycle** | period, flow, symptoms, mood, basal temperature, ovulation tests; predictions with fertile window, ovulation and PMS; phase card with cycle ring and illustrations, **Pingo** the animated penguin guide (17 states, layered animation), "Ask Pingo" chat, profile questionnaire, tips by phase, statistics charts, pill reminder, reminders, CSV/JSON export, optional PIN, light/dark theme and colour palettes, separate data per account; a **cycle card in the Gym** adapts training and diet tips to the phase | Groq/Gemini (optional, for Ask Pingo) |
+| **Focus** | tasks and routines for ADHD/autism: small steps, timers, one thing at a time; uses the Idea Box | none |
+| **Free games** | list of currently free games and optional alerts | none |
 
 ### Interface and platform
 
@@ -59,7 +61,7 @@
 | **Language** | English / Português switch for the tools and the app |
 | **Ryoku theme** | extra theme for Odysseus and all tool pages (GPL-3.0 art from the ryoku.dev project) |
 | **Setup assistant** | step-by-step wizard for keys and services, with *Test* and *Skip* on every step (admins only) |
-| **Reminders and jobs** | scheduled scripts (cron) that create Odysseus reminders: instalments and expenses, debts, study deadlines, flight delays, period/ovulation, workouts, daily ClickUp list, gallery sync |
+| **Reminders and jobs** | scheduled scripts (cron) that create Odysseus reminders: instalments and expenses, debts, study deadlines, flight delays, period/ovulation, workouts, daily ClickUp list, gallery sync, free-game alerts, pill reminder, **nightly scan** (checks services, containers and tool pages; optional free Groq model summarises failures; Telegram alert only on failure) |
 | **Core patches** | optional: an **Auto** model in the picker (fast vs thinking), sampling defaults, base persona, memory audit in batches, quieter email logs; applied by the installer, all-or-nothing, see `patches/README.md` |
 | **Android app** | widgets, reminders with actions, native translator, calendar, quick voice task, fingerprint lock |
 

@@ -16,7 +16,7 @@ CATS = ["casa", "contas", "comida", "restaurantes", "transportes", "combustivel"
 import time, base64, re
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
-import period, period_ui
+import period, period_ui, games, focus
 import inbox
 import routine
 import study, extras, usage
@@ -524,7 +524,7 @@ def m_gym_page(m):
     plan_html, quiz_html = m_gym(m)
     return page(hero.replace('<div class="box"><h2>Registo de hoje</h2>', cta + '<div class="box"><h2>Registo de hoje</h2>', 1)
                 + reports.box(m, "/finance/m/gym/report") + media.box(m, "/finance/m/gym")
-                + gym_chat_box(m, "/finance/m/gym/chat") + plan_html + quiz_html, "Gym")
+                + period_ui.gym_card(getattr(CUR, "u", None) or MEMBER) + gym_chat_box(m, "/finance/m/gym/chat") + plan_html + quiz_html, "Gym")
 
 def m_gym(m):
     """Devolve (plano, questionario) no mesmo estilo do Gym do administrador."""
@@ -719,9 +719,9 @@ class H(BaseHTTPRequestHandler):
         for k, v in (headers or {}).items(): self.send_header(k, v)
         self.send_header("Content-Length", "0"); self.end_headers()
 
-    def form(self):
+    def form(self, limit=10000):
         n = int(self.headers.get("Content-Length", 0) or 0)
-        return {k: v[0] for k, v in urllib.parse.parse_qs(self.rfile.read(min(n, 10000)).decode()).items()}
+        return {k: v[0] for k, v in urllib.parse.parse_qs(self.rfile.read(min(n, limit)).decode()).items()}
 
     def norm(self):
         p = self.path
@@ -924,6 +924,18 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.norm()
+        _m = re.fullmatch(r"(?:/finance)?/pingo/layers/([a-z_]+)\.png", self.path.split("?")[0])
+        if _m:                                                       # camadas do Pingo
+            try: _b = open(os.path.join(HERE, "pingo", "layers", _m.group(1) + ".png"), "rb").read()
+            except OSError: return self.send(404, "nao existe")
+            self.send_response(200); self.send_header("Content-Type", "image/png"); self.send_header("Cache-Control", "public, max-age=604800")
+            self.send_header("Content-Length", str(len(_b))); self.end_headers(); return self.wfile.write(_b)
+        _m = re.fullmatch(r"(?:/finance)?/pingo/([a-z]+)\.png", self.path.split("?")[0])
+        if _m:                                                       # sprites do Pingo (estaticos)
+            try: _b = open(os.path.join(HERE, "pingo", "png", _m.group(1) + ".png"), "rb").read()
+            except OSError: return self.send(404, "nao existe")
+            self.send_response(200); self.send_header("Content-Type", "image/png"); self.send_header("Cache-Control", "public, max-age=604800")
+            self.send_header("Content-Length", str(len(_b))); self.end_headers(); return self.wfile.write(_b)
         u = who(self.headers); CUR.u = u
         if self.path.split("?")[0].rstrip("/") == "/prefs":
             if not u: return self.send(403, json.dumps({"error": "sem acesso"}))
@@ -975,10 +987,15 @@ class H(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(b))); self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff"); self.end_headers()
             return self.wfile.write(b)
+        if u and self.path.split("?")[0].rstrip("/") == "/games":
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            return self.send(200, page(games.render((q.get("p") or [""])[0][:10], i18n.from_cookie(self.headers.get("Cookie", "")), u), "Jogos"))
+        if u and self.path.split("?")[0].rstrip("/") == "/focus":
+            return self.send(200, page(focus.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), u in (OWNER,) + MLIKE), "Foco"))
         if u and self.path.split("?")[0].rstrip("/") == "/period":   # Ciclo: every user, separate data per account
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             g = lambda k, n: (q.get(k) or [""])[0][:n]
-            return self.send(200, page(period_ui.render(u, g("m", 200), g("ym", 7), g("day", 10), self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", ""))), "Ciclo"))
+            return self.send(200, page(period_ui.render(u, g("m", 200), g("ym", 7), g("day", 10), self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", "")), g("edit", 1) == "1", g("tab", 10), {k: v[0][:3] for k, v in q.items()}), "Ciclo"))
         if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/routine":
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(study.nav("plan") + routine.render(u, (q.get("m") or [""])[0][:200]), "Rotina"))
@@ -1077,8 +1094,18 @@ class H(BaseHTTPRequestHandler):
             return self.files_delete(re.sub(r"[^a-z0-9_-]", "", str(u).lower()))
         if u in (OWNER,) + MLIKE and self.path.startswith("/study/"):
             return study.post(self, u)
+        if u and self.path.split("?")[0].rstrip("/") == "/games/alerts":
+            games.alerts_set(u, self.form().get("on") == "1", i18n.from_cookie(self.headers.get("Cookie", "")))
+            return self.redirect("/finance/games")
+        if u and self.path.startswith("/focus/"):
+            focus.post(u, self.path.split("?")[0], self.form(), u in (OWNER,) + MLIKE)
+            return self.redirect("/finance/focus")
+        if u and self.path.split("?")[0] == "/period/ask":
+            try: j = self.read_json(6000)
+            except Exception: j = {}
+            return self.send(200, json.dumps(period_ui.ask_api(u, j, self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", ""))), ensure_ascii=False))
         if u and self.path.startswith("/period/"):
-            msg, hdr = period.post(u, self.path.split("?")[0], self.form(), self.headers.get("Cookie", ""))
+            msg, hdr = period.post(u, self.path.split("?")[0], self.form(3000000 if self.path.split("?")[0] == "/period/import" else 10000), self.headers.get("Cookie", ""))
             return self.redirect("/finance/period" + ("?m=" + urllib.parse.quote(msg) if msg else ""), hdr)
         if u in (OWNER,) + MLIKE and self.path.startswith("/routine/"):
             msg = routine.post(u, self.path.split("?")[0], self.form())

@@ -1,8 +1,11 @@
 """Ciclo (interface HTML). Usa o núcleo em period.py."""
 import calendar, datetime, html
 import period as P
+import period_care as PC
+import period_pg as PG
 E = html.escape
 MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"]
+WD_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 WD = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
 MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 LABEL_EN = {"Cólicas": "Cramps", "Dor de cabeça": "Headache", "Seios sensíveis": "Breast tenderness", "Acne": "Acne", "Inchaço": "Bloating",
@@ -11,7 +14,19 @@ LABEL_EN = {"Cólicas": "Cramps", "Dor de cabeça": "Headache", "Seios sensívei
             "Dores musculares": "Muscle aches", "Libido alta": "High libido", "Feliz": "Happy", "Calma": "Calm", "Energética": "Energetic",
             "Ansiosa": "Anxious", "Triste": "Sad", "Irritada": "Irritable", "Sensível": "Sensitive", "Cansada": "Tired",
             "Manchas": "Spotting", "Leve": "Light", "Média": "Medium", "Intensa": "Heavy", "Negativo": "Negative", "Positivo": "Positive",
-            "Sim": "Yes", "Sim, protegido": "Yes, protected"}
+            "Sim": "Yes", "Sim, protegido": "Yes, protected", "Incerto": "Uncertain",
+            "Diarreia": "Diarrhea", "Gases": "Colic gas", "Obstipação": "Constipation", "Calafrios": "Chills", "Febre": "Fever",
+            "Cólicas musculares": "Muscle cramps", "Suores noturnos": "Night sweats", "Afrontamentos": "Hot flashes",
+            "Secura vaginal": "Vaginal dryness", "Comichão vaginal": "Vaginal itching", "Ardor vaginal": "Vaginal burning",
+            "Urinar com frequência": "Frequent urination", "Erupção na pele": "Skin rash", "Inchaço nas pernas": "Leg swelling",
+            "Inchaço facial": "Facial swelling", "Dor na ovulação (esq.)": "Left ovulation pain", "Dor na ovulação (dir.)": "Right ovulation pain",
+            "Dor lombar baixa": "Lower back pain", "Dor no baixo-ventre": "Lower abdominal pulling", "Enxaqueca": "Migraine",
+            "Dor nas relações": "Painful sex", "Tudo bem": "Everything is fine", "Indiferente": "Indifferent", "Zangada": "Angry",
+            "Entusiasmada": "Excited", "Em pânico": "Panicking", "Inspirada": "Inspired", "Melancólica": "Melancholy", "Neutra": "Neutral",
+            "Instável": "Changeable", "Stress": "Stress", "Sexo": "Sex", "Sexo com proteção": "Sex with protection",
+            "Sexo sem proteção": "Sex without protection", "Libido alta": "High sex drive", "Masturbação": "Masturbation", "Orgasmo": "Orgasm",
+            "Sem corrimento": "No discharge", "Pegajoso": "Sticky", "Cremoso": "Creamy", "Clara de ovo": "Egg-white", "Aquoso": "Watery",
+            "Atípico": "Atypical", "Mau cheiro": "Bad odor", "Tomei a pílula": "Pill taken", "Pílula de ontem": "Yesterday's pill"}
 PHASES_EN = {
     "menstrual": ("Menstrual", "The body is renewing itself; energy is usually lower.",
                   ["Food: iron (legumes, leafy greens) and plenty of water.", "Movement: gentle walks and stretching.",
@@ -66,6 +81,20 @@ CSS = """<style>
 .cy .bars{display:flex;align-items:flex-end;gap:4px;height:90px;margin:6px 0}
 .cy .bars div{flex:1;background:#4a7bd0;border-radius:3px 3px 0 0;position:relative;min-width:8px}
 .cy .bars span{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:.7em;color:#bbb}
+.cy .chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.cy .chip{margin:0!important;display:block}.cy .chip input{position:absolute;opacity:0;pointer-events:none}
+.cy .chip span{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:68px;max-width:84px;padding:7px 6px;border-radius:12px;background:#2a2e36;border:2px solid transparent;font-size:1.3em;text-align:center;cursor:pointer}
+.cy .chip small{font-size:.5em;color:#bbb;line-height:1.15}
+.cy .chip input:checked+span{border-color:#8a7cff;background:#34305a}
+.cy .sec{background:#262a31;border-radius:12px;padding:8px 10px;margin:10px 0}.cy .st{font-weight:600;margin-bottom:2px}
+.cy .week{display:flex;gap:4px;margin:6px 0 10px}
+.cy .wk{flex:1;text-align:center;border-radius:20px;padding:6px 0;background:#23272e;color:#eee;text-decoration:none;display:block;border:2px solid transparent}
+.cy .wk small{display:block;color:#999;font-size:.7em}.cy .wk.today{border-color:#fff}.cy .wk.per{background:#c0392b}.cy .wk.pred{border:2px dashed #d46a6a}
+.cy .wk.fert{background:#1f4a35}.cy .wk.ov{background:#1e3f6b}.cy .wk.pms{background:#3d2c4f}
+.cy .daypanel{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#262a31;border-radius:12px;padding:10px 12px;margin:10px 0}
+.cy .eg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cy .eg i{display:block}
+.cy .eg .ed{padding:9px 0;border-radius:50%;border:2px solid #d46a6a;background:transparent;color:#eee}.cy .eg .ed.on{background:#c0392b}.cy .eg .ed:disabled{opacity:.3;border-color:#555}
+.cy .mh{font-weight:600;margin:10px 0 4px}
 .cy .aviso{font-size:.8em;color:#aaa;margin-top:12px}
 .cy .hero{display:flex;gap:14px;align-items:center;border-radius:18px;padding:14px 16px;margin:8px 0 12px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g1),var(--g2))}
 .cy .hero .art{position:absolute;right:-18px;top:-18px;width:150px;height:150px;opacity:.22;pointer-events:none}
@@ -146,7 +175,16 @@ PH_COL = {"menstrual": ("#7a1f2e", "#c0392b", "#ff8a80"), "folicular": ("#1d4d3a
           "ovulatoria": ("#7a5a12", "#d99a1f", "#ffe08a"), "lutea": ("#2d2a5e", "#6a5acd", "#c3bcff")}
 SYM_EMO = {"Cólicas": "🌀", "Dor de cabeça": "🤕", "Seios sensíveis": "🌸", "Acne": "✨", "Inchaço": "🎈", "Cansaço": "😴",
            "Irritabilidade": "⚡", "Dor nas costas": "🦴", "Mais apetite": "🍽️", "Náuseas": "🤢", "Insónias": "🌙",
-           "Desejo de doces": "🍫", "Tonturas": "💫", "Dores musculares": "💪", "Libido alta": "🔥"}
+           "Desejo de doces": "🍫", "Tonturas": "💫", "Dores musculares": "💪", "Libido alta": "🔥",
+           "Diarreia": "🚽", "Gases": "💨", "Obstipação": "🧻", "Calafrios": "🥶", "Febre": "🌡️", "Cólicas musculares": "⚡", "Suores noturnos": "🌙",
+           "Afrontamentos": "♨️", "Secura vaginal": "🏜️", "Comichão vaginal": "🔸", "Ardor vaginal": "🔥", "Urinar com frequência": "🚻",
+           "Erupção na pele": "🔴", "Inchaço nas pernas": "🦵", "Inchaço facial": "🙂", "Dor na ovulação (esq.)": "◀️", "Dor na ovulação (dir.)": "▶️",
+           "Dor lombar baixa": "🦴", "Dor no baixo-ventre": "🌀", "Enxaqueca": "🤯", "Dor nas relações": "💔", "Tudo bem": "👍",
+           "Feliz": "😄", "Calma": "😌", "Energética": "⚡", "Ansiosa": "😟", "Triste": "😢", "Irritada": "😠", "Sensível": "🥺", "Cansada": "😪",
+           "Indiferente": "😑", "Zangada": "😡", "Entusiasmada": "🤩", "Em pânico": "😱", "Inspirada": "💡", "Melancólica": "😔", "Neutra": "😐",
+           "Instável": "🎭", "Stress": "😰", "Sexo": "❤️", "Sexo com proteção": "🛡️", "Sexo sem proteção": "💗", "Masturbação": "✋", "Orgasmo": "💫",
+           "Sem corrimento": "⭕", "Manchas": "🩸", "Pegajoso": "🍯", "Cremoso": "🥛", "Clara de ovo": "🥚", "Aquoso": "💧", "Atípico": "❓",
+           "Mau cheiro": "☣️", "Tomei a pílula": "💊", "Pílula de ontem": "⏪"}
 
 
 def _icon(ph, size=44):
@@ -274,26 +312,135 @@ def _calendar(d, info, y, m, sel, today, lang="pt"):
     return out
 
 
-def _form(d, sel, today, lang="pt"):
+def _chips(pre, items, cur, lang):
+    return '<div class="chips">%s</div>' % "".join(
+        '<label class="chip"><input type="checkbox" name="%s%d" value="1"%s><span>%s<small>%s</small></span></label>' % (
+            pre, i, " checked" if s in cur else "", SYM_EMO.get(s, "•"), E(lab(s, lang))) for i, s in enumerate(items))
+
+
+def _sec(title, body):
+    return '<div class="sec"><div class="st">%s</div>%s</div>' % (title, body)
+
+
+def _form(d, sel, today, lang="pt", info=None):
     e = d["days"].get(sel.isoformat(), {})
     sel_opt = lambda items, cur: "".join('<option value="%s"%s>%s</option>' % (v, " selected" if cur == v else "", lab(l, lang)) for v, l in items)
-    mood = "".join('<option value="%s"%s>%s</option>' % (v, " selected" if e.get("mood", "") == v else "", lab(v, lang) if v else "—") for v in P.MOODS)
-    syms = "".join('<label><input type="checkbox" name="s%d" value="1"%s> %s</label>' % (
-        i, " checked" if s in e.get("sym", []) else "", (SYM_EMO.get(s, "") + " " + E(lab(s, lang))).strip()) for i, s in enumerate(P.SYMPTOMS))
+    moods = e.get("moods") or ([e["mood"]] if e.get("mood") else [])
+    flow = "".join('<label class="chip"><input type="radio" name="flow" value="%s"%s><span>%s<small>%s</small></span></label>' % (
+        v, " checked" if e.get("flow", "") == v else "", ic, E(lab(l, lang))) for (v, l), ic in zip(P.FLOW, ["⚪", "🩸", "💧", "🩸", "🔴"]))
+    sex = e.get("sx") or ([{"sim": "Sexo", "prot": "Sexo com proteção"}[e["sex"]]] if e.get("sex") in ("sim", "prot") else [])
+    tst = lambda name, cur: "".join('<label class="chip"><input type="radio" name="%s" value="%s"%s><span>%s<small>%s</small></span></label>' % (
+        name, v, " checked" if cur == v else "", ic, E(lab(l, lang))) for (v, l), ic in zip(P.OVTEST, ["⚪", "➖", "➕", "❔"]) if v or True)
     f = ('<form method="post" action="/finance/period/log" class="box">'
-         '<label><span>Dia</span> <input type="date" name="date" value="%s" max="%s" required></label>'
-         '<div class="row"><label><span>Fluxo</span> <select name="flow">%s</select></label><label><span>Humor</span> <select name="mood">%s</select></label></div>'
-         '<div class="mut">Sintomas</div><div class="syms">%s</div>'
-         '<div class="row"><label>Temperatura basal (°C) <input type="number" step="0.01" min="34" max="42" name="temp" value="%s"></label>'
-         '<label>Teste de ovulação <select name="ov">%s</select></label></div>'
-         '<label><span>Relações</span> <select name="sex">%s</select></label>'
-         '<label><span>Nota</span> <input type="text" name="note" maxlength="300" value="%s"></label><button>Guardar</button></form>'
-         % (sel.isoformat(), today.isoformat(), sel_opt(P.FLOW, e.get("flow", "")), mood, syms, E(str(e.get("temp", ""))),
-            sel_opt(P.OVTEST, e.get("ov", "")), sel_opt(P.SEX, e.get("sex", "")), E(e.get("note", ""))))
+         '<label><span>%s</span> <input type="date" name="date" value="%s" max="%s" required></label>' % (T(lang, "Dia", "Day"), sel.isoformat(), today.isoformat())
+         + _sec(T(lang, "Fluxo menstrual", "Menstruation flow"), '<div class="chips">%s</div>' % flow)
+         + _sec(T(lang, "Sintomas", "Symptoms"), _chips("s", P.SYMPTOMS, e.get("sym", []), lang))
+         + _sec(T(lang, "Humor", "Mood"), _chips("m", P.MOODS[1:], moods, lang))
+         + _sec(T(lang, "Sexo", "Sex"), _chips("x", P.SEXO, sex, lang))
+         + _sec(T(lang, "Corrimento vaginal", "Vaginal discharge"), _chips("d", P.DISCH, e.get("disch", []), lang))
+         + (_sec(T(lang, "Contracetivo oral", "Oral contraceptives"), _chips("p", P.PILL, e.get("pill", []), lang)) if d["settings"].get("takes_pill") else "")
+         + _sec(T(lang, "Teste de gravidez", "Pregnancy test"), '<div class="chips">%s</div>' % tst("preg", e.get("preg", "")))
+         + _sec(T(lang, "Teste de ovulação", "Ovulation test"), '<div class="chips">%s</div>' % tst("ov", e.get("ov", "")))
+         + '<div class="row"><label>%s <input type="number" step="0.01" min="34" max="42" name="temp" value="%s"></label>'
+           '<label>%s <input type="number" step="0.1" min="25" max="300" name="weight" value="%s"></label></div>'
+           % (T(lang, "Temperatura basal (°C)", "Basal temperature (°C)"), E(str(e.get("temp", ""))), T(lang, "Peso (kg)", "Weight (kg)"), E(str(e.get("weight", ""))))
+         + '<label><span>%s</span> <input type="text" name="note" maxlength="300" value="%s"></label><button>%s</button></form>'
+           % (T(lang, "Nota", "Note"), E(e.get("note", "")), T(lang, "Guardar", "Save")))
     if e:
         f += ('<form method="post" action="/finance/period/del" style="margin:0"><input type="hidden" name="date" value="%s">'
               '<button style="background:#7a3030">Apagar este dia</button></form>' % sel.isoformat())
     return f
+
+
+def _week(d, info, today, lang):
+    out = []
+    wd = WD_EN if lang == "en" else WD
+    for k in range(-3, 4):
+        dt = today + datetime.timedelta(days=k)
+        cls = " ".join(sorted(_tags(dt, d["days"], info) | ({"today"} if k == 0 else set())))
+        inner = '<small>%s</small><b>%d</b>' % (wd[dt.weekday()][:1], dt.day)
+        out.append('<a class="wk %s" href="/finance/period?ym=%04d-%02d&day=%s">%s</a>' % (cls, dt.year, dt.month, dt.isoformat(), inner) if dt <= today
+                   else '<span class="wk %s">%s</span>' % (cls, inner))
+    return '<div class="week">%s</div>' % "".join(out)
+
+
+def _daypanel(info, sel, today, ph, lang, edit_href):
+    day = (sel - info["last"]).days + 1 if info["last"] and sel >= info["last"] else None
+    ch = {"alta": T(lang, "alta", "high"), "média": T(lang, "média", "medium"), "baixa": T(lang, "baixa", "low")}[P.chance(info, sel)]
+    return ('<div class="daypanel"><div><b>%s</b><div class="mut">%s %s</div><div class="mut">%s</div></div><a class="lnk" href="%s">%s</a></div>' % (
+        _pt(sel, lang), T(lang, "Probabilidade de gravidez:", "Chance of getting pregnant:"), ch,
+        (T(lang, "Dia %d do ciclo", "Day %d of cycle") % day) if day else "", edit_href, T(lang, "Editar datas do período", "Edit period dates")))
+
+
+def _edit(d, today, lang):
+    lo = (today.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+    lo = (lo - datetime.timedelta(days=1)).replace(day=1)
+    on = sorted(k for k, v in d["days"].items() if v.get("flow") and P._d(k) and lo <= P._d(k) <= today)
+    months, y, m = [], lo.year, lo.month
+    while (y, m) <= (today.year, today.month):
+        cells = []
+        for week in calendar.Calendar(firstweekday=0).monthdatescalendar(y, m):
+            for dt in week:
+                if dt.month != m:
+                    cells.append("<i></i>")
+                else:
+                    iso = dt.isoformat()
+                    cells.append('<button type="button" class="ed%s" data-d="%s"%s>%d</button>' % (
+                        " on" if iso in on else "", iso, " disabled" if dt > today else "", dt.day))
+        months.append('<div class="mh">%s %d</div><div class="eg">%s</div>' % ((MONTHS_EN if lang == "en" else MONTHS)[m - 1].capitalize(), y, "".join(cells)))
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return ('<form method="post" action="/finance/period/dates" class="box"><h3>%s</h3><p class="mut">%s</p>%s'
+            '<input type="hidden" name="sel" id="edsel" value="%s"><input type="hidden" name="scope" value="%s,%s">'
+            '<div class="row"><a class="lnk" href="/finance/period">%s</a><button>✓ %s</button></div></form>'
+            '<script>(function(){var s=document.getElementById("edsel");function up(){var a=[];document.querySelectorAll(".eg .ed.on").forEach(function(b){a.push(b.dataset.d)});s.value=a.join(",")}'
+            'document.querySelectorAll(".eg .ed").forEach(function(b){b.onclick=function(){b.classList.toggle("on");up()}});up()})()</script>'
+            % (T(lang, "Editar datas do período", "Edit period dates"), T(lang, "Toca nos dias com menstruação.", "Tap the days with bleeding."),
+               "".join(months), ",".join(on), lo.isoformat(), today.isoformat(), T(lang, "Cancelar", "Cancel"), T(lang, "Guardar", "Save")))
+
+
+def _cyc_changed(d, info, lang):
+    st = d["settings"]
+    starts = [r[0] for r in info["runs"][::-1]]
+    if len(starts) < 2:
+        return ""
+    last = (starts[-1] - starts[-2]).days
+    ack = starts[-1].isoformat()
+    if not 18 <= last <= 60 or abs(last - info["cycle"]) < 4 or st.get("cyc_ack") == ack:
+        return ""
+    return ('<div class="card big" style="grid-column:auto"><b>%s</b><div class="mut">%s</div><p>%s <b>%d</b> %s &rarr; %s <b>%d</b> %s</p>'
+            '<form method="post" action="/finance/period/cyc" class="row"><input type="hidden" name="ack" value="%s"><input type="hidden" name="n" value="%d">'
+            '<button name="act" value="save">%s</button><button name="act" value="keep" style="background:#444">%s</button></form></div>' % (
+                T(lang, "A duração do ciclo mudou", "Cycle length has changed"),
+                T(lang, "Reparámos uma mudança no teu ciclo. Atualiza a duração média para previsões mais certas.", "We noticed a change in your cycle. Update the average length to make predictions more accurate."),
+                T(lang, "Era", "Was"), info["cycle"], T(lang, "dias (média)", "days (avg.)"), T(lang, "Passa a", "Will be"), last, T(lang, "dias (último ciclo)", "days (last cycle)"),
+                ack, last, T(lang, "Guardar nova duração", "Save new cycle length"), T(lang, "Não alterar", "Do not change")))
+
+
+FAQ = [("E se tiver SOP (síndrome do ovário poliquístico)?", "What if I have PCOS?",
+        "A SOP costuma dar ciclos longos ou irregulares, por isso as previsões ficam menos certas. Regista os ciclos e leva o histórico ao médico para diagnóstico e tratamento.",
+        "PCOS often causes long or irregular cycles, so predictions are less certain. Keep logging and take the history to your doctor for diagnosis and treatment."),
+       ("É normal ter corrimento?", "Is it okay to have discharge?",
+        "Sim, o corrimento varia ao longo do ciclo: mais claro e elástico perto da ovulação, mais espesso depois. Cheiro forte, cor estranha ou comichão justificam consulta.",
+        "Yes, it changes through the cycle: clearer and stretchy near ovulation, thicker afterwards. Strong odor, odd colour or itching are worth a check-up."),
+       ("O que é a ovulação?", "What is ovulation?",
+        "É quando o ovário liberta um óvulo, cerca de 14 dias antes da menstruação seguinte. A janela fértil dura uns 6 dias, até ao dia depois da ovulação.",
+        "It is when an ovary releases an egg, about 14 days before the next period. The fertile window lasts about 6 days, up to the day after ovulation."),
+       ("Quando devo fazer um teste de gravidez?", "When should I take a pregnancy test?",
+        "A partir do primeiro dia de atraso, de preferência de manhã. Se der negativo e a menstruação não vier, repete passados 2 a 3 dias.",
+        "From the first day of a late period, preferably in the morning. If negative and the period does not arrive, repeat after 2 to 3 days."),
+       ("Qual é a duração normal do ciclo?", "What is a normal cycle length?",
+        "Entre 21 e 35 dias conta-se como normal. Varia de mês para mês; o que importa é o teu padrão.",
+        "Between 21 and 35 days counts as normal. It varies month to month; your own pattern is what matters."),
+       ("Para que serve a temperatura basal?", "What is basal temperature for?",
+        "Mede-se ao acordar, sempre à mesma hora. Sobe ligeiramente após a ovulação e ajuda a confirmar que ela aconteceu.",
+        "Measured on waking, at the same time every day. It rises slightly after ovulation and helps confirm it happened.")]
+
+
+def _faq(lang):
+    return '<details><summary>%s</summary>%s<p class="mut">%s</p></details>' % (
+        T(lang, "Perguntas frequentes", "Common questions"),
+        "".join('<details><summary>%s</summary><p>%s</p></details>' % (E(T(lang, a, b)), E(T(lang, c, dd))) for a, b, c, dd in FAQ),
+        T(lang, "Informação geral, não substitui o médico.", "General information, not a substitute for your doctor."))
 
 
 def _hbars(items, lang="pt"):
@@ -364,17 +511,52 @@ def _settings(d, lang="pt"):
             '<label>Avisar quantos dias antes <input type="number" name="before" min="0" max="7" value="%d"></label>'
             '<label><input type="checkbox" name="r_ov" value="1"%s> Lembrete da janela fértil / ovulação</label>'
             '<label><input type="checkbox" name="r_late" value="1"%s> Avisar se a menstruação atrasar</label>'
+            '<label><input type="checkbox" name="takes_pill" value="1"%s> Tomo pílula (ativa o registo e o lembrete; se desligares, os registos da pílula são apagados)</label>'
+            '%s'
             '<button>Guardar</button></form>%s'
             '<p><a class="lnk" href="/finance/period/export?fmt=csv">Exportar CSV</a> <a class="lnk" href="/finance/period/export?fmt=json">Exportar JSON</a>%s</p>'
+            '<form method="post" action="/finance/period/import" class="box"><b>🐧 Importar dados (Clover, outras apps, CSV ou JSON)</b>'
+            '<div class="mut">Escolhe o ficheiro exportado da outra app. Os dias novos são adicionados e os teus registos existentes não são apagados.</div>'
+            '<input type="file" accept=".csv,.json,.txt" onchange="var f=this.files[0];if(f){var r=new FileReader();r.onload=function(){document.getElementById(\'impd\').value=r.result};r.readAsText(f)}">'
+            '<textarea id="impd" name="data" rows="2" style="display:none"></textarea><button>Importar</button></form>'
             '<form method="post" action="/finance/period/wipe" class="box"><b>Apagar todos os registos</b>'
             '<input type="text" name="confirm" placeholder="Escreve APAGAR"><button style="background:#7a3030">Apagar tudo</button></form></details>'
             % (goal, st["cycle"], st["period"], _opts(st.get("theme", "auto"), (("auto", "Automático"), ("escuro", "Escuro"), ("claro", "Claro"))),
-               _opts(st.get("palette", "natural"), (("natural", "Natural"), ("rosa", "Rosa"), ("oceano", "Oceano"), ("lavanda", "Lavanda"))), ck(r["period"]), r["before"], ck(r["ovulation"]), ck(r["late"]), pin,
+               _opts(st.get("palette", "gelo"), (("gelo", "Gelo 🐧"), ("natural", "Natural"), ("rosa", "Rosa"), ("oceano", "Oceano"), ("lavanda", "Lavanda"))), ck(r["period"]), r["before"], ck(r["ovulation"]), ck(r["late"]), ck(st.get("takes_pill")), ('<label><input type="checkbox" name="r_pill" value="1"%s> Lembrete diário da pílula</label><label>Hora da pílula <input type="time" name="pill_time" value="%s"></label>' % (ck(r.get("pill")), r.get("pill_time", "09:00"))) if st.get("takes_pill") else "", pin,
                ' <form method="post" action="/finance/period/lock" style="display:inline"><button>Bloquear agora</button></form>' if P.has_pin(d) else ""))
-    return out.replace("<label>Objetivo <select", "<label>Goal <select") if lang == "en" else out
+    return out.replace("<label>Objetivo <select", "<label>Goal <select").replace("Lembrete diário da pílula", "Daily pill reminder").replace("Tomo pílula (ativa o registo e o lembrete; se desligares, os registos da pílula são apagados)", "I take the pill (enables logging and reminder; turning it off deletes pill records)").replace("🐧 Importar dados (Clover, outras apps, CSV ou JSON)", "🐧 Import data (Clover, other apps, CSV or JSON)").replace("Escolhe o ficheiro exportado da outra app. Os dias novos são adicionados e os teus registos existentes não são apagados.", "Pick the file exported from the other app. New days are added; your existing records are kept.").replace(">Importar<", ">Import<").replace("Hora da pílula", "Pill time") if lang == "en" else out
 
 
-def render(user, msg="", ym="", day="", cookie="", lang="pt"):
+def _pingo_banner(d, info, ph, today, lang):
+    """Pingo reage ao estado do dia: cólicas, período, ovulação, pílula, noite, atraso."""
+    import datetime as _dt
+    pt = lang != "en"
+    e = d["days"].get(today.isoformat()) or {}
+    sym = [x for x in (e.get("sym") or [])]
+    key = ph[0] if ph else None
+    hour = _dt.datetime.now().hour
+    pill_on = bool((d["settings"].get("remind") or {}).get("pill")) or bool(e.get("pill"))
+    if any("lica" in x or "ramp" in x for x in sym):
+        st, tx = "cramps", ("Hoje há cólicas. Calor na barriga, chá quente e descanso ajudam." if pt else "Cramps today. A warm compress, hot tea and rest can help.")
+    elif info.get("late"):
+        st, tx = "warning", ("O período está atrasado. Se for habitual, está tudo bem; se tiveres dúvidas, fala com o teu médico." if pt else "Your period is late. If that's unusual, consider a test or talk to your doctor.")
+    elif key == "menstrual":
+        st, tx = "period", ("Estás no período. Cuida de ti e bebe água." if pt else "You're on your period. Take care and drink water.")
+    elif key == "ovulatoria":
+        st, tx = "ovulation", ("Janela fértil. Se não queres engravidar, usa proteção." if pt else "Fertile window. Use protection if you're avoiding pregnancy.")
+    elif pill_on and not e.get("pill") and 6 <= hour < 23:
+        st, tx = "pill", ("Já tomaste a pílula hoje? Marca-a no registo." if pt else "Did you take your pill today? Log it below.")
+    elif hour >= 23 or hour < 6:
+        st, tx = "sleep", ("É tarde. Dormir bem ajuda o ciclo." if pt else "It's late. Good sleep helps your cycle.")
+    elif e.get("flow") or sym:
+        st, tx = "selfcare", ("Obrigado por registares hoje." if pt else "Thanks for logging today.")
+    else:
+        st, tx = "idle", ("Olá! Regista como te sentes hoje." if pt else "Hi! Log how you feel today.")
+    return '<div class="pgbox">%s<p>%s</p></div>' % (PG.pg(st, 130), E(tx))
+
+
+
+def render(user, msg="", ym="", day="", cookie="", lang="pt", edit=False, tab="", q=None):
     d = P.load(user)
     if not P.unlocked(user, d, cookie):
         return lock_page(msg)
@@ -393,11 +575,80 @@ def render(user, msg="", ym="", day="", cookie="", lang="pt"):
         hist = "<details><summary>Histórico de períodos</summary><table><tr><th>Início</th><th>Fim</th><th>Dias</th></tr>%s</table></details>" % "".join(
             "<tr><td>%s</td><td>%s</td><td>%d</td></tr>" % (_pt(a, lang), _pt(b, lang), (b - a).days + 1) for a, b in info["runs"])
     stt = d["settings"]
+    if tab in ("stories", "care", "ask", "profile"):
+        th0 = stt.get("theme") if stt.get("theme") in ("auto", "escuro", "claro") else "auto"
+        pal0 = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda", "gelo") else "gelo"
+        body = PC.stories(ph, today, lang) if tab == "stories" else (PC.ask_page(lang, bool(stt.get("profile"))) if tab == "ask" else (PG.profile_page(stt.get("profile") or {}, lang, msg) if tab == "profile" else PC.care(q or {}, lang)))
+        return CSS + PG.PG_CSS + '<div class="cy th-%s pal-%s"><div class="cybar"><a href="/finance/">← Finanças</a><a href="/finance/logout">sair</a></div><h2>Ciclo 🐧</h2>' % (th0, pal0) + PC.nav(tab, lang) + body + '</div>'
     th = stt.get("theme") if stt.get("theme") in ("auto", "escuro", "claro") else "auto"
-    pal = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda") else "natural"
-    return (CSS + '<div class="cy th-%s pal-%s"><h2>Ciclo</h2>' % (th, pal) + ('<p class="green">%s</p>' % E(msg) if msg else "")
-            + _hero(info, ph, lang, T(lang, P.chance(info, today), {"alta": "high", "média": "medium", "baixa": "low"}[P.chance(info, today)])) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
+    pal = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda", "gelo") else "gelo"
+    return (CSS + PG.PG_CSS + '<div class="cy th-%s pal-%s"><div class="cybar"><a href="/finance/">← Finanças</a><a href="/finance/logout">sair</a></div><h2>Ciclo 🐧</h2>' % (th, pal) + ('<p class="green">%s</p>' % E(msg) if msg else "")
+            + PC.nav('', lang) + _pingo_banner(d, info, ph, today, lang) + _week(d, info, today, lang) + (_edit(d, today, lang) if edit else "") + _cyc_changed(d, info, lang) + _hero(info, ph, lang, T(lang, P.chance(info, today), {"alta": "high", "média": "medium", "baixa": "low"}[P.chance(info, today)])) + '<div class="cards">%s</div>' % _summary(info, d["settings"]["goal"], today, ph, lang)
             + _tips(ph, today, lang) + '<div class="box">%s</div>' % _calendar(d, info, y, m, sel, today, lang)
-            + '<h3>%s</h3>%s' % (T(lang, "Registar · %s", "Log · %s") % _pt(sel, lang), _form(d, sel, today, lang)) + _stats(d, today, lang) + hist + _settings(d, lang)
+            + _daypanel(info, sel, today, ph, lang, "/finance/period?edit=1")
+            + '<h3>%s</h3>%s' % (T(lang, "Registar · %s", "Log · %s") % _pt(sel, lang), _form(d, sel, today, lang)) + _faq(lang) + _stats(d, today, lang) + hist + _settings(d, lang)
             + '<p class="aviso">Estimativas com base nos teus registos (ou nos valores das definições). '
               'Não é um método contracetivo. Em caso de dúvida, fala com o teu médico.</p></div>')
+
+
+def ask_api(user, body, cookie, lang):
+    d = P.load(user)
+    if not P.unlocked(user, d, cookie):
+        return {"error": "Bloqueado" if lang != "en" else "Locked"}
+    q = str((body or {}).get("q") or "").strip()
+    if not q:
+        return {"error": "Escreve uma pergunta" if lang != "en" else "Type a question"}
+    today = datetime.date.today()
+    info = P.predict(d["days"], today, d["settings"])
+    ph = P.phase(info, today)
+    recent = []
+    for k in sorted(d["days"])[-3:]:
+        for s in d["days"][k].get("sym", []):
+            if s not in recent: recent.append(str(s)[:30])
+    try:
+        a = PC.ask(PC.ask_system(info, ph, today, recent[:8], lang, PG.profile_text(d["settings"].get("profile") or {})), (body or {}).get("h") or [], q)
+    except Exception:
+        return {"error": "O Pingo não respondeu. Tenta outra vez." if lang != "en" else "Pingo didn't answer. Please try again."}
+    return {"a": a or ("Sem resposta." if lang != "en" else "No answer.")}
+
+
+GYM_TIPS = {
+    "menstrual": ("🩸", "Fase menstrual", "Energia mais baixa: treina por sensação, não por números.",
+                  ["Treino: mantém as 3 sessões se te sentires bem, mas com cargas 10 a 20% mais leves e menos séries. Se doer muito, troca por caminhada ou alongamentos.",
+                   "Dieta: ferro (carne magra, leguminosas, espinafres) com fruta rica em vitamina C, e bastante água. Mantém as calorias do plano.",
+                   "Pausa: se há cólicas fortes, descansar também é treino."]),
+    "folicular": ("🌱", "Fase folicular", "A energia sobe: bom momento para puxar mais.",
+                  ["Treino: é a melhor fase para aumentar carga (2 a 5%) e tentar recordes nos exercícios principais (hip thrust, supino).",
+                   "Dieta: segue o plano com a proteína completa (1,6 a 2 g por kg) e hidratos antes do treino.",
+                   "Recuperação: costuma ser mais rápida, por isso aproveita."]),
+    "ovulatoria": ("✨", "Fase ovulatória", "Pico de energia, mas as articulações ficam mais soltas.",
+                   ["Treino: bom dia para treinos intensos. Aquece mais tempo e cuida da técnica nos afundos e agachamentos, por causa dos joelhos.",
+                    "Dieta: refeições leves com antioxidantes (frutos vermelhos, vegetais) e hidratação a sério.",
+                    "Atenção: evita saltos e mudanças bruscas de direção sem aquecer."]),
+    "lutea": ("🌙", "Fase lútea", "Mais fome e cansaço, sobretudo no fim.",
+              ["Treino: mantém a frequência, mas se estiveres cansada baixa o volume (menos 1 série) em vez de faltar. Yoga e pilates contam como treino leve.",
+               "Dieta: é normal ter mais fome. Acrescenta 100 a 200 kcal em hidratos complexos (aveia, batata-doce) e magnésio (frutos secos, cacau puro).",
+               "Sono e sal: dorme bem e bebe água; podes reter líquidos, por isso o peso sobe e desce nesta fase, sem ser gordura. Compara o peso na mesma fase do ciclo."]),
+}
+
+
+def gym_card(user, today=None):
+    """Caixa 'Treino e dieta ao ritmo do teu ciclo' para o Gym. Vazia se a conta nao usa o Ciclo."""
+    import datetime as _dt
+    try:
+        d = P.load(user)
+    except Exception:
+        return ""
+    today = today or _dt.date.today()
+    if not d.get("days"):
+        return ('<div class="box"><h2>🐧 Ciclo e treino</h2><p style="color:#aaa">Regista o teu período na aba '
+                '<a href="/finance/period">Ciclo</a> e aqui aparecem dicas de treino e dieta para a fase em que estás.</p></div>')
+    info = P.predict(d["days"], today, d["settings"])
+    key, day = P.phase(info, today)
+    if not key:
+        return ""
+    ico, nome, resumo, tips = GYM_TIPS[key]
+    li = "".join("<li>%s</li>" % html.escape(t) for t in tips)
+    return ('<div class="box" style="border-left:4px solid #6fa8ff"><h2>%s Treino e dieta · %s (dia %d)</h2>'
+            '<p>%s</p><ul>%s</ul><div style="color:#aaa;font-size:12px">Orientação geral, não substitui o médico ou nutricionista. '
+            'O plano base não muda.</div></div>' % (ico, nome, day, html.escape(resumo), li))

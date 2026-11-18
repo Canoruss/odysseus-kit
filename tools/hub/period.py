@@ -2,22 +2,25 @@
 A interface está em period_ui.py. Dados por utilizador em period-<user>.json (0600).
 As previsões são estimativas e não substituem contraceção nem consulta médica."""
 import csv, datetime, hashlib, hmac, io, json, os, re, secrets, threading, time
-try:
-    import sys as _sys
-    _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-    from kitconfig import HUB as DIR   # data next to the other hub data (KIT_HUB_DIR)
-except Exception:
-    DIR = os.path.dirname(os.path.abspath(__file__))
+DIR = os.path.dirname(os.path.abspath(__file__))
 LOCK = threading.Lock()
 FLOW = [("", "—"), ("manchas", "Manchas"), ("leve", "Leve"), ("média", "Média"), ("intensa", "Intensa")]
 SYMPTOMS = ["Cólicas", "Dor de cabeça", "Seios sensíveis", "Acne", "Inchaço", "Cansaço", "Irritabilidade", "Dor nas costas",
             "Mais apetite", "Náuseas", "Insónias", "Desejo de doces", "Tonturas", "Dores musculares", "Libido alta"]
 MOODS = ["", "Feliz", "Calma", "Energética", "Ansiosa", "Triste", "Irritada", "Sensível", "Cansada"]
-OVTEST = [("", "—"), ("neg", "Negativo"), ("pos", "Positivo")]
+MOODS += ["Indiferente", "Zangada", "Entusiasmada", "Em pânico", "Inspirada", "Melancólica", "Neutra", "Instável", "Stress"]
+OVTEST = [("", "—"), ("neg", "Negativo"), ("pos", "Positivo"), ("unc", "Incerto")]
+SYMPTOMS += ["Diarreia", "Gases", "Obstipação", "Calafrios", "Febre", "Cólicas musculares", "Suores noturnos", "Afrontamentos",
+             "Secura vaginal", "Comichão vaginal", "Ardor vaginal", "Urinar com frequência", "Erupção na pele", "Inchaço nas pernas",
+             "Inchaço facial", "Dor na ovulação (esq.)", "Dor na ovulação (dir.)", "Dor lombar baixa", "Dor no baixo-ventre", "Enxaqueca",
+             "Dor nas relações", "Tudo bem"]
+SEXO = ["Sexo", "Sexo com proteção", "Sexo sem proteção", "Libido alta", "Masturbação", "Orgasmo"]
+DISCH = ["Sem corrimento", "Manchas", "Pegajoso", "Cremoso", "Clara de ovo", "Aquoso", "Atípico", "Mau cheiro"]
+PILL = ["Tomei a pílula", "Pílula de ontem"]
 SEX = [("", "—"), ("sim", "Sim"), ("prot", "Sim, protegido")]
 DEFAULT_CYCLE, DEFAULT_PERIOD, LUTEAL = 28, 5, 14
 SETTINGS = {"lang": "pt", "goal": "acompanhar", "cycle": DEFAULT_CYCLE, "period": DEFAULT_PERIOD,
-            "remind": {"period": True, "ovulation": False, "late": True, "before": 2}}
+            "remind": {"period": True, "ovulation": False, "late": True, "before": 2, "pill": False, "pill_time": "09:00"}}
 PIN_TTL = 600
 _FAILS = {}
 
@@ -33,6 +36,8 @@ def load(user):
         d = {}
     d.setdefault("days", {})
     st = d.setdefault("settings", {})
+    if "takes_pill" not in st:   # contas antigas: so quem ja usava a pilula
+        st["takes_pill"] = bool(st.get("remind", {}).get("pill") or any(v.get("pill") for v in d["days"].values() if isinstance(v, dict)))
     for k, v in SETTINGS.items():
         if isinstance(v, dict):
             st.setdefault(k, {})
@@ -41,6 +46,17 @@ def load(user):
         else:
             st.setdefault(k, v)
     return d
+
+
+def pill_off(d):
+    """Quem nao toma pilula nao tem registos nem lembrete da pilula na base de dados."""
+    d["settings"]["takes_pill"] = False
+    d["settings"].setdefault("remind", {})["pill"] = False
+    for k in list(d["days"]):
+        v = d["days"][k]
+        v.pop("pill", None)
+        if not v.get("flow") and not any(x for kk, x in v.items() if kk != "flow"):
+            del d["days"][k]
 
 
 def save(user, d):
@@ -77,6 +93,8 @@ def predict(days, today, st=None):
     lens = [(r[1] - r[0]).days + 1 for r in rs]
     gaps = [(b - a).days for a, b in zip(starts, starts[1:]) if 18 <= (b - a).days <= 60]
     cyc = round(sum(gaps[-6:]) / len(gaps[-6:])) if gaps else int(st.get("cycle", DEFAULT_CYCLE))
+    if st.get("cycle_fixed"):
+        cyc = int(st.get("cycle", cyc))
     per = round(sum(lens[-6:]) / len(lens[-6:])) if lens else int(st.get("period", DEFAULT_PERIOD))
     per = max(2, min(10, per))
     info = {"cycle": cyc, "period": per, "n": len(rs), "runs": rs[-6:][::-1], "next": None, "late": 0,
@@ -156,8 +174,8 @@ def stats(days, today):
     for v in days.values():
         for s in v.get("sym", []):
             sym[s] = sym.get(s, 0) + 1
-        if v.get("mood"):
-            mood[v["mood"]] = mood.get(v["mood"], 0) + 1
+        for mo in (v.get("moods") or ([v["mood"]] if v.get("mood") else [])):
+            mood[mo] = mood.get(mo, 0) + 1
     streak, dt = 0, today
     if today.isoformat() not in days:
         dt = today - datetime.timedelta(days=1)
@@ -245,11 +263,12 @@ def export(user, fmt):
     if fmt == "csv":
         out = io.StringIO()
         w = csv.writer(out)
-        w.writerow(["data", "fluxo", "sintomas", "humor", "temperatura", "teste_ovulacao", "sexo", "nota"])
+        w.writerow(["data", "fluxo", "sintomas", "humor", "temperatura", "teste_ovulacao", "sexo", "nota", "humores", "corrimento", "pilula", "teste_gravidez", "peso", "relacoes"])
         for k in sorted(d["days"]):
             v = d["days"][k]
             w.writerow([k, v.get("flow", ""), "; ".join(v.get("sym", [])), v.get("mood", ""), v.get("temp", ""),
-                        v.get("ov", ""), v.get("sex", ""), v.get("note", "")])
+                        v.get("ov", ""), v.get("sex", ""), v.get("note", ""), "; ".join(v.get("moods", [])), "; ".join(v.get("disch", [])),
+                        "; ".join(v.get("pill", [])), v.get("preg", ""), v.get("weight", ""), "; ".join(v.get("sx", []))])
         return "text/csv; charset=utf-8", out.getvalue()
     safe = {"days": d["days"], "settings": {k: v for k, v in d["settings"].items() if k != "pin"}}
     return "application/json; charset=utf-8", json.dumps(safe, ensure_ascii=False, indent=1)
@@ -291,23 +310,64 @@ def post(user, path, f, cookie=""):
             if flow not in [v for v, _ in FLOW]:
                 raise ValueError
             e = {"flow": flow, "sym": [s for i, s in enumerate(SYMPTOMS) if f.get("s%d" % i) == "1"]}
-            mood = f.get("mood", "")
-            if mood in MOODS and mood:
-                e["mood"] = mood
+            pick = lambda pre, lst: [s for i, s in enumerate(lst) if f.get("%s%d" % (pre, i)) == "1"]
+            moods = [m for m in pick("m", MOODS[1:])]
+            if moods:
+                e["moods"], e["mood"] = moods, moods[0]
+            sx = pick("x", SEXO)
+            if sx:
+                e["sx"] = sx
+                e["sex"] = "prot" if "Sexo com proteção" in sx and "Sexo sem proteção" not in sx else ("sim" if any(x.startswith("Sexo") for x in sx) else "")
+                if not e["sex"]:
+                    del e["sex"]
+            for k, lst in (("disch", DISCH), ("pill", PILL)):
+                if k == "pill" and not d["settings"].get("takes_pill"):
+                    continue
+                v = pick(k[0] if k == "pill" else "d", lst)
+                if v:
+                    e[k] = v
             if f.get("temp", "").strip():
                 e["temp"] = _num(f["temp"], 34.0, 42.0)
-            if f.get("ov", "") in ("neg", "pos"):
-                e["ov"] = f["ov"]
-            if f.get("sex", "") in ("sim", "prot"):
-                e["sex"] = f["sex"]
+            if f.get("weight", "").strip():
+                e["weight"] = _num(f["weight"], 25.0, 300.0)
+            for k in ("ov", "preg"):
+                if f.get(k, "") in ("neg", "pos", "unc"):
+                    e[k] = f[k]
             if f.get("note", "").strip():
                 e["note"] = f["note"].strip()[:300]
             key = dt.isoformat()
-            if len(e) == 2 and not e["flow"] and not e["sym"]:
+            if not e["flow"] and not any(v for k, v in e.items() if k != "flow"):
                 d["days"].pop(key, None)
             else:
                 d["days"][key] = e
             msg = "Registo guardado."
+        elif path == "/period/dates":
+            sel = {x for x in f.get("sel", "").split(",") if _d(x)}
+            lo, _, hi = f.get("scope", "").partition(",")
+            lo, hi = _d(lo), _d(hi)
+            if not lo or not hi or hi > today or (hi - lo).days > 400:
+                raise ValueError
+            for k in list(d["days"]):
+                kd = _d(k)
+                if kd and lo <= kd <= hi and k not in sel and d["days"][k].get("flow"):
+                    d["days"][k]["flow"] = ""
+                    e2 = d["days"][k]
+                    if not any(v for kk, v in e2.items() if kk != "flow"):
+                        d["days"].pop(k)
+            for k in sel:
+                kd = _d(k)
+                if lo <= kd <= hi:
+                    d["days"].setdefault(k, {"flow": "", "sym": []})
+                    if not d["days"][k].get("flow"):
+                        d["days"][k]["flow"] = "média"
+            msg = "Datas do período atualizadas."
+        elif path == "/period/cyc":
+            st = d["settings"]
+            if f.get("act") == "save":
+                st["cycle"] = max(21, min(45, int(f.get("n", st["cycle"]))))
+                st["cycle_fixed"] = True
+            st["cyc_ack"] = f.get("ack", "")[:10]
+            msg = "Duração do ciclo atualizada." if f.get("act") == "save" else "Mantido."
         elif path == "/period/del":
             dt = _d(f.get("date", ""))
             if not dt:
@@ -320,13 +380,46 @@ def post(user, path, f, cookie=""):
                 st["goal"] = f["goal"]
             if f.get("theme") in ("auto", "escuro", "claro"):
                 st["theme"] = f["theme"]
-            if f.get("palette") in ("natural", "rosa", "oceano", "lavanda"):
+            if f.get("palette") in ("natural", "rosa", "oceano", "lavanda", "gelo"):
                 st["palette"] = f["palette"]
-            st["cycle"] = max(21, min(45, int(f.get("cycle", st["cycle"]))))
+            nc = max(21, min(45, int(f.get("cycle", st["cycle"]))))
+            if nc != st["cycle"]:
+                st["cycle_fixed"] = False
+            st["cycle"] = nc
             st["period"] = max(2, min(10, int(f.get("period", st["period"]))))
+            if f.get("takes_pill") == "1":
+                st["takes_pill"] = True
+            else:
+                pill_off(d)
+            f = dict(f, r_pill="1" if (f.get("r_pill") == "1" and st.get("takes_pill")) else "0")
             st["remind"] = {"period": f.get("r_period") == "1", "ovulation": f.get("r_ov") == "1",
-                            "late": f.get("r_late") == "1", "before": max(0, min(7, int(f.get("before", 2))))}
+                            "late": f.get("r_late") == "1", "before": max(0, min(7, int(f.get("before", 2)))),
+                            "pill": f.get("r_pill") == "1",
+                            "pill_time": f.get("pill_time") if re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", f.get("pill_time", "")) else "09:00"}
             msg = "Definições guardadas."
+        elif path == "/period/profile":
+            import period_pg as PG
+            if f.get("clear") == "1":
+                d["settings"].pop("profile", None)
+                msg = "Perfil apagado."
+            else:
+                d["settings"]["profile"] = PG.parse_profile(f)
+                c = d["settings"]["profile"].get("contra")
+                if c == "pill":
+                    d["settings"]["takes_pill"] = True
+                elif c:
+                    pill_off(d)
+                msg = "Perfil guardado. O Pingo já sabe mais sobre ti 🐧"
+        elif path == "/period/import":
+            import period_pg as PG
+            try:
+                new = PG.parse_import(f.get("data", ""))
+            except Exception:
+                return "Não consegui ler o ficheiro. Usa CSV ou JSON.", {}
+            if not new:
+                return "Não encontrei registos válidos no ficheiro.", {}
+            a, u = PG.merge(d, new, d["settings"].get("takes_pill"))
+            msg = "Importados %d dias novos e completados %d." % (a, u)
         elif path == "/period/pin":
             if f.get("remove") == "1":
                 ok, m = try_pin(user, d, f.get("old", ""))
@@ -347,7 +440,7 @@ def post(user, path, f, cookie=""):
                 hdr = cookie_header(user)
                 msg = "PIN definido."
         elif path == "/period/wipe":
-            if f.get("confirm", "").strip().upper() != "APAGAR":
+            if f.get("confirm", "").strip().upper() not in ("APAGAR", "DELETE"):
                 return "Escreve APAGAR para confirmar.", {}
             d["days"] = {}
             msg = "Todos os registos foram apagados."
