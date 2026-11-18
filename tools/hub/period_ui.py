@@ -578,7 +578,7 @@ def render(user, msg="", ym="", day="", cookie="", lang="pt", edit=False, tab=""
     if tab in ("stories", "care", "ask", "profile"):
         th0 = stt.get("theme") if stt.get("theme") in ("auto", "escuro", "claro") else "auto"
         pal0 = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda", "gelo") else "gelo"
-        body = PC.stories(ph, today, lang) if tab == "stories" else (PC.ask_page(lang, bool(stt.get("profile"))) if tab == "ask" else (PG.profile_page(stt.get("profile") or {}, lang, msg) if tab == "profile" else PC.care(q or {}, lang)))
+        body = PC.stories(ph, today, lang) if tab == "stories" else (PC.ask_page(lang, bool(stt.get("profile"))) if tab == "ask" else (PG.profile_page(stt.get("profile") or {}, lang, msg, q) if tab == "profile" else PC.care(q or {}, lang)))
         return CSS + PG.PG_CSS + '<div class="cy th-%s pal-%s"><div class="cybar"><a href="/finance/">← Finanças</a><a href="/finance/logout">sair</a></div><h2>Ciclo 🐧</h2>' % (th0, pal0) + PC.nav(tab, lang) + body + '</div>'
     th = stt.get("theme") if stt.get("theme") in ("auto", "escuro", "claro") else "auto"
     pal = stt.get("palette") if stt.get("palette") in ("natural", "rosa", "oceano", "lavanda", "gelo") else "gelo"

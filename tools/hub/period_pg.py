@@ -226,8 +226,23 @@ def mascot_bar(state, pt, en, lang, extra=""):
     return '<div class="pgbox"><span class="pgm">%s</span><div><p>%s</p>%s</div></div>' % (pg(state, 130), E(_t(lang, pt, en)), extra)
 
 
-def profile_page(profile, lang, msg=""):
+def profile_page(profile, lang, msg="", q=None):
     L = lambda a, b: _t(lang, a, b)
+    q = q or {}
+    if profile and q.get("redo") != "1":
+        done0 = pct(profile)
+        head = mascot_bar("happy", "Perfil guardado! Já sei mais sobre ti 🐧", "Profile saved! I know you better now 🐧", lang)
+        info = '<div class="mut">%s %d%%</div>' % (E(L("Perfil preenchido:", "Profile completed:")), done0)
+        if q.get("reset") == "1":
+            from period_care import TESTS
+            opts = '<a class="lnk" href="/finance/period?tab=profile&redo=1">📝 %s</a>' % E(L("Perfil de saúde do Pingo", "Pingo health profile"))
+            for k, v in TESTS.items():
+                opts += '<a class="lnk" href="/finance/period?tab=care&t=%s">%s %s</a>' % (k, v[0], E(L(v[1], v[2])))
+            opts += '<form method="post" action="/finance/period/profile" style="display:inline"><input type="hidden" name="clear" value="1"><button style="background:#7a3030">%s</button></form>' % E(L("Apagar o meu perfil de saúde", "Delete my health profile"))
+            body = '<div class="box"><h3>%s</h3><div class="row">%s</div><p><a class="lnk" href="/finance/period?tab=profile">‹ %s</a></p></div>' % (E(L("Qual queres repor?", "Which one do you want to reset?")), opts, E(L("Voltar", "Back")))
+        else:
+            body = '<div class="box"><a class="lnk" href="/finance/period?tab=profile&reset=1">🔄 %s</a></div>' % E(L("Repor questionários", "Reset questionnaires"))
+        return PG_CSS + head + ('<p class="green">%s</p>' % E(msg) if msg else "") + info + body
     qs = []
     for i, (qid, typ, p, e, opts) in enumerate(Q):
         cur = profile.get(qid)
