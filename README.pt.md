@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="Primeiro ecrã da app Android" width="26%">
 </p>
 
-> **Estado: pré-lançamento (1.3.0).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
+> **Estado: pré-lançamento (1.3.1).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
 
 ## Índice
 
