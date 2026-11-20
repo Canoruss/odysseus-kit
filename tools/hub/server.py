@@ -16,7 +16,7 @@ CATS = ["casa", "contas", "comida", "restaurantes", "transportes", "combustivel"
 import time, base64, re
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
-import period, period_ui, games, focus
+import period, period_ui, games, focus, dreams, health, bills
 import inbox
 import routine
 import study, extras, usage
@@ -402,7 +402,7 @@ def gym_page(d):
 <form method="post" action="/finance/gym/weight" style="margin-top:8px"><input type="number" step="0.1" name="kg" placeholder="peso em kg" required>
 <input type="date" name="date" value="{today}" required><button>Registar peso</button></form>
 <table><tr><th>Data</th><th>Peso</th></tr>{wrows}</table></div>
-{reports.box(d, '/finance/gym/report')}{media.box(d, '/finance/gym', True)}
+{health.box(getattr(CUR, 'u', None) or OWNER, getattr(CUR, 'lang', 'pt'))}{reports.box(d, '/finance/gym/report')}{media.box(d, '/finance/gym', True)}
 {gym_chat_box(d)}
 <h2 style="margin:18px 0 4px">Plano</h2>{gym_plan_cards(GYM_PLAN)}""", "Gym")
 
@@ -523,7 +523,7 @@ def m_gym_page(m):
     cta = '<a class="cta" href="/finance/m/gym/treino">▶ Abrir Treino+ (séries, descanso, peso)</a>'
     plan_html, quiz_html = m_gym(m)
     return page(hero.replace('<div class="box"><h2>Registo de hoje</h2>', cta + '<div class="box"><h2>Registo de hoje</h2>', 1)
-                + reports.box(m, "/finance/m/gym/report") + media.box(m, "/finance/m/gym")
+                + health.box(getattr(CUR, "u", None) or MEMBER, getattr(CUR, "lang", "pt")) + reports.box(m, "/finance/m/gym/report") + media.box(m, "/finance/m/gym")
                 + period_ui.gym_card(getattr(CUR, "u", None) or MEMBER) + gym_chat_box(m, "/finance/m/gym/chat") + plan_html + quiz_html, "Gym")
 
 def m_gym(m):
@@ -990,6 +990,10 @@ class H(BaseHTTPRequestHandler):
         if u and self.path.split("?")[0].rstrip("/") == "/games":
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(games.render((q.get("p") or [""])[0][:10], i18n.from_cookie(self.headers.get("Cookie", "")), u), "Jogos"))
+        if u and self.path.split("?")[0].rstrip("/") == "/dreams":
+            return self.send(200, page(dreams.render(u, i18n.from_cookie(self.headers.get("Cookie", ""))), "Sonhos"))
+        if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/bills":
+            return self.send(200, page(bills.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), self.headers.get("Cookie", "")), "Faturas"))
         if u and self.path.split("?")[0].rstrip("/") == "/focus":
             return self.send(200, page(focus.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), u in (OWNER,) + MLIKE), "Foco"))
         if u and self.path.split("?")[0].rstrip("/") == "/period":   # Ciclo: every user, separate data per account
@@ -1097,6 +1101,35 @@ class H(BaseHTTPRequestHandler):
         if u and self.path.split("?")[0].rstrip("/") == "/games/alerts":
             games.alerts_set(u, self.form().get("on") == "1", i18n.from_cookie(self.headers.get("Cookie", "")))
             return self.redirect("/finance/games")
+        if u and self.path.split("?")[0] == "/health/sync":
+            try: out = health.ingest(u, self.read_json(200000))
+            except Exception: out = {"ok": False}
+            return self.send(200, json.dumps(out))
+        if u and self.path.split("?")[0] == "/dreams/stt":
+            n = min(int(self.headers.get("Content-Length", 0) or 0), 12_000_000)
+            raw = self.rfile.read(n)
+            try: out = {"text": dreams.stt(raw, self.headers.get("Content-Type", ""))}
+            except Exception as e: out = {"text": "", "error": str(e)[:100]}
+            b = json.dumps(out).encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b); return
+        if u and self.path.startswith("/dreams/"):
+            dreams.post(u, self.path.split("?")[0], self.form(), i18n.from_cookie(self.headers.get("Cookie", "")))
+            return self.redirect("/finance/dreams")
+        if u in (OWNER,) + MLIKE and self.path.startswith("/bills/"):
+            def _add_debt(name, amount, due, ref):
+                note = name + (" (" + due + ")" if due else "") + (" ref. " + ref if ref else "")
+                if u in MLIKE: m = mload(); m.setdefault("debts", []).append({"name": note[:80], "amount": amount}); msave(m)
+                else: dd = load(); dd.setdefault("debts", []).append({"name": note[:80], "amount": amount}); save(dd)
+                return note[:80]
+            def _del_debt(note):
+                if u in MLIKE: m = mload(); L_ = m.get("debts", [])
+                else: dd = load(); L_ = dd.get("debts", [])
+                for y in L_:
+                    if y.get("name") == note: L_.remove(y); break
+                if u in MLIKE: msave(m)
+                else: save(dd)
+            bills.post(u, self.path.split("?")[0], self.form(), self.headers.get("Cookie", ""), _add_debt, _del_debt)
+            return self.redirect("/finance/bills")
         if u and self.path.startswith("/focus/"):
             focus.post(u, self.path.split("?")[0], self.form(), u in (OWNER,) + MLIKE)
             return self.redirect("/finance/focus")

@@ -71,6 +71,9 @@ The tools appear in the **Tools** bar, and you can hide them in **Appearance**.
 In `tools/jobs/`: installment and expense alerts, workout reminders, daily ClickUp list, and gallery synchronization. They require `~/.config/odysseus-kit/agent.env` with `ODYSSEUS_URL` and `ODYSSEUS_API_TOKEN` (agent token created in Odysseus settings). Example `cron`:
 ```
 40 9 * * *  python3 -I ~/odysseus-kit/tools/jobs/installments.py
+17 8 * * *  python3 -I ~/odysseus-kit/tools/jobs/bills_auto.py          # invoice search (only users who enabled it)
+42 9 * * *  python3 -I ~/odysseus-kit/tools/jobs/bills_reminders.py     # recurring invoice reminders
+20 */3 * * * python3 -I ~/odysseus-kit/tools/jobs/email_events.py       # events in email missing from the calendar
 ```
 
 

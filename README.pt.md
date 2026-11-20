@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="Primeiro ecrã da app Android" width="26%">
 </p>
 
-> **Estado: pré-lançamento (1.3.1).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
+> **Estado: pré-lançamento (1.4.0).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
 
 ## Índice
 
@@ -35,7 +35,7 @@
 | **Prompts** | descreves o que queres na tua língua e recebes um prompt em inglês pronto a colar (chat, imagem, código, vídeo, música, agente), com aviso quando faltam detalhes importantes | Groq (Claude Haiku de reserva) |
 | **Notícias** | feed estilo revista (notícia em destaque + cartões com imagem), fontes e temas por pessoa, temas que sobem, palavras silenciadas, filtro «só críticas», resumo diário neutro | Groq |
 | **Estudo** | trabalhos com etapas, fontes com citação APA, resumo de links/PDF (com OCR para digitalizações), exportar referências para Word, avisos de prazos, planeador de 14 dias | Groq |
-| **Emails** | liga contas IMAP/SMTP (Gmail, Outlook, Yahoo, iCloud, outras) com os servidores preenchidos e teste de ligação | palavras-passe de aplicação do teu fornecedor |
+| **Emails** | liga contas IMAP/SMTP (Gmail, Outlook, Yahoo, iCloud, outras) com os servidores preenchidos e teste de ligação. **Faturas detetadas no e-mail** (`/finance/bills`): uma procura diária ou à pedido lê o correio recente (no Gmail, «Todo o correio», por isso inclui os separadores) e as primeiras páginas dos PDFs em anexo; o Groq extrai emissor, valor, vencimento e referência e tu **confirmas ou ignoras** cada uma. Confirmar cria uma dívida nas Finanças. Avisos de pagamento falhado (devolução bancária, suspensão) aparecem como alerta. Os remetentes que confirmas são aprendidos; os que ignoras duas vezes deixam de ser analisados. Só se guarda o ID da mensagem e os campos extraídos, nunca o corpo do e-mail | palavras-passe de aplicação do teu fornecedor; Groq |
 | **Voos** | voos guardados e agrupados em Hoje / Próximos / Passados, contagem decrescente até à partida, etiqueta de estado (atraso, aterrou, cancelado), ligações ao Flightradar24 / FlightAware, avisos de atraso e de porta, mensagem para copiar e enviar ao hóspede | chave AirLabs (opcional) |
 | **Canva** | criar designs e exportar PNG | conta de programador do Canva |
 | **Caixa de ideias** | os utilizadores enviam ideias/bugs (texto e capturas) e a IA organiza-os em tarefas | Groq (visão), Gemini de reserva |
@@ -44,12 +44,13 @@
 
 | Ferramenta | O que faz | Precisa de |
 |---|---|---|
-| **Finanças** | movimentos, dívidas com alertas, metas, talões por foto, despesas mensais | Groq (talões) |
-| **Gym + Treino+** | plano, séries com esforço (RPE), temporizador de descanso, peso corporal e meta, fotos de progresso, análise de técnica por IA, relatórios médicos. **Treino+**: recordes pessoais automáticos, sugestões de progressão (regra de +2,5%), séries por semana por grupo muscular (alvo 10–20), calculadora de discos, 1RM estimado, notas por exercício | Groq/Gemini |
+| **Finanças** | movimentos, dívidas com alertas, metas, talões por foto, despesas mensais. **Faturas recorrentes**: marca uma fatura confirmada como mensal e recebes lembrete na véspera e no dia do vencimento, um «venceu ontem, já pagaste?» no dia seguinte e um aviso 3 dias antes da data habitual se a fatura ainda não chegou. «Já paguei» remove a dívida correspondente | Groq (talões, faturas) |
+| **Gym + Treino+** | plano, séries com esforço (RPE), temporizador de descanso, peso corporal e meta, fotos de progresso, análise de técnica por IA, relatórios médicos. **Treino+**: recordes pessoais automáticos, sugestões de progressão (regra de +2,5%), séries por semana por grupo muscular (alvo 10–20), calculadora de discos, 1RM estimado, notas por exercício Um **cartão de saúde** mostra frequência cardíaca, passos e sono de um relógio com Health Connect (sincronização Android). | Groq/Gemini |
 | **Glicose** | gráfico e histórico do LibreLinkUp, registo manual e editável. **Análise** a 7/14/30 dias: tempo no alvo (5 zonas com as metas internacionais), média, GMI, variabilidade (CV), perfil diário (AGP) com mediana e faixas de percentis, padrões por hora do dia, imprimir/PDF e copiar resumo para o médico. A calculadora de insulina vem **desativada** | LibreLinkUp |
 | **Ciclo** | período, fluxo, sintomas, humor, temperatura basal, testes de ovulação; previsões com janela fértil, ovulação e TPM; cartão da fase com anel do ciclo e ilustrações, o **Pingo**, pinguim guia animado (17 estados, animação por camadas), chat "Pergunta ao Pingo", questionário de perfil, dicas por fase, gráficos de estatísticas, lembrete da pílula, lembretes, exportação CSV/JSON, PIN opcional, tema claro/escuro e paletas de cores, dados separados por conta; uma **caixa do ciclo no Ginásio** ajusta as dicas de treino e dieta à fase | Groq/Gemini (opcional, para o Pergunta ao Pingo) |
 | **Foco** | tarefas e rotinas para TDAH/autismo: passos pequenos, temporizadores, uma coisa de cada vez; usa a Caixa de ideias | nada |
-| **Jogos grátis** | lista de jogos grátis neste momento e avisos opcionais | nada |
+| **Jogos grátis** | lista de jogos grátis neste momento, com data de fim e preço, e avisos opcionais quando aparece um novo | nenhum |
+| **Sonhos** | diário de sonhos por conta (texto ou voz), interpretação por IA com guia estilo psicologia, temas recorrentes e estado de espírito | Groq |
 
 ### Interface e plataforma
 
@@ -61,7 +62,7 @@
 | **Idioma** | seletor English / Português para as ferramentas e a app |
 | **Tema Ryoku** | tema extra para o Odysseus e todas as páginas das ferramentas (arte GPL-3.0 do projeto ryoku.dev) |
 | **Assistente de configuração** | passo a passo para chaves e serviços, com *Testar* e *Saltar* em cada passo (só administradores) |
-| **Lembretes e tarefas agendadas** | scripts agendados (cron) que criam lembretes no Odysseus: prestações e despesas, dívidas, prazos de estudo, atrasos de voos, período/ovulação, treinos, lista diária do ClickUp, sincronização da galeria, avisos de jogos grátis, lembrete da pílula, **scan noturno** (verifica serviços, contentores e páginas das ferramentas; um modelo Groq gratuito opcional resume as falhas; alerta no Telegram só se houver falhas) |
+| **Lembretes e tarefas agendadas** | scripts agendados (cron) que criam lembretes no Odysseus: prestações e despesas, dívidas, prazos de estudo, atrasos de voos, período/ovulação, treinos, lista diária do ClickUp, sincronização da galeria, avisos de jogos grátis, lembrete da pílula, **procura e lembretes de faturas**, **avisos de eventos em falta no calendário** (eventos mencionados no e-mail que não estão no calendário), **scan noturno** (verifica serviços, contentores e páginas das ferramentas; um modelo Groq gratuito opcional resume as falhas; alerta no Telegram só se houver falhas) |
 | **Patches ao núcleo** | opcionais: modelo **Auto** no seletor (rápido vs raciocínio), parâmetros por defeito, persona base, auditoria de memórias em lotes, menos ruído nos registos de email; aplicados pelo instalador, tudo ou nada, ver `patches/README.md` |
 | **App Android** | widgets, lembretes com ações, tradutor nativo, calendário, tarefa rápida por voz, bloqueio por impressão digital |
 
