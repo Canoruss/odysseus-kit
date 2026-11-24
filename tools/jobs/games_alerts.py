@@ -29,8 +29,10 @@ def main():
     for user, st in games.alerts_load().items():
         if not st.get("on"): continue
         en = st.get("lang") == "en"
-        names = [games.re.sub(r" ?\(.*?\) Giveaway| Giveaway", "", g["title"]) for g in new[:3]]
-        more = len(new) - 3
+        mine = [g for g in new if any(x in (g.get("platforms") or "").lower() for x in st.get("stores", games.STORES))]
+        if not mine: continue
+        names = [games.re.sub(r" ?\(.*?\) Giveaway| Giveaway", "", g["title"]) for g in mine[:3]]
+        more = len(mine) - 3
         title = ("Free game: " if en else "Jogo grátis: ") + ", ".join(names) + ((" +%d" % more if en else " e mais %d" % more) if more > 0 else "")
         if DRY: print("[dry]", user, title); continue
         print(user, users.add_reminder(user, title))

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Odysseus</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body class="settings-page">
+    <main class="settings-shell">
+      <div class="wordmark">
+        <img src="icons/48.png" width="30" height="30" alt="">
+        <strong>Odysseus</strong>
+      </div>
+      <h1 data-i="settings">Settings</h1>
+      <form id="settingsForm" class="settings-form">
+        <fieldset>
+          <legend data-i="connection">Server connection</legend>
+          <label for="url" data-i="serverUrl">Server address</label>
+          <input id="url" type="url" required placeholder="https://odysseus.example.net" autocomplete="off" spellcheck="false" aria-describedby="urlHint">
+          <small id="urlHint" data-i="urlHint"></small>
+          <label class="check" id="httpRow" hidden>
+            <input id="allowHttp" type="checkbox">
+            <span data-i="httpLabel"></span>
+          </label>
+          <label for="token" data-i="apiToken">API token</label>
+          <input id="token" type="password" autocomplete="off" spellcheck="false" aria-describedby="tokenHint">
+          <small id="tokenHint" data-i="tokenHint"></small>
+        </fieldset>
+        <fieldset>
+          <legend data-i="chatModel">Chat model</legend>
+          <label for="ep" data-i="epLabel"></label>
+          <input id="ep" autocomplete="off" spellcheck="false">
+          <label for="model" data-i="modelLabel"></label>
+          <input id="model" autocomplete="off" spellcheck="false">
+          <small data-i="modelHint"></small>
+        </fieldset>
+        <div class="settings-actions">
+          <button class="primary" id="save" type="submit" data-i="save">Save settings</button>
+          <button id="test" type="button" data-i="test">Test connection</button>
+          <button id="disconnect" type="button" data-i="disconnect" hidden></button>
+        </div>
+        <div class="version-row"><small id="version"></small><button type="button" id="checkVersion" data-i="checkVersion"></button></div>
+        <div class="version-row"><button type="button" id="upd" data-i="u_on"></button> <small data-i="u_hint"></small></div>
+        <p role="status" id="st" class="status"></p>
+      </form>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

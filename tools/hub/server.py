@@ -16,7 +16,7 @@ CATS = ["casa", "contas", "comida", "restaurantes", "transportes", "combustivel"
 import time, base64, re
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
-import period, period_ui, games, focus, dreams, health, bills
+import quiet, search, period, period_ui, games, focus, dreams, health, bills
 import inbox
 import routine
 import study, extras, usage
@@ -102,7 +102,7 @@ body{{font-family:system-ui,sans-serif;background:#1d2026;color:#eee;margin:0;pa
 h1,h2{{font-weight:600}} table{{width:100%;border-collapse:collapse;margin:8px 0}} td,th{{padding:6px;border-bottom:1px solid #333;text-align:left}}
 input,select,button{{padding:8px;border-radius:6px;border:1px solid #444;background:#2a2e36;color:#eee;margin:3px}}
 button{{background:#4a7bd0;border:0;cursor:pointer}} .red{{color:#f07070}} .green{{color:#70d080}} .box{{background:#262a31;padding:12px;border-radius:10px;margin:10px 0}}
-</style></head><body>{body}</body></html>"""
+</style></head><body>{'' if title in ('Pesquisa', 'Login', 'Private Browser live') else '<form method="get" action="/finance/search" style="text-align:right;margin:0"><input name="q" placeholder="🔎" style="width:110px"></form>'}{body}</body></html>"""
 
 def eur(v): return f"{v:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -658,6 +658,22 @@ def ryoku_skin(html):
     return html[:m.end()] + _RYOKU_CSS + html[m.end():] if m else _RYOKU_CSS + html
 
 
+PB_OWNER = OWNER
+PB_LIVE_HTML = page("""<h2>Private Browser — ao vivo / live</h2>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><input id="u" placeholder="https://..." style="flex:1;min-width:200px;padding:8px"><button onclick="go()">Abrir / Open</button><button onclick="act({cmd:'back'})">&larr;</button><button onclick="act({cmd:'scroll',dir:'up'})">&uarr;</button><button onclick="act({cmd:'scroll'})">&darr;</button><button onclick="act({cmd:'key',key:'Enter'})">Enter</button></div>
+<div style="display:flex;gap:6px;margin-bottom:8px"><input id="t" placeholder="escrever texto / type text" style="flex:1;padding:8px"><button onclick="typ()">Escrever / Type</button></div>
+<img id="v" style="max-width:100%;border-radius:8px;cursor:crosshair;border:1px solid #8884" alt="sem sessão / no session — abre um URL"><p id="s" style="font-size:12px;opacity:.7"></p>
+<script>
+const v=document.getElementById('v');
+async function act(o){const r=await fetch('/finance/pblive/act',{method:'POST',body:JSON.stringify(o)});document.getElementById('s').textContent=(await r.text()).slice(0,120);tick()}
+function go(){act({cmd:'open',url:document.getElementById('u').value})}
+function typ(){const t=document.getElementById('t');act({cmd:'typeraw',text:t.value});t.value=''}
+v.addEventListener('click',e=>{const r=v.getBoundingClientRect();act({cmd:'mouse',x:Math.round((e.clientX-r.left)*v.naturalWidth/r.width),y:Math.round((e.clientY-r.top)*v.naturalHeight/r.height)})});
+let busy=false;async function tick(){if(busy||document.hidden)return;busy=true;try{const r=await fetch('/finance/pblive.jpg?'+Date.now());if(r.status==200){v.src=URL.createObjectURL(await r.blob())}}catch(e){}busy=false}
+setInterval(tick,1000);tick();
+</script>""", "Private Browser live")
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
@@ -924,6 +940,17 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.norm()
+        _pp = self.path.split("?")[0]
+        if _pp in ("/pblive", "/finance/pblive", "/pblive.jpg", "/finance/pblive.jpg"):   # vista ao vivo do Private Browser (so o dono)
+            if who(self.headers) != PB_OWNER: return self.send(403, "so o dono / owner only")
+            if _pp.endswith(".jpg"):
+                try:
+                    _r = urllib.request.urlopen("http://127.0.0.1:8794/live.jpg", timeout=8); _b = _r.read()
+                except Exception: _b = b""
+                if not _b: return self.send(204, "")
+                self.send_response(200); self.send_header("Content-Type", "image/jpeg"); self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", str(len(_b))); self.end_headers(); return self.wfile.write(_b)
+            return self.send(200, PB_LIVE_HTML)
         _m = re.fullmatch(r"(?:/finance)?/pingo/layers/([a-z_]+)\.png", self.path.split("?")[0])
         if _m:                                                       # camadas do Pingo
             try: _b = open(os.path.join(HERE, "pingo", "layers", _m.group(1) + ".png"), "rb").read()
@@ -994,12 +1021,15 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, page(dreams.render(u, i18n.from_cookie(self.headers.get("Cookie", ""))), "Sonhos"))
         if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/bills":
             return self.send(200, page(bills.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), self.headers.get("Cookie", "")), "Faturas"))
+        if u and self.path.split("?")[0].rstrip("/") == "/search":      # global search over the user's own tabs
+            _q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            return self.send(200, page(search.render(u, (_q.get("q") or [""])[0], i18n.from_cookie(self.headers.get("Cookie", "")), u == OWNER, u in MLIKE), "Pesquisa"))
         if u and self.path.split("?")[0].rstrip("/") == "/focus":
-            return self.send(200, page(focus.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), u in (OWNER,) + MLIKE), "Foco"))
+            return self.send(200, page(focus.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), u in (OWNER,) + MLIKE) + quiet.box(u, i18n.from_cookie(self.headers.get("Cookie", "")), "/finance/focus"), "Foco"))
         if u and self.path.split("?")[0].rstrip("/") == "/period":   # Ciclo: every user, separate data per account
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             g = lambda k, n: (q.get(k) or [""])[0][:n]
-            return self.send(200, page(period_ui.render(u, g("m", 200), g("ym", 7), g("day", 10), self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", "")), g("edit", 1) == "1", g("tab", 10), {k: v[0][:3] for k, v in q.items()}), "Ciclo"))
+            return self.send(200, page(period_ui.render(u, g("m", 200), g("ym", 7), g("day", 10), self.headers.get("Cookie", ""), i18n.from_cookie(self.headers.get("Cookie", "")), g("edit", 1) == "1", g("tab", 10), {k: v[0][:3] for k, v in q.items()}) + quiet.box(u, i18n.from_cookie(self.headers.get("Cookie", "")), "/finance/period"), "Ciclo"))
         if u in (OWNER,) + MLIKE and self.path.split("?")[0].rstrip("/") == "/routine":
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(study.nav("plan") + routine.render(u, (q.get("m") or [""])[0][:200]), "Rotina"))
@@ -1065,6 +1095,15 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         self.norm()
         u = who(self.headers); CUR.u = u
+        if self.path.split("?")[0].rstrip("/") in ("/pblive/act", "/finance/pblive/act"):
+            if u != PB_OWNER: return self.send(403, json.dumps({"error": "so o dono"}))
+            try: _a = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length") or 0), 4000)) or b"{}")
+            except ValueError: return self.send(400, "{}")
+            if _a.get("cmd") not in ("mouse", "typeraw", "key", "scroll", "back", "open"): return self.send(400, "{}")
+            _a["profile"] = "default"
+            try: _o = urllib.request.urlopen(urllib.request.Request("http://127.0.0.1:8794/", json.dumps(_a).encode(), {"Content-Type": "application/json"}), timeout=40).read().decode()
+            except Exception as _e: _o = "ERRO " + str(_e)[:80]
+            return self.send(200, json.dumps({"ok": True, "r": _o.split("\n")[0]}))
         if self.path.split("?")[0].rstrip("/") == "/prefs":
             if not u: return self.send(403, json.dumps({"error": "sem acesso"}))
             try: body = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length") or 0), 20000)) or b"{}")
@@ -1099,7 +1138,8 @@ class H(BaseHTTPRequestHandler):
         if u in (OWNER,) + MLIKE and self.path.startswith("/study/"):
             return study.post(self, u)
         if u and self.path.split("?")[0].rstrip("/") == "/games/alerts":
-            games.alerts_set(u, self.form().get("on") == "1", i18n.from_cookie(self.headers.get("Cookie", "")))
+            _n = int(self.headers.get("Content-Length", 0) or 0); _q = urllib.parse.parse_qs(self.rfile.read(min(_n, 2000)).decode())
+            games.alerts_set(u, (_q.get("on") or [""])[0] == "1", i18n.from_cookie(self.headers.get("Cookie", "")), _q.get("store") if (_q.get("on") or [""])[0] == "1" and "store" in _q else None)
             return self.redirect("/finance/games")
         if u and self.path.split("?")[0] == "/health/sync":
             try: out = health.ingest(u, self.read_json(200000))
@@ -1130,6 +1170,10 @@ class H(BaseHTTPRequestHandler):
                 else: save(dd)
             bills.post(u, self.path.split("?")[0], self.form(), self.headers.get("Cookie", ""), _add_debt, _del_debt)
             return self.redirect("/finance/bills")
+        if u and self.path.split("?")[0].rstrip("/") == "/quiet":       # quiet hours for automatic reminders
+            _n = int(self.headers.get("Content-Length", 0) or 0); _q = urllib.parse.parse_qs(self.rfile.read(min(_n, 1000)).decode()); _g = lambda k: (_q.get(k) or [""])[0]
+            quiet.save(u, _g("on") == "1", _g("from"), _g("to"))
+            return self.redirect(_g("back") if _g("back") in ("/finance/focus", "/finance/period") else "/finance/focus")
         if u and self.path.startswith("/focus/"):
             focus.post(u, self.path.split("?")[0], self.form(), u in (OWNER,) + MLIKE)
             return self.redirect("/finance/focus")

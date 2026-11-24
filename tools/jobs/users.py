@@ -5,6 +5,7 @@ USERS: nome curto usado nos ficheiros das ferramentas (ex.: flights-<nome>.json)
 import datetime, http.cookiejar, json, os, re, sys, urllib.request
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from kitconfig import OWNER, MEMBER, secret_file
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "hub")); import quiet
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lib
 
@@ -35,9 +36,12 @@ def _session(user):
     return op
 
 
-def add_reminder(user, title, when=None):
+def add_reminder(user, title, when=None, urgent=False):
     """Cria um lembrete (com notificacao) na conta do utilizador. Devolve (ok, mensagem)."""
     when = when or (lib.now() + datetime.timedelta(minutes=1))
+    if not urgent:                       # quiet hours (Focus/Cycle tabs): wait until they end
+        try: when = quiet.shift(user, when)
+        except Exception: pass
     if user not in USERS: return False, "utilizador desconhecido: " + user
     if USERS[user] is None:
         return lib.add_todo(title, when)

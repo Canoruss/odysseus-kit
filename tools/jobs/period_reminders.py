@@ -82,7 +82,7 @@ def main():
                 continue
             if DRY:
                 print("[dry]", user, "->", title); continue
-            ok, msg = users.add_reminder(user, title, when)
+            ok, msg = users.add_reminder(user, title, when, urgent=(kind == "pill" or "pill" in str(kind)))
             print(user, ok, title, msg[:60])
             if ok:
                 sent[k] = today.isoformat(); n += 1

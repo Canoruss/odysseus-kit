@@ -18,11 +18,11 @@
   <img src="docs/img/app-setup.png" alt="Primeiro ecrã da app Android" width="26%">
 </p>
 
-> **Estado: pré-lançamento (1.4.0).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
+> **Estado: pré-lançamento (1.5.0).** Extraído de uma instalação pessoal. O instalador foi testado num contentor Ubuntu 24.04 limpo, ainda não numa conta Oracle real nem por terceiros. Se algo falhar, [abre uma issue](../../issues).
 
 ## Índice
 
-[O que inclui](#o-que-inclui) · [Como se liga tudo](#como-se-liga-tudo) · [Início rápido](#início-rápido) · [App Android](#descarregar-a-app-android) · [Segurança e privacidade](#segurança-e-privacidade) · [Problemas comuns](#problemas-comuns) · [Contribuir](#contribuir) · [Licença](#licença)
+[O que inclui](#o-que-inclui) · [Como se liga tudo](#como-se-liga-tudo) · [Início rápido](#início-rápido) · [Extensão do browser](#extensão-do-browser) · [Guia de utilização](docs/GUIDE.pt.md) · [App Android](#descarregar-a-app-android) · [Segurança e privacidade](#segurança-e-privacidade) · [Problemas comuns](#problemas-comuns) · [Contribuir](#contribuir) · [Licença](#licença)
 
 ## O que inclui
 
@@ -49,13 +49,17 @@
 | **Glicose** | gráfico e histórico do LibreLinkUp, registo manual e editável. **Análise** a 7/14/30 dias: tempo no alvo (5 zonas com as metas internacionais), média, GMI, variabilidade (CV), perfil diário (AGP) com mediana e faixas de percentis, padrões por hora do dia, imprimir/PDF e copiar resumo para o médico. A calculadora de insulina vem **desativada** | LibreLinkUp |
 | **Ciclo** | período, fluxo, sintomas, humor, temperatura basal, testes de ovulação; previsões com janela fértil, ovulação e TPM; cartão da fase com anel do ciclo e ilustrações, o **Pingo**, pinguim guia animado (17 estados, animação por camadas), chat "Pergunta ao Pingo", questionário de perfil, dicas por fase, gráficos de estatísticas, lembrete da pílula, lembretes, exportação CSV/JSON, PIN opcional, tema claro/escuro e paletas de cores, dados separados por conta; uma **caixa do ciclo no Ginásio** ajusta as dicas de treino e dieta à fase | Groq/Gemini (opcional, para o Pergunta ao Pingo) |
 | **Foco** | tarefas e rotinas para TDAH/autismo: passos pequenos, temporizadores, uma coisa de cada vez; usa a Caixa de ideias | nada |
-| **Jogos grátis** | lista de jogos grátis neste momento, com data de fim e preço, e avisos opcionais quando aparece um novo | nenhum |
+| **Jogos grátis** | lista de jogos grátis neste momento, com data de fim e preço, e avisos opcionais quando aparece um novo, **por loja** (Epic, Steam, GOG, itch.io, Prime) | nenhum |
 | **Sonhos** | diário de sonhos por conta (texto ou voz), interpretação por IA com guia estilo psicologia, temas recorrentes e estado de espírito | Groq |
 
 ### Interface e plataforma
 
 | Funcionalidade | O que faz |
 |---|---|
+| **Pesquisa global** | uma caixa 🔎 em cada página das ferramentas pesquisa só nos teus dados (Foco, Sonhos, Estudo, Contas, Finanças; Caixa de ideias para o administrador) | nenhum |
+| **Horas de silêncio** | período de silêncio por conta (abas Foco e Ciclo): os lembretes automáticos não urgentes esperam pelo fim; avisos de voo e pílula passam sempre | nenhum |
+| **Private Browser** | Chromium opcional que o assistente controla, com capturas, extração de produtos/preços, perfis de login separados, proteção de compras e **vista ao vivo com controlo remoto** para o administrador (`tools/pbrowse`) | Node.js + Playwright |
+| **Extensão do browser** | painel lateral Chrome/Edge: chat com contexto da página e de separadores, Guia da página, modo agente e histórico (`extension/`) | um token de API do Odysseus |
 | **Barra de uso** | barra fina por cima do teu nome com os limites de sessão/semana do Claude e o uso do Groq, DeepL e AirLabs |
 | **Botões de escolha** | quando o assistente precisa de uma decisão termina a resposta com `[[opcoes: Sim \| Não]]` e o chat mostra botões (a palavra `opcoes` é fixa) |
 | **Abas das Tools** | ordenar e esconder abas em *Settings → Appearance*; guardado no servidor, partilhado pelo browser e pela app |
@@ -115,6 +119,10 @@ Para cada serviço o assistente explica o que é, onde obter a chave, tem um bot
 | [docs/APK.md](docs/APK.pt.md) | instalar ou compilar a app Android |
 | [docs/I18N.md](docs/I18N.pt.md) | idiomas e como acrescentar traduções |
 | [docs/GLUCOSE.md](docs/GLUCOSE.pt.md) | ferramenta de glicose e calculadora de insulina |
+
+## Extensão do browser
+
+Um painel lateral para Chrome/Edge que fala com o teu servidor: chat com a página atual ou até três separadores, um **Guia da página** passo a passo (cada ação precisa da tua aprovação), um **modo agente** e histórico pesquisável. Instalação, privacidade e problemas comuns: **[docs/EXTENSION.pt.md](docs/EXTENSION.pt.md)**. Instruções do dia a dia de cada ferramenta: **[docs/GUIDE.pt.md](docs/GUIDE.pt.md)**.
 
 ## Descarregar a app Android
 

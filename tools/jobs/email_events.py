@@ -23,8 +23,12 @@ MODEL = "qwen/qwen3.8-27b"
 
 def api(method, path, body=None):
     if USER != OWNER:
-        try: return json.load(users._session(USER).open(users.B + path, timeout=120))
-        except Exception as e: raise RuntimeError("API %s falhou: %r" % (path, e))
+        err = None
+        for _i in range(3):                      # transient 401/5xx (Odysseus restart): log in again and retry
+            try: return json.load(users._session(USER).open(users.B + path, timeout=120))
+            except Exception as e:
+                err = e; users._sessions.pop(USER, None); time.sleep(15)
+        raise RuntimeError("API %s falhou: %r" % (path, err))
     cmd = ["python3", "-I", lib.ODY, method, path] + ([json.dumps(body)] if body is not None else [])
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=120, env=lib.ENV)
     try: return json.loads(r.stdout)

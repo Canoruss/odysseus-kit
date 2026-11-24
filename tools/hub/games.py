@@ -17,9 +17,11 @@ def alerts_load():
     except (OSError, ValueError): return {}
 
 
-def alerts_set(u, on, lang):
+def alerts_set(u, on, lang, stores=None):
     d = alerts_load(); u = re.sub(r"[^a-z0-9_-]", "", str(u).lower())
-    d[u] = {"on": bool(on), "lang": "en" if lang == "en" else "pt"}
+    old = d.get(u, {})
+    st = [x for x in (stores if stores is not None else old.get("stores", list(STORES))) if x in STORES]
+    d[u] = {"on": bool(on), "lang": "en" if lang == "en" else "pt", "stores": st or list(STORES)}
     tmp = ALERTS + ".tmp"; fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, "w") as f: json.dump(d, f)
     os.replace(tmp, ALERTS)
@@ -64,7 +66,7 @@ def _ok(u): return u if re.match(r"https://", u or "") else "#"
 
 
 def render(flt, lang, user=""):
-    d = fetch(); on = alerts_load().get(re.sub(r"[^a-z0-9_-]", "", str(user).lower()), {}).get("on", False); flt = flt if flt in [f[0] for f in FILTERS] else ""
+    d = fetch(); _a = alerts_load().get(re.sub(r"[^a-z0-9_-]", "", str(user).lower()), {}); on = _a.get("on", False); _sel = _a.get("stores", list(STORES)); flt = flt if flt in [f[0] for f in FILTERS] else ""
     rows = []
     for g in d["now"]:
         pl = (g.get("platforms") or "")
@@ -83,6 +85,6 @@ def render(flt, lang, user=""):
     return f"""<style>.gms{{max-width:720px;margin:auto}}.gm{{display:flex;gap:12px;align-items:center;background:#262a31;border-radius:10px;padding:8px;margin:8px 0;color:#eee;text-decoration:none}}
 .gm img{{width:120px;height:68px;object-fit:cover;border-radius:6px;background:#1d2026}}.gm div{{display:flex;flex-direction:column;gap:2px}}.gm small{{color:#9aa3b2}}
 .ch{{display:inline-block;padding:6px 12px;border-radius:16px;background:#2a2e36;color:#ccc;text-decoration:none;margin:2px}}.ch.on{{background:#4a7bd0;color:#fff}}</style>
-<div class="gms"><h1>🎮 {E(T(lang, "Jogos grátis", "Free games"))}</h1><form method="post" action="/finance/games/alerts" style="margin:6px 0"><input type="hidden" name="on" value="{0 if on else 1}"><button>{"🔔 " + E(T(lang, "Avisos ligados (desligar)", "Alerts on (turn off)")) if on else "🔕 " + E(T(lang, "Avisar-me de jogos grátis novos (Epic, Steam, GOG, itch.io, Prime)", "Alert me about new free games (Epic, Steam, GOG, itch.io, Prime)"))}</button></form><div>{chips}</div>{"".join(rows)}{empty}
+<div class="gms"><h1>🎮 {E(T(lang, "Jogos grátis", "Free games"))}</h1><form method="post" action="/finance/games/alerts" style="margin:6px 0">{"" if not on else "".join(f'<label style="margin-right:10px"><input type="checkbox" name="store" value="{k}"{" checked" if k in _sel else ""}> {E(dict((x[0], x[1]) for x in FILTERS).get(k, k))}</label>' for k in STORES) + "<br>"}<button name="on" value="1">{"🔔 " + E(T(lang, "Guardar lojas", "Save stores")) if on else "🔕 " + E(T(lang, "Avisar-me de jogos grátis novos (Epic, Steam, GOG, itch.io, Prime)", "Alert me about new free games (Epic, Steam, GOG, itch.io, Prime)"))}</button>{"" if not on else '<button name="on" value="0">' + E(T(lang, "Desligar avisos", "Turn alerts off")) + '</button>'}</form><div>{chips}</div>{"".join(rows)}{empty}
 <h2>{E(T(lang, "Próximos grátis na Epic", "Coming next on Epic"))}</h2><ul>{nxt or "<li>—</li>"}</ul>
 <small style="color:#7d8594">{E(T(lang, f"Atualizado há {age} min · fonte: GamerPower e Epic", f"Updated {age} min ago · source: GamerPower and Epic"))}</small></div>"""

@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Private Browser. Uso: pb [--profile NOME] [--confirm] COMANDO
+  open URL | click @eN|TEXTO | type @eN "texto" [--enter] | key Enter | scroll [up] | back | snap | text | close
+  full (página inteira) | zoom @eN | extract (tabela produto/preço/link) | compare URL1 URL2 ... | gallery
+  search "termos" [site.com]  (SearXNG com retry; se falhar abre DuckDuckGo no browser)
+Compras/envios: o browser pede --confirm; só repetir com --confirm se o utilizador autorizou.
+Perfil: --profile NOME ou env PB_PROFILE (default 'default')."""
+import sys, os, json, re, subprocess, urllib.request, urllib.error, urllib.parse
+a = sys.argv[1:]
+profile = os.environ.get("PB_PROFILE", "default"); confirm = False
+rest = []; i = 0
+while i < len(a):
+    if a[i] == "--profile" and i + 1 < len(a): profile = a[i + 1]; i += 2; continue
+    if a[i] == "--confirm": confirm = True; i += 1; continue
+    rest.append(a[i]); i += 1
+a = rest
+if not a: print(__doc__); sys.exit(1)
+
+def call(d):
+    d["profile"] = profile; d["confirm"] = confirm
+    try:
+        r = urllib.request.urlopen(urllib.request.Request("http://127.0.0.1:8794", json.dumps(d).encode()), timeout=120)
+        return r.read().decode()
+    except urllib.error.HTTPError as e: return e.read().decode()
+    except Exception as e: return "ERRO: servidor do browser parado: %s" % e
+
+def sxm(q):   # optional SearXNG (set SEARXNG_URL, e.g. http://127.0.0.1:8888); empty -> falls back to DuckDuckGo in the browser
+    base = os.environ.get("SEARXNG_URL", "").rstrip("/")
+    if not base: return ""
+    try:
+        r = json.load(urllib.request.urlopen(base + "/search?format=json&q=" + urllib.parse.quote(q), timeout=20))
+        return "\n".join("- %s\n  %s\n  %s" % (x.get("title", ""), x.get("url", ""), (x.get("content") or "")[:160]) for x in r.get("results", [])[:8])
+    except Exception: return ""
+
+c = a[0]; d = {"cmd": c}
+if c == "open": d["url"] = a[1]
+elif c == "click": d["target"] = " ".join(a[1:])
+elif c == "type": d["target"] = a[1]; d["text"] = a[2]; d["enter"] = "--enter" in a
+elif c == "key": d["key"] = a[1]
+elif c == "scroll": d["dir"] = a[1] if len(a) > 1 else "down"
+elif c == "zoom": d["target"] = a[1]
+elif c == "compare": d["urls"] = a[1:]
+elif c == "search":
+    q = a[1]; site = a[2] if len(a) > 2 else ""
+    qs = [q + (" site:" + site if site else "")]
+    words = [w for w in re.split(r"\s+", q) if len(w) > 2]
+    if len(words) > 2: qs.append(" ".join(words[:3]) + (" " + site if site else ""))
+    qs.append(q + " buy price" if not site else q + " " + site)
+    for qq in qs:
+        for _ in range(2):
+            out = sxm(qq)
+            if re.search(r"https?://", out): print("SEARCH (%s):\n%s" % (qq, out)); sys.exit(0)
+    print("SearXNG sem resultados; a abrir DuckDuckGo no browser…")
+    c = "open"; d = {"cmd": "open", "url": "https://duckduckgo.com/?q=" + urllib.parse.quote(q + (" site:" + site if site else "")) + "&ia=web"}
+print(call(d))

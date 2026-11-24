@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Odysseus</title>
+    <link rel="stylesheet" href="sidepanel.css">
+  </head>
+  <body class="panel">
+    <header class="panel-header">
+      <div class="brand">
+        <img src="icons/48.png" width="30" height="30" alt="">
+        <div class="brand-text">
+          <strong>Odysseus</strong>
+          <small id="host"></small>
+        </div>
+      </div>
+      <div class="header-buttons">
+        <button id="historyToggle" type="button" data-i="history" aria-controls="historyPanel" aria-expanded="false">History</button>
+        <button id="new" type="button" data-label="newChat" class="icon-btn">＋</button>
+        <button id="cfg" type="button" data-label="settings" class="icon-btn">⚙</button>
+      </div>
+    </header>
+    <div class="mode-bar" id="modeBar">
+      <div class="mode-switch" role="group" data-label="mode">
+        <button type="button" id="chatMode" aria-pressed="true" data-i="chat">Chat</button>
+        <button type="button" id="guideMode" aria-pressed="false" data-i="guide">Page guide</button>
+        <button type="button" id="agentMode" aria-pressed="false" data-i="agentMode">Agent</button>
+      </div>
+      <select id="model" data-label="chooseModel">
+        <option data-i="serverDefault">Server default</option>
+      </select>
+      <select id="agentModel" data-label="chooseModel" hidden></select>
+    </div>
+    <div id="notice" role="status" hidden></div>
+    <section id="historyPanel" data-label="history" hidden>
+      <div class="history-toolbar">
+        <label><input id="historyEnabled" type="checkbox"> <span data-i="saveHistory"></span></label>
+        <button id="exportCurrent" type="button" data-i="exportCurrent"></button>
+      </div>
+      <p class="history-hint" data-i="historyHint"></p>
+      <label for="historyQuery" class="sr-only" data-i="historySearch"></label>
+      <input id="historyQuery" type="search" autocomplete="off">
+      <p id="historyStatus" role="status"></p>
+      <div id="historyList"></div>
+      <div id="historyDetail" hidden></div>
+    </section>
+    <main id="conversation">
+      <section id="welcome">
+        <h1 id="welcomeTitle"></h1>
+        <p id="guideIntro" data-i="guideIntro" hidden></p>
+        <div id="starters">
+          <button data-prompt="sum" type="button" data-i="quickSum"></button>
+          <button data-prompt="exp" type="button" data-i="quickExplain"></button>
+          <button data-prompt="tr" type="button" data-i="quickTranslate"></button>
+        </div>
+      </section>
+      <div id="log" role="log" aria-live="off"></div>
+    </main>
+    <aside id="review" aria-live="polite" hidden></aside>
+    <footer id="composeFooter">
+      <div id="contextControl" hidden>
+        <label for="contextMode" data-i="pageContext">Page context</label>
+        <select id="contextMode">
+          <option value="focused" data-i="focusContext">Relevant excerpts</option>
+          <option value="full" data-i="fullContext">Full captures</option>
+        </select>
+        <small id="contextSize"></small>
+      </div>
+      <section id="attachments" data-label="attachments" hidden></section>
+      <form id="composer">
+        <label for="inp" class="sr-only" id="inputLabel">Message</label>
+        <textarea id="inp" maxlength="32000" rows="2" spellcheck="true"></textarea>
+        <div class="compose-actions">
+          <div id="tools">
+            <button type="button" id="bPage" data-i="page">Page</button>
+            <button type="button" id="bSel" data-i="selection">Selection</button>
+            <button type="button" id="bShot" data-i="screenshot">Screenshot</button>
+            <button id="bCompare" type="button" data-i="compareTabs">Compare tabs</button>
+            <button id="bFile" type="button" data-i="files">Files</button>
+            <input id="file" type="file" multiple hidden>
+          </div>
+          <button id="send" type="submit" class="primary" disabled data-i="send">Send</button>
+        </div>
+      </form>
+      <p id="privacy"></p>
+      <span id="live" class="sr-only" role="status"></span>
+    </footer>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

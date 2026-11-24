@@ -75,7 +75,7 @@ def watch(user, flights, state):
                     if code in st["alerts"]: continue
                     title = "Voo %s %s%s" % (n, text, (" · " + f["note"]) if f.get("note") else "")
                     if DRY: print("  [dry] lembrete:", user, title); continue
-                    ok, msg = users.add_reminder(user, title); print("  lembrete:", user, ok, title)
+                    ok, msg = users.add_reminder(user, title, urgent=True); print("  lembrete:", user, ok, title)
                     if ok: st["alerts"].append(code)
                 st["last"] = r["info"]
 

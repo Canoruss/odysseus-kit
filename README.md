@@ -18,11 +18,11 @@
   <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
 </p>
 
-> **Status: pre-release (1.4.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
+> **Status: pre-release (1.5.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
 
 ## Contents
 
-[What's included](#whats-included) · [How it fits together](#how-it-fits-together) · [Quick start](#quick-start) · [Android app](#download-the-android-app) · [Security and privacy](#security-and-privacy) · [Troubleshooting](#troubleshooting) · [Contributing](#contributing) · [License](#license)
+[What's included](#whats-included) · [How it fits together](#how-it-fits-together) · [Quick start](#quick-start) · [Browser extension](#browser-extension) · [Usage guide](docs/GUIDE.md) · [Android app](#download-the-android-app) · [Security and privacy](#security-and-privacy) · [Troubleshooting](#troubleshooting) · [Contributing](#contributing) · [License](#license)
 
 ## What's included
 
@@ -49,7 +49,7 @@
 | **Glucose** | LibreLinkUp chart and history, manual and editable log. **Analysis** for 7/14/30 days: time in range (5 zones with international targets), mean, GMI, variability (CV), daily profile (AGP) with median and percentile bands, hour-of-day patterns, print/PDF and copy-summary for your doctor. The insulin calculator ships **disabled** | LibreLinkUp |
 | **Cycle** | period, flow, symptoms, mood, basal temperature, ovulation tests; predictions with fertile window, ovulation and PMS; phase card with cycle ring and illustrations, **Pingo** the animated penguin guide (17 states, layered animation), "Ask Pingo" chat, profile questionnaire, tips by phase, statistics charts, pill reminder, reminders, CSV/JSON export, optional PIN, light/dark theme and colour palettes, separate data per account; a **cycle card in the Gym** adapts training and diet tips to the phase | Groq/Gemini (optional, for Ask Pingo) |
 | **Focus** | tasks and routines for ADHD/autism: small steps, timers, one thing at a time; uses the Idea Box | none |
-| **Free games** | list of currently free games with end dates and prices, and optional alerts when a new one appears | none |
+| **Free games** | list of currently free games with end dates and prices, and optional alerts when a new one appears, **per store** (Epic, Steam, GOG, itch.io, Prime) | none |
 | **Dreams** | dream journal per account (text or voice), AI interpretation with a psychology-style guide, recurring themes and mood tags | Groq |
 
 ### Interface and platform
@@ -58,6 +58,10 @@
 |---|---|
 | **Usage bar** | slim bar above your name with Claude session/weekly limits and Groq, DeepL and AirLabs usage |
 | **Choice buttons** | when the assistant needs a decision it ends its reply with `[[opcoes: Yes \| No]]` and the chat shows tap-able buttons (the `opcoes` keyword is fixed) |
+| **Global search** | a 🔎 box on every tool page searches only your own data (Focus, Dreams, Study, Bills, Finance; Idea Box for the admin) | none |
+| **Quiet hours** | per-account quiet period (Focus and Cycle tabs): non-urgent automatic reminders wait until it ends; flight alerts and the pill reminder always pass | none |
+| **Private Browser** | optional Chromium the assistant can drive with screenshots, product/price extraction, separate login profiles, purchase confirmation guard and a **live view with remote control** for the admin (`tools/pbrowse`) | Node.js + Playwright |
+| **Browser extension** | Chrome/Edge side panel: chat with page and tab context, Page guide, Agent mode, saved history (`extension/`) | an Odysseus API token |
 | **Tool tabs** | reorder and hide tabs in *Settings → Appearance*; saved on the server, shared by browser and app |
 | **Language** | English / Português switch for the tools and the app |
 | **Ryoku theme** | extra theme for Odysseus and all tool pages (GPL-3.0 art from the ryoku.dev project) |
@@ -115,6 +119,10 @@ For each service the wizard explains what it is, where to get the key, offers a 
 | [docs/APK.md](docs/APK.md) | install or build the Android app |
 | [docs/I18N.md](docs/I18N.md) | languages and adding translations |
 | [docs/GLUCOSE.md](docs/GLUCOSE.md) | glucose tool and insulin calculator setup |
+
+## Browser extension
+
+A Chrome/Edge side panel that talks to your own server: chat with the current page or up to three tabs, a step-by-step **Page guide** (every action needs your approval), an **Agent mode** and a searchable history. Install steps, privacy and troubleshooting: **[docs/EXTENSION.md](docs/EXTENSION.md)**. Day-to-day instructions for every tool: **[docs/GUIDE.md](docs/GUIDE.md)**.
 
 ## Download the Android app
 
