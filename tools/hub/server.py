@@ -20,7 +20,7 @@ import quiet, search, period, period_ui, games, focus, dreams, health, bills
 import inbox
 import routine
 import study, extras, usage
-import reports, media
+import reports, media, mediatools
 IDLE = 180
 LAST = [0.0]
 
@@ -674,6 +674,9 @@ setInterval(tick,1000);tick();
 </script>""", "Private Browser live")
 
 
+mediatools.SKIN = ryoku_skin
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
@@ -1014,6 +1017,8 @@ class H(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(b))); self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff"); self.end_headers()
             return self.wfile.write(b)
+        if u and self.path.split("?")[0].rstrip("/").startswith("/mediatools"):   # Otimizar media (ampliar/video/imagem)
+            return mediatools.route_get(self, u, i18n.from_cookie(self.headers.get("Cookie", "")), page)
         if u and self.path.split("?")[0].rstrip("/") == "/games":
             q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(games.render((q.get("p") or [""])[0][:10], i18n.from_cookie(self.headers.get("Cookie", "")), u), "Jogos"))
@@ -1137,6 +1142,8 @@ class H(BaseHTTPRequestHandler):
             return self.files_delete(re.sub(r"[^a-z0-9_-]", "", str(u).lower()))
         if u in (OWNER,) + MLIKE and self.path.startswith("/study/"):
             return study.post(self, u)
+        if u and self.path.split("?")[0].rstrip("/").startswith("/mediatools"):
+            return mediatools.route_post(self, u, i18n.from_cookie(self.headers.get("Cookie", "")))
         if u and self.path.split("?")[0].rstrip("/") == "/games/alerts":
             _n = int(self.headers.get("Content-Length", 0) or 0); _q = urllib.parse.parse_qs(self.rfile.read(min(_n, 2000)).decode())
             games.alerts_set(u, (_q.get("on") or [""])[0] == "1", i18n.from_cookie(self.headers.get("Cookie", "")), _q.get("store") if (_q.get("on") or [""])[0] == "1" and "store" in _q else None)

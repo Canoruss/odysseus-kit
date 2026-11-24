@@ -29,6 +29,7 @@ Como usar o KIT depois de instalado ([INSTALL](INSTALL.pt.md) ou [ORACLE](ORACLE
 | **Foco** | Uma tarefa de cada vez, com temporizadores e passos pequenos. |
 | **Sonhos** | Escreve ou dita um sonho e pede uma interpretação. |
 | **Jogos grátis** | Vê o que está grátis agora. Liga os avisos e **escolhe as lojas** (Epic, Steam, GOG, itch.io, Prime) que te interessam. |
+| **Otimizar média** | Reduz vídeos (ffmpeg, H.264/HEVC/AV1) e imagens (WebP/JPEG) e, opcionalmente, amplia imagens com IA (Real-ESRGAN). Os trabalhos correm um de cada vez, em fila. A ampliação com IA é opcional: instala com `install.sh --media-ai` ou `tools/media-tools/install_ai.sh --ai` (cerca de 1 GB, lenta em CPU). |
 
 ## 3. Lembretes e horas de silêncio
 

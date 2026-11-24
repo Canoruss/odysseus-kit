@@ -205,7 +205,8 @@
   "📷 Foto do talão": "📷 Photo of the receipt",
   "🔊 Ouvir": "🔊 Listen",
   "🗣 Conversa": "🗣 Conversation",
-  "🩺 Consulta às %02d:%02d\n": "🩺 Appointment on %02d:%02d\n"
+  "🩺 Consulta às %02d:%02d\n": "🩺 Appointment on %02d:%02d\n",
+  "Otimizar média": "Optimise media"
  },
  "web": {
   "\"ajustes_treino_alimentacao\": [\"sugestões práticas e prudentes para treino e alimentação, a confirmar com o médico\"],": "\"training_and_nutrition_adjustments\": [\"practical and sensible suggestions for training and nutrition; consult your doctor\"],",

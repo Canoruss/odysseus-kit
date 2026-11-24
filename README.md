@@ -18,7 +18,7 @@
   <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
 </p>
 
-> **Status: pre-release (1.5.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
+> **Status: pre-release (1.6.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
 
 ## Contents
 

@@ -29,6 +29,7 @@ How to use the KIT once it is installed ([INSTALL](INSTALL.md) or [ORACLE](ORACL
 | **Focus** | One task at a time with timers and small steps. |
 | **Dreams** | Write or dictate a dream, then ask for an interpretation. |
 | **Free games** | See what is free now. Turn on alerts and **choose the stores** (Epic, Steam, GOG, itch.io, Prime) you care about. |
+| **Optimise media** | Shrink videos (ffmpeg, H.264/HEVC/AV1) and images (WebP/JPEG), and optionally upscale images with AI (Real-ESRGAN). Jobs run one at a time in a queue. AI upscaling is optional: install with `install.sh --media-ai` or `tools/media-tools/install_ai.sh --ai` (about 1 GB, slow on CPU). |
 
 ## 3. Reminders and quiet hours
 

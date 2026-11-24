@@ -14,6 +14,7 @@
 #   --home-dir DIR     where to keep the server files (default: ~/odysseus-server)
 #   --kit-dir DIR      KIT checkout (default: the one this script is in, else ~/odysseus-kit)
 #   --no-firewall      do not touch iptables
+#   --media-ai         also install PyTorch (~1 GB) for AI image upscaling in the Optimise media tab
 #   --help
 set -euo pipefail
 
@@ -21,7 +22,7 @@ IMAGE_VERSION="1.0.2"
 ODY_IMAGE="ghcr.io/pewdiepie-archdaemon/odysseus:${IMAGE_VERSION}"
 KIT_REPO="https://github.com/Canoruss/odysseus-kit"
 
-DOMAIN=""; ADMIN_USER="admin"; TZNAME=""; SRV_DIR="$HOME/odysseus-server"; KIT_DIR=""; FIREWALL=1
+DOMAIN=""; ADMIN_USER="admin"; TZNAME=""; SRV_DIR="$HOME/odysseus-server"; KIT_DIR=""; FIREWALL=1; MEDIA_AI=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --domain) DOMAIN="$2"; shift 2;;
@@ -30,6 +31,7 @@ while [ $# -gt 0 ]; do
     --home-dir) SRV_DIR="$2"; shift 2;;
     --kit-dir) KIT_DIR="$2"; shift 2;;
     --no-firewall) FIREWALL=0; shift;;
+    --media-ai) MEDIA_AI=1; shift;;
     -h|--help) sed -n 2,22p "$0"; exit 0;;
     *) echo "Unknown option: $1 (try --help)"; exit 2;;
   esac
@@ -350,6 +352,10 @@ EOF
 done
 $SUDO systemctl daemon-reload
 $SUDO systemctl enable --now kit-hub kit-translate kit-canva kit-wizard >/dev/null 2>&1
+
+# Optimise media tab: video/image engine (ffmpeg + Pillow); --media-ai also adds PyTorch for AI upscaling (~1 GB)
+say "Installing the media tools engine"
+bash "$KIT_DIR/tools/media-tools/install_ai.sh" $([ "$MEDIA_AI" -eq 1 ] && echo --ai) || warn "Media tools engine not installed (the Optimise media tab will be limited). Run tools/media-tools/install_ai.sh later."
 
 # daily reminders for the Cycle tab (only runs once you have created an agent token: see docs/INSTALL.md section 5)
 CRONLINE="47 9 * * *  [ -f $CONF_DIR/agent.env ] && python3 -I $KIT_DIR/tools/jobs/period_reminders.py >>\$HOME/.local/share/odysseus-kit/logs/period-reminders.log 2>&1"
