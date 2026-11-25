@@ -25,7 +25,7 @@ except OSError:
     print("(aviso: sem lista privada em ~/.config/odysseus-kit/scan-private.txt; so uso os padroes embutidos)")
 hits = 0
 for dp, dn, fn in os.walk(ROOT):
-    dn[:] = [d for d in dn if d not in SKIP_DIRS]
+    dn[:] = [d for d in dn if d not in SKIP_DIRS and not (d == "target" and os.path.isfile(os.path.join(dp, "Cargo.toml")))]
     for f in fn:
         p = os.path.join(dp, f)
         rel = os.path.relpath(p, ROOT)
@@ -40,13 +40,13 @@ for dp, dn, fn in os.walk(ROOT):
                 for m in re.finditer(rx, line):
                     if any(a in m.group(0) for a in ALLOW.get(name, ())):
                         continue
-                    print(f"{rel}:{i}: [{name}] {line.strip()[:110]}")
+                    print(f"{rel}:{i}: [{name}]")
                     hits += 1
             # o endereco publico do proprio repositorio e permitido
             chk = line.replace("Canoruss/odysseus-kit", "")
             for term in priv:
                 if term.lower() in chk.lower():
-                    print(f"{rel}:{i}: [termo privado] {line.strip()[:110]}")
+                    print(f"{rel}:{i}: [termo privado]")
                     hits += 1
 print(f"\n{hits} problema(s) encontrado(s)." if hits else "\nLimpo: nada encontrado.")
 sys.exit(1 if hits else 0)
