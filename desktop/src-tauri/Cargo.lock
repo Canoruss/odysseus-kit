@@ -2694,7 +2694,7 @@ dependencies = [
 
 [[package]]
 name = "odysseus-desktop"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "open",
  "reqwest 0.12.28",

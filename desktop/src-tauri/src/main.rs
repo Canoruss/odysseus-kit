@@ -402,8 +402,12 @@ const SETTINGS_JS: &str = r#"
     });
     panel.insertBefore(box, panel.firstChild);
   }
-  new MutationObserver(add).observe(document.documentElement,{childList:true,subtree:true});
-  document.addEventListener('DOMContentLoaded', add);
+  function start(){
+    add();
+    if (document.documentElement) new MutationObserver(add).observe(document.documentElement,{childList:true,subtree:true});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
+  else start();
 })();
 "#;
 fn act(app: &AppHandle, id: &str) {
