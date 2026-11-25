@@ -17,7 +17,9 @@ jobs:
         working-directory: desktop
       - run: cargo test --locked
         working-directory: desktop/src-tauri
-      - run: npx --no-install tauri build --bundles nsis
+      - shell: bash
+        run: |
+          npx --no-install tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":false}}'
         working-directory: desktop
       - name: Launch desktop and verify native window
         shell: pwsh
