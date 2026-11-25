@@ -55,6 +55,7 @@ jobs:
           path: |
             desktop/src-tauri/target/release/bundle/nsis/*
             desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage.sig
   release:
     if: ${{ inputs.release }}
     needs: build
@@ -74,15 +75,18 @@ jobs:
           sig="$exe.sig"
           [ -f "$sig" ] || { echo "Missing .sig: set secret TAURI_SIGNING_PRIVATE_KEY"; exit 1; }
           appimg=$(find out/Odysseus-Linux -name "*.AppImage" | head -1)
+          [ -f "$appimg.sig" ] || { echo "Missing Linux signature"; exit 1; }
           name=$(basename "$exe")
           url="https://github.com/${{ github.repository }}/releases/download/desktop-latest/$name"
-          python3 - "$ver" "$url" "$sig" <<'PY' > latest.json
+          python3 - "$ver" "$url" "$sig" "$appimg" "https://github.com/${{ github.repository }}/releases/download/desktop-latest/$(basename "$appimg")" <<'PY' > latest.json
           import json,sys,datetime
-          v,u,s=sys.argv[1:4]
+          v,u,s,app,linux_url=sys.argv[1:6]
           print(json.dumps({"version":v,"notes":"Odysseus Desktop "+v,"pub_date":datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "platforms":{"windows-x86_64":{"signature":open(s).read().strip(),"url":u}}}))
+            "platforms":{"windows-x86_64":{"signature":open(s).read().strip(),"url":u},"linux-x86_64":{"signature":open(app+".sig").read().strip(),"url":linux_url}}}))
           PY
-          gh release view desktop-latest >/dev/null 2>&1 && gh release delete desktop-latest --cleanup-tag --yes || true
-          gh release create desktop-latest --prerelease --title "Odysseus Desktop $ver" \
-            --notes "Windows (.exe) and Linux (.AppImage) desktop clients. Windows auto-updates from latest.json." \
-            "$exe" "$sig" latest.json "$appimg"
+          if ! gh release view desktop-latest >/dev/null 2>&1; then
+            gh release create desktop-latest --prerelease --title "Odysseus Desktop $ver" --notes "Signed Windows and Linux desktop clients."
+          fi
+          gh release upload desktop-latest "$exe" "$sig" "$appimg" "$appimg.sig" --clobber
+          gh release upload desktop-latest latest.json --clobber
+          gh release edit desktop-latest --title "Odysseus Desktop $ver"
