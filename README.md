@@ -92,7 +92,7 @@ The Android app is a shell around **your** Odysseus: it shows whatever your serv
 |---|---|---|---|
 | 1 | **Windows app (.exe)** | Desktop client with a setup wizard ("I have a server" / "I don't"), tray icon, auto-update | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
 | 2 | **Linux app (.AppImage)** | Same desktop client for Linux | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
-| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Releases](../../releases/latest) / [docs/APK.md](docs/APK.md) |
+| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Android 1.4.0](../../releases/tag/v1.4.0) / [docs/APK.md](docs/APK.md) |
 | 4 | **Script install on a cloud server** | Full Odysseus + KIT in one command (Oracle Always Free, any Ubuntu/Debian VPS) | [Quick start](#quick-start) |
 
 The apps need an Odysseus server (option 4, or your own). Source for the desktop client is in [`desktop/`](desktop/); to run the installer on your own PC use `install/install.sh --local`. Desktop actions (update, reload, change server) are in **Settings → System → Odysseus Desktop** and in the tray menu.
@@ -137,7 +137,7 @@ A Chrome/Edge side panel that talks to your own server: chat with the current pa
 
 ## Download the Android app
 
-No compiling needed: the signed APK is in **[Releases](../../releases/latest)** (`Odysseus-KIT-<version>.apk`).
+No compiling needed: the signed APK is in **[Android 1.4.0](../../releases/tag/v1.4.0)** (`Odysseus-KIT-1.4.0.apk`).
 
 1. Download it on your phone and install it (allow "install unknown apps" when Android asks).
 2. Open it, choose a language, enter your Odysseus address and tap **Test connection**.

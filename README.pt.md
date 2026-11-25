@@ -92,7 +92,7 @@ A app Android é uma casca à volta do **teu** Odysseus: mostra o que o teu serv
 |---|---|---|---|
 | 1 | **App Windows (.exe)** | Cliente de computador com assistente («tenho servidor» / «não tenho»), ícone na bandeja, atualização automática | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
 | 2 | **App Linux (.AppImage)** | O mesmo cliente para Linux | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
-| 3 | **App Android (.apk)** | Cliente móvel, atualizações dentro da app | [Releases](../../releases/latest) / [docs/APK.pt.md](docs/APK.pt.md) |
+| 3 | **App Android (.apk)** | Cliente móvel, atualizações dentro da app | [Android 1.4.0](../../releases/tag/v1.4.0) / [docs/APK.pt.md](docs/APK.pt.md) |
 | 4 | **Instalação por script num servidor cloud** | Odysseus + KIT completos num só comando (Oracle Always Free, qualquer VPS Ubuntu/Debian) | [Início rápido](#início-rápido) |
 
 As apps precisam de um servidor Odysseus (opção 4, ou o seu). O código do cliente de computador está em [`desktop/`](desktop/); para correr o instalador no seu PC use `install/install.sh --local`. As ações do desktop (atualizar, recarregar, mudar servidor) estão em **Definições → Sistema → Odysseus Desktop** e no menu da bandeja.
@@ -137,7 +137,7 @@ Um painel lateral para Chrome/Edge que fala com o teu servidor: chat com a pági
 
 ## Descarregar a app Android
 
-Não precisas de compilar: a APK assinada está em **[Releases](../../releases/latest)** (`Odysseus-KIT-<versão>.apk`).
+Não precisas de compilar: a APK assinada está em **[Android 1.4.0](../../releases/tag/v1.4.0)** (`Odysseus-KIT-1.4.0.apk`).
 
 1. Descarrega-a no telemóvel e instala-a (permite "instalar apps desconhecidas" quando o Android pedir).
 2. Abre-a, escolhe o idioma, escreve o endereço do teu Odysseus e toca em **Testar ligação**.
