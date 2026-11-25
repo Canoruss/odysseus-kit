@@ -368,18 +368,26 @@ fn update_progress(st: State<'_, St>) -> Value {
     json!({"phase": st.phase.load(Ordering::Relaxed), "got": st.got.load(Ordering::Relaxed), "total": st.total.load(Ordering::Relaxed)})
 }
 fn open_update_window(app: &AppHandle) {
-    if let Some(w) = app.get_webview_window("update") {
-        let _ = w.show();
-        let _ = w.set_focus();
-        return;
-    }
-    let _ = WebviewWindowBuilder::new(app, "update", WebviewUrl::App("update.html".into()))
-        .title("Odysseus")
-        .inner_size(460., 320.)
-        .resizable(false)
-        .center()
-        .build();
+    let app = app.clone();
+    // WebView2 bloqueia se outra janela for criada dentro de um evento síncrono.
+    std::thread::spawn(move || {
+        if let Some(w) = app.get_webview_window("update") {
+            let _ = w.show();
+            let _ = w.set_focus();
+            return;
+        }
+        if let Err(error) = WebviewWindowBuilder::new(&app, "update", WebviewUrl::App("update.html".into()))
+            .title("Odysseus")
+            .inner_size(460., 320.)
+            .resizable(false)
+            .center()
+            .build()
+        {
+            eprintln!("Falha ao abrir atualizações / Failed to open updates: {error}");
+        }
+    });
 }
+
 const SETTINGS_JS: &str = r#"
 (function(){
   if (location.protocol === 'tauri:' || location.hostname === 'tauri.localhost') return;
