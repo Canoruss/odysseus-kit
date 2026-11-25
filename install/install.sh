@@ -14,6 +14,8 @@
 #   --home-dir DIR     where to keep the server files (default: ~/odysseus-server)
 #   --kit-dir DIR      KIT checkout (default: the one this script is in, else ~/odysseus-kit)
 #   --no-firewall      do not touch iptables
+#   --local            home/PC install: no public address, no HTTPS; opens at http://localhost:8080
+#   --keys-file FILE   JSON with your own API keys (made by the Odysseus desktop app): applied automatically
 #   --media-ai         also install PyTorch (~1 GB) for AI image upscaling in the Optimise media tab
 #   --help
 set -euo pipefail
@@ -22,7 +24,7 @@ IMAGE_VERSION="1.0.2"
 ODY_IMAGE="ghcr.io/pewdiepie-archdaemon/odysseus:${IMAGE_VERSION}"
 KIT_REPO="https://github.com/Canoruss/odysseus-kit"
 
-DOMAIN=""; ADMIN_USER="admin"; TZNAME=""; SRV_DIR="$HOME/odysseus-server"; KIT_DIR=""; FIREWALL=1; MEDIA_AI=0
+DOMAIN=""; ADMIN_USER="admin"; TZNAME=""; SRV_DIR="$HOME/odysseus-server"; KIT_DIR=""; FIREWALL=1; MEDIA_AI=0; LOCAL=0; KEYS_FILE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --domain) DOMAIN="$2"; shift 2;;
@@ -31,8 +33,10 @@ while [ $# -gt 0 ]; do
     --home-dir) SRV_DIR="$2"; shift 2;;
     --kit-dir) KIT_DIR="$2"; shift 2;;
     --no-firewall) FIREWALL=0; shift;;
+    --local) LOCAL=1; shift;;
+    --keys-file) KEYS_FILE="$2"; shift 2;;
     --media-ai) MEDIA_AI=1; shift;;
-    -h|--help) sed -n 2,22p "$0"; exit 0;;
+    -h|--help) sed -n 2,24p "$0"; exit 0;;
     *) echo "Unknown option: $1 (try --help)"; exit 2;;
   esac
 done
@@ -89,7 +93,9 @@ fi
 echo "KIT: $KIT_DIR"
 
 # ---------------------------------------------------------------- 3. address
-if [ -z "$DOMAIN" ]; then
+if [ "$LOCAL" -eq 1 ]; then
+  DOMAIN="localhost"; FIREWALL=0
+elif [ -z "$DOMAIN" ]; then
   IP=""
   IP="$(curl -fsS -m 4 -H 'Authorization: Bearer Oracle' http://169.254.169.254/opc/v2/vnics/ 2>/dev/null | python3 -c 'import sys,json; print(json.load(sys.stdin)[0].get("publicIp",""))' 2>/dev/null || true)"
   [ -n "$IP" ] || IP="$(curl -fsS -m 6 https://api.ipify.org 2>/dev/null || true)"
@@ -97,7 +103,8 @@ if [ -z "$DOMAIN" ]; then
   DOMAIN="${IP//./-}.sslip.io"
 fi
 [[ "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || die "Invalid --domain."
-echo "Address: https://$DOMAIN"
+if [ "$LOCAL" -eq 1 ]; then PUBHOST="http://localhost:8080"; BASEURL="http://localhost:8080"; else PUBHOST="$DOMAIN"; BASEURL="https://$DOMAIN"; fi
+echo "Address: $BASEURL"
 
 # ---------------------------------------------------------------- 4. server files
 say "Creating the server files in $SRV_DIR"
@@ -117,14 +124,14 @@ SEARXNG_SECRET=$SEARX_SECRET
 PUID=$MYUID
 PGID=$MYGID
 TZ=$TZNAME
-PUBLIC_HOST=$DOMAIN
+PUBLIC_HOST=$PUBHOST
 EOF
   umask 022
 fi
 # shellcheck disable=SC1090
 ADMIN_USER="$(grep '^ODYSSEUS_ADMIN_USER=' "$ENVF" | cut -d= -f2-)"
 ADMIN_PASS="$(grep '^ODYSSEUS_ADMIN_PASSWORD=' "$ENVF" | cut -d= -f2-)"
-sed -i "s|^PUBLIC_HOST=.*|PUBLIC_HOST=$DOMAIN|" "$ENVF"
+sed -i "s|^PUBLIC_HOST=.*|PUBLIC_HOST=$PUBHOST|" "$ENVF"
 
 cat >"$SRV_DIR/config/searxng/settings.yml" <<'EOF'
 use_default_settings: true
@@ -314,13 +321,13 @@ fi
 say "Writing the KIT configuration"
 CONF_DIR="$HOME/.config/odysseus-kit"
 mkdir -p "$CONF_DIR"; chmod 700 "$CONF_DIR"
-python3 -I - "$CONF_DIR" "$ADMIN_USER" "$DOMAIN" "$TZNAME" <<'PY'
+python3 -I - "$CONF_DIR" "$ADMIN_USER" "$BASEURL" "$TZNAME" <<'PY'
 import json, os, sys
 d, owner, dom, tz = sys.argv[1:5]
 p = os.path.join(d, "config.json")
 try: c = json.load(open(p))
 except Exception: c = {}
-c.update({"owner": owner, "owner_name": owner.capitalize(), "public_url": "https://" + dom, "timezone": tz})
+c.update({"owner": owner, "owner_name": owner.capitalize(), "public_url": dom, "timezone": tz})
 c.setdefault("features", {})
 c.setdefault("odysseus_url", "http://127.0.0.1:7860")
 json.dump(c, open(p, "w"), indent=2, ensure_ascii=False); os.chmod(p, 0o600)
@@ -387,6 +394,12 @@ done
 echo
 [ "$OK" -eq 1 ] || { warn "Odysseus did not answer in 6 minutes. See: cd $SRV_DIR && sudo docker compose logs odysseus"; exit 1; }
 
+if [ -n "$KEYS_FILE" ]; then
+  say "Applying your API keys"
+  python3 -I "$KIT_DIR/setup/apply_keys.py" --keys "$KEYS_FILE" --url http://127.0.0.1:7860 --user "$ADMIN_USER" --password "$ADMIN_PASS" || warn "Could not apply all keys. Add them later in Odysseus (Settings > Models) and Tools > Setup."
+  shred -u "$KEYS_FILE" 2>/dev/null || rm -f "$KEYS_FILE"
+fi
+
 HUB=$(curl -s -o /dev/null -w '%{http_code}' -m 5 http://127.0.0.1:8792/login || true)
 TRN=$(curl -s -o /dev/null -w '%{http_code}' -m 5 http://127.0.0.1:8791/login || true)
 echo "Odysseus: up | KIT hub: HTTP $HUB | translation: HTTP $TRN"
@@ -394,7 +407,7 @@ echo "Odysseus: up | KIT hub: HTTP $HUB | translation: HTTP $TRN"
 cat <<EOF
 
 ================ Done ================
-Open:       https://$DOMAIN
+Open:       $BASEURL
 User:       $ADMIN_USER
 Password:   $ADMIN_PASS      (also saved in $ENVF, mode 600; change it in Odysseus after logging in)
 
@@ -404,7 +417,7 @@ Still to do (about 5 minutes):
     This cannot be done from inside the VM. Without it the site is not reachable from outside.
  2. Log in, then add your AI key: Odysseus settings > Models (your own key; the KIT never has one).
  3. Tools > Setup: turn the KIT features you want on or off and fill in the optional keys.
- 4. In the Android app: set the server address to https://$DOMAIN
+ 4. In the Android app: set the server address to $BASEURL
 
 Update later:  bash $KIT_DIR/install/install.sh        (keeps your data and passwords)
 Remove:        bash $KIT_DIR/install/uninstall.sh
