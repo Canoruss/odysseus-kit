@@ -1,0 +1,107 @@
+name: Build and test desktop release
+on:
+  push:
+    branches: [test/desktop-035-windows]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: cargo test --locked
+        working-directory: desktop/src-tauri
+      - name: Build signed installer
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npx --no-install tauri build --bundles nsis --config src-tauri/release.conf.json
+      - name: Install and launch
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem src-tauri/target/release/bundle/nsis/*-setup.exe | Select-Object -First 1
+          if (!$installer) { throw "Installer missing" }
+          if (!(Test-Path "$($installer.FullName).sig")) { throw "Updater signature missing" }
+          $dest = Join-Path $env:RUNNER_TEMP 'Odysseus-test'
+          $p = Start-Process $installer.FullName -ArgumentList '/S', "/D=$dest" -PassThru -Wait
+          if ($p.ExitCode -ne 0) { throw "Installer failed $($p.ExitCode)" }
+          $exe = Get-ChildItem $dest -Filter '*.exe' -Recurse | Where-Object { $_.Name -ne 'uninstall.exe' } | Select-Object -First 1
+          if (!$exe) { throw "Installed executable missing" }
+          $app = Start-Process $exe.FullName -PassThru
+          try {
+            foreach ($i in 1..60) {
+              Start-Sleep 1
+              $app.Refresh()
+              if ($app.HasExited) { throw "Application exited $($app.ExitCode)" }
+              if ($app.MainWindowHandle -ne 0 -and $app.MainWindowTitle -eq 'Odysseus' -and $app.Responding) { Write-Output 'Installed window responds'; return }
+            }
+            throw 'Installed window did not appear'
+          } finally { if (!$app.HasExited) { $app.Kill() } }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows-035
+          if-no-files-found: error
+          path: |
+            desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+            desktop/src-tauri/target/release/bundle/nsis/*-setup.exe.sig
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev patchelf xdg-utils xvfb
+      - run: npm ci
+      - run: cargo test --locked
+        working-directory: desktop/src-tauri
+      - name: Build signed packages
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npx --no-install tauri build --bundles deb,appimage --config src-tauri/release.conf.json
+      - name: Check packages
+        run: |
+          set -eu
+          deb=$(find src-tauri/target/release/bundle/deb -name '*.deb' -print -quit)
+          appimage=$(find src-tauri/target/release/bundle/appimage -name '*.AppImage' -print -quit)
+          test -n "$deb" && test -n "$appimage" && test -f "$appimage.sig"
+          dpkg-deb --info "$deb"
+          mkdir -p "$RUNNER_TEMP/deb"
+          dpkg-deb -x "$deb" "$RUNNER_TEMP/deb"
+          exe=$(find "$RUNNER_TEMP/deb/usr/bin" -type f -executable -print -quit)
+          test -n "$exe"
+          timeout 15s xvfb-run -a "$exe" >"$RUNNER_TEMP/deb-run.log" 2>&1 || test "$?" -eq 124
+          chmod +x "$appimage"
+          cd "$RUNNER_TEMP"
+          "$GITHUB_WORKSPACE/desktop/$appimage" --appimage-extract >/dev/null
+          timeout 15s xvfb-run -a ./squashfs-root/AppRun >"$RUNNER_TEMP/appimage-run.log" 2>&1 || test "$?" -eq 124
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux-035
+          if-no-files-found: error
+          path: |
+            desktop/src-tauri/target/release/bundle/deb/*.deb
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage.sig
