@@ -70,9 +70,10 @@ jobs:
         run: |
           set -e
           ver=$(python3 -c "import json;print(json.load(open('desktop/src-tauri/tauri.conf.json'))['version'])")
-          exe=$(ls out/Odysseus-Windows/*-setup.exe | head -1)
+          exe=$(find out/Odysseus-Windows -name "*-setup.exe" | head -1)
           sig="$exe.sig"
           [ -f "$sig" ] || { echo "Missing .sig: set secret TAURI_SIGNING_PRIVATE_KEY"; exit 1; }
+          appimg=$(find out/Odysseus-Linux -name "*.AppImage" | head -1)
           name=$(basename "$exe")
           url="https://github.com/${{ github.repository }}/releases/download/desktop-latest/$name"
           python3 - "$ver" "$url" "$sig" <<'PY' > latest.json
@@ -84,4 +85,4 @@ jobs:
           gh release view desktop-latest >/dev/null 2>&1 && gh release delete desktop-latest --cleanup-tag --yes || true
           gh release create desktop-latest --prerelease --title "Odysseus Desktop $ver" \
             --notes "Windows (.exe) and Linux (.AppImage) desktop clients. Windows auto-updates from latest.json." \
-            "$exe" "$sig" latest.json out/Odysseus-Linux/*.AppImage
+            "$exe" "$sig" latest.json "$appimg"
