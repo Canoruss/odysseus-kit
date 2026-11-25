@@ -3,26 +3,36 @@
 **English** · [Português](README.pt.md)
 
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Canoruss/odysseus-kit?include_prereleases)](../../releases/latest)
+[![Release](https://img.shields.io/github/v/release/Canoruss/odysseus-kit?include_prereleases)](../../releases)
 ![Status](https://img.shields.io/badge/status-pre--release-orange)
 ![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Portugu%C3%AAs-lightgrey)
 
-**A toolbox for Odysseus (your self-hosted AI chat).** It adds in-chat tools (translation, finance, gym, glucose, cycle, study, news, flights, …), optional core patches (an **Auto** model picker and more), a signed Android app, a step-by-step setup assistant and a **one-command installer for a free Oracle Cloud server**, so you can go from nothing to a personal assistant in one evening.
+**Your AI assistant, on your own server.** Odysseus KIT brings together the server tools, apps for Windows, Linux and Android, and a browser extension. Chat, organise tasks, translate, track finances and use other optional tools from one place.
 
-- **Everything is optional.** Enable what you want; hide the rest in *Settings → Appearance*. Skipped tools keep their settings, so you can switch them on later.
-- **Bring your own keys.** You pick the AI providers (Groq, Gemini, DeepL, Claude…) and paste your own keys. Nothing is shared with the author.
-- **Private by design.** Keys stay on your server. Each person who logs in gets their own data.
+**New here?** A server is the computer that runs Odysseus and stores its data. The apps connect to that server; they do not replace it. You can use a server you already have or install one on a compatible Linux machine or cloud server.
 
-<p align="center">
-  <img src="docs/img/tools.png" alt="Odysseus with the KIT tools in the sidebar" width="62%">
-  <img src="docs/img/app-setup.png" alt="First screen of the Android app" width="26%">
-</p>
+### Get started
 
-> **Status: pre-release (1.6.0).** Extracted from a personal installation. The installer was tested on a clean Ubuntu 24.04 container, not yet on a real Oracle account, and not yet by third parties. If something fails, please [open an issue](../../issues).
+1. **Set up a server:** follow the [cloud guide](docs/ORACLE.md), or [install the tools on an existing server](docs/INSTALL.md).
+2. **Choose an app:** [Windows and Linux downloads](../../releases/tag/desktop-latest) · [Android 1.49 download](../../releases/tag/desktop-v0.3.2) · [browser extension guide](docs/EXTENSION.md).
+3. **Connect:** open the app, enter the address of your own server and sign in. For remote access, your server must be reachable from your device.
+4. **Configure optional services:** use the setup assistant to add your own provider keys for features you want. Provider costs and free-tier limits vary.
 
-## Contents
+> **Current status:** pre-release software. Desktop 0.3.3 is available for Windows and Linux; Android 1.49 is available in the 0.3.2 release. The Android source currently in this repository is version 1.4.0, so it does not represent the published 1.49 APK. Some installation paths and features still need broader testing.
 
-[What's included](#whats-included) · [How it fits together](#how-it-fits-together) · [Quick start](#quick-start) · [Browser extension](#browser-extension) · [Usage guide](docs/GUIDE.md) · [Android app](#download-the-android-app) · [Security and privacy](#security-and-privacy) · [Troubleshooting](#troubleshooting) · [Contributing](#contributing) · [License](#license)
+### A look inside
+
+| Chat and tools | Setup assistant |
+|---|---|
+| ![Odysseus chat and tool sidebar](docs/img/tools.png) | ![KIT setup assistant](docs/img/wizard.png) |
+| Chat with your assistant and choose the tools you need. | Configure optional services step by step. |
+
+| Prompts tool | Android setup example |
+|---|---|
+| ![Prompts tool](docs/img/prompts.png) | ![Android setup screen from an earlier KIT version](docs/img/app-setup.png) |
+| Turn an idea into a prompt. | Earlier KIT screen shown as an example; the 1.49 interface may differ. |
+
+[Features](#whats-included) · [Downloads and installation](#choose-how-to-use-odysseus-4-options) · [Extension](docs/EXTENSION.md) · [User guide](docs/GUIDE.md) · [Security](#security-and-privacy)
 
 ## What's included
 
@@ -92,7 +102,7 @@ The Android app is a shell around **your** Odysseus: it shows whatever your serv
 |---|---|---|---|
 | 1 | **Windows app (.exe)** | Desktop client with a setup wizard ("I have a server" / "I don't"), tray icon, auto-update | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
 | 2 | **Linux app (.AppImage)** | Same desktop client for Linux | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
-| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Android 1.4.0](../../releases/tag/v1.4.0) / [docs/APK.md](docs/APK.md) |
+| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Android 1.49](../../releases/tag/desktop-v0.3.2) / [docs/APK.md](docs/APK.md) |
 | 4 | **Script install on a cloud server** | Full Odysseus + KIT in one command (Oracle Always Free, any Ubuntu/Debian VPS) | [Quick start](#quick-start) |
 
 The apps need an Odysseus server (option 4, or your own). Source for the desktop client is in [`desktop/`](desktop/); to run the installer on your own PC use `install/install.sh --local`. Desktop actions (update, reload, change server) are in **Settings → System → Odysseus Desktop** and in the tray menu.
@@ -137,13 +147,13 @@ A Chrome/Edge side panel that talks to your own server: chat with the current pa
 
 ## Download the Android app
 
-No compiling needed: the signed APK is in **[Android 1.4.0](../../releases/tag/v1.4.0)** (`Odysseus-KIT-1.4.0.apk`).
+No compiling needed: download **[Odysseus-1.49.apk](../../releases/download/desktop-v0.3.2/Odysseus-1.49.apk)**. The Android source and build guide in this repository currently describe the older KIT 1.4.0 version.
 
 1. Download it on your phone and install it (allow "install unknown apps" when Android asks).
 2. Open it, choose a language, enter your Odysseus address and tap **Test connection**.
 3. Log in and follow **Tools → Setup**.
 
-Verify the download first: the release notes list the file's `SHA-256` and the signing certificate fingerprint (`sha256sum`, `apksigner verify --print-certs`). The app requires your own Odysseus server.
+The app requires your own Odysseus server. Android updates depend on the configured server; they do not necessarily come from GitHub.
 
 ## Security and privacy
 
