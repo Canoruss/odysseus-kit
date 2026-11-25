@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>Odysseus</title><link rel="stylesheet" href="common.css"><body><main id="m"></main>
+<script src="common.js"></script><script>
+T.pt={t:'Sem ligação ao servidor',d:'Verifique a rede (ou o Tailscale/VPN) e tente de novo.',r:'Tentar de novo',c:'Mudar de servidor'};
+T.en={t:'Cannot reach the server',d:'Check your network (or Tailscale/VPN) and try again.',r:'Retry',c:'Change server'};
+function render(){m.innerHTML=`<div class="top"><div class="logo">Odysseus</div>${langBar()}</div><h1>${tr('t')}</h1><p>${tr('d')}</p><div class="row"><button class="btn" onclick="inv('retry_server')">${tr('r')}</button><button class="btn sec" onclick="inv('forget_server')">${tr('c')}</button></div>`}
+render();</script>

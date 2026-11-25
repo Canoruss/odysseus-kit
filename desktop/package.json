@@ -1,0 +1,12 @@
+{
+  "name": "odysseus-desktop",
+  "version": "0.2.0",
+  "description": "Cliente desktop para o Odysseus",
+  "scripts": {
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.6"
+  },
+  "private": true
+}

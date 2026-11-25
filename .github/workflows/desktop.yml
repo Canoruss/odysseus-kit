@@ -1,0 +1,87 @@
+name: Odysseus Desktop
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Publish release "desktop-latest" (installers + latest.json for auto-update)
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            bundles: nsis
+            name: Windows
+          - os: ubuntu-22.04
+            bundles: appimage
+            name: Linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: rustup default stable
+      - name: Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev patchelf xdg-utils
+      - run: npm ci
+      - name: Build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        shell: bash
+        run: |
+          if [ -n "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            npx tauri build --bundles ${{ matrix.bundles }} --config src-tauri/release.conf.json
+          else
+            npx tauri build --bundles ${{ matrix.bundles }}
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Odysseus-${{ matrix.name }}
+          path: |
+            desktop/src-tauri/target/release/bundle/nsis/*
+            desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+  release:
+    if: ${{ inputs.release }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          ver=$(python3 -c "import json;print(json.load(open('desktop/src-tauri/tauri.conf.json'))['version'])")
+          exe=$(ls out/Odysseus-Windows/*-setup.exe | head -1)
+          sig="$exe.sig"
+          [ -f "$sig" ] || { echo "Missing .sig: set secret TAURI_SIGNING_PRIVATE_KEY"; exit 1; }
+          name=$(basename "$exe")
+          url="https://github.com/${{ github.repository }}/releases/download/desktop-latest/$name"
+          python3 - "$ver" "$url" "$sig" <<'PY' > latest.json
+          import json,sys,datetime
+          v,u,s=sys.argv[1:4]
+          print(json.dumps({"version":v,"notes":"Odysseus Desktop "+v,"pub_date":datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "platforms":{"windows-x86_64":{"signature":open(s).read().strip(),"url":u}}}))
+          PY
+          gh release view desktop-latest >/dev/null 2>&1 && gh release delete desktop-latest --cleanup-tag --yes || true
+          gh release create desktop-latest --prerelease --title "Odysseus Desktop $ver" \
+            --notes "Windows (.exe) and Linux (.AppImage) desktop clients. Windows auto-updates from latest.json." \
+            "$exe" "$sig" latest.json out/Odysseus-Linux/*.AppImage

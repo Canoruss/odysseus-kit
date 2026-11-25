@@ -1,0 +1,124 @@
+<!doctype html><meta charset="utf-8"><title>Odysseus</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="common.css"><body><main id="m"></main><div class="foot"><span id="ver"></span><span><a class="lnk" onclick="inv('open_link',{url:'https://github.com/Canoruss/odysseus-kit'})">GitHub</a> · <a class="lnk" onclick="inv('open_update')">↻</a></span></div>
+<script src="common.js"></script><script>
+T.pt={
+ sub:'O seu assistente de IA, no seu próprio servidor.',have:'Já tenho um servidor',have_d:'Ligar a um Odysseus que já está a funcionar.',none:'Não tenho servidor',none_d:'Guia para instalar o seu, passo a passo.',
+ back:'Voltar',next:'Continuar',
+ h_have:'Ligar ao seu servidor',h_have_d:'Escreva o endereço (IP ou nome) do seu Odysseus. A app confirma primeiro que está a funcionar.',addr:'Endereço do servidor',ph:'192.168.X.Y:7860  ou  o-meu-servidor.ts.net',verify:'Verificar e ligar',checking:'A verificar…',
+ e_invalid:'Endereço inválido. Exemplo: 192.168.X.Y:7860',e_unreachable:'Não foi possível ligar. Confirme o endereço, a porta e se o servidor está ligado (e o Tailscale/VPN, se usar).',e_not_odysseus:'Respondeu, mas não parece ser um Odysseus. Confirme a porta.',
+ ok:'Odysseus encontrado. A abrir…',insecure:'Ligação sem HTTPS: o ditado por voz e as notificações só funcionam com HTTPS (por exemplo com Tailscale) ou em localhost.',
+ where_ip:'Onde encontro o IP?',w_ts:'Tailscale',w_lan:'Rede de casa',w_cloud:'Servidor na nuvem',
+ ts1:'No painel do Tailscale (login.tailscale.com → Machines) veja a linha do servidor.',ts2:'Pode usar o nome (termina em .ts.net) ou o IP que começa por 100. Para HTTPS use o nome.',
+ lan1:'No computador onde o Odysseus está instalado abra o PowerShell (Windows) ou o Terminal e escreva ipconfig (Windows) ou hostname -I (Linux/Mac).',lan2:'Use o endereço IPv4 seguido da porta, por exemplo 192.168.X.Y:7860. Funciona nos aparelhos ligados à mesma rede.',
+ cl1:'No painel do seu fornecedor (por exemplo Oracle Cloud → Compute → Instances) abra a máquina.',cl2:'Copie o «Public IP address». Se instalou com o nosso guia, use o endereço que o instalador mostrou no fim (termina em .sslip.io).',
+ h_where:'Onde quer instalar?',pc:'Neste computador',pc_d:'Mais simples; só funciona enquanto o computador estiver ligado.',srv:'Num servidor',srv_d:'Fica sempre ligado e acessível do telemóvel (recomendado).',
+ h_srv:'Criar um servidor gratuito na Oracle Cloud',h_srv_d:'Cerca de 30 minutos. Siga os passos; o último é colar um único comando.',
+ s1:'Criar a conta',s1d:'Abra oracle.com/cloud/free e escolha «Start for free». Precisa de email, telefone e um cartão (só para confirmar a identidade; não é cobrado no plano gratuito).',
+ s2:'Criar a máquina',s2d:'Compute → Instances → Create instance. Imagem Ubuntu 24.04, forma Ampere A1 com 2 OCPU e 12 GB, e descarregue a chave SSH.',
+ s3:'Abrir as portas 80 e 443',s3d:'Na instância: Subnet → Security List → Add Ingress Rules, com origem 0.0.0.0/0, TCP, portas 80,443.',
+ s4:'Ligar-se à máquina',s4d:'No PowerShell/Terminal use o comando da imagem com o IP público da sua máquina e a chave que descarregou.',
+ open_oracle:'Abrir a Oracle Cloud',
+ h_pc:'Instalar neste computador',h_pc_d:'No Windows o Odysseus corre dentro do Ubuntu (WSL), que o Windows instala em 2 minutos. Em Linux/Mac salte para o passo 3.',
+ p1:'Instalar o Ubuntu (WSL)',p1d:'Abra o PowerShell como administrador e escreva o comando da imagem. Reinicie o computador quando pedido.',
+ p2:'Instalar o Docker',p2d:'No Windows instale o Docker Desktop (docker.com) e ative a integração com o Ubuntu; em Linux o instalador trata disto.',
+ p3:'Abrir o Ubuntu',p3d:'Menu Iniciar → Ubuntu. Crie um utilizador e uma palavra-passe. É lá que vai colar o comando do último passo.',
+ h_keys:'As suas chaves de IA',h_keys_d:'Tudo é opcional e fica só na sua máquina: o instalador configura-as sozinho no seu Odysseus. Pode saltar e adicionar mais tarde.',
+ models:'Modelos de IA (conversa)',tabs:'Funcionalidades das abas',get:'Obter chave',test:'Testar',good:'Chave válida',bad:'Chave recusada',
+ groq_w:'Conversa rápida e grátis + ditado por voz, sugestões e leitura de recibos. Sem cartão.',gem_w:'Modelo da Google e leitura de fotos. Plano gratuito com limites.',
+ or_w:'Acesso a muitos modelos (Claude, GPT, Llama…) com uma só chave.',oa_w:'Modelos GPT da OpenAI.',cu_w:'Qualquer servidor compatível com a API da OpenAI.',
+ deepl_w:'Tradução rápida e de boa qualidade (500 000 caracteres grátis por mês).',air_w:'Estado e atrasos dos voos.',click_w:'Tarefas do ClickUp no Odysseus.',
+ key:'Chave',url:'Endereço (URL base)',team:'ID da equipa',
+ h_cmd:'Instalar',h_cmd_d:'Copie o comando e cole-o no terminal. Instala o Odysseus e configura tudo sozinho.',
+ admin:'Nome do administrador',copy:'Copiar comando',copied:'Copiado!',
+ c_srv:'Cole no terminal da sua máquina (passo «Ligar-se à máquina»). Demora uns 10 minutos. No fim mostra o endereço, o utilizador e a palavra-passe.',
+ c_pc:'Cole no terminal do Ubuntu. No fim o Odysseus fica em http://localhost:8080.',
+ done:'Já instalei: ligar agora',sens:'O comando contém as suas chaves: não o partilhe. Depois de instalar o ficheiro de chaves é apagado da máquina.',
+ changesrv:'Mudar de servidor'
+};
+T.en={
+ sub:'Your AI assistant, on your own server.',have:'I already have a server',have_d:'Connect to an Odysseus that is already running.',none:'I don\'t have a server',none_d:'Step-by-step guide to set up your own.',
+ back:'Back',next:'Continue',
+ h_have:'Connect to your server',h_have_d:'Enter the address (IP or name) of your Odysseus. The app checks it works first.',addr:'Server address',ph:'192.168.X.Y:7860  or  my-server.ts.net',verify:'Check and connect',checking:'Checking…',
+ e_invalid:'Invalid address. Example: 192.168.X.Y:7860',e_unreachable:'Could not connect. Check the address, the port and that the server is on (and Tailscale/VPN, if you use one).',e_not_odysseus:'Something answered, but it does not look like Odysseus. Check the port.',
+ ok:'Odysseus found. Opening…',insecure:'Connection without HTTPS: voice dictation and notifications only work over HTTPS (for example with Tailscale) or on localhost.',
+ where_ip:'Where do I find the IP?',w_ts:'Tailscale',w_lan:'Home network',w_cloud:'Cloud server',
+ ts1:'In the Tailscale admin console (login.tailscale.com → Machines) find your server.',ts2:'You can use the name (ends in .ts.net) or the IP starting with 100. Use the name for HTTPS.',
+ lan1:'On the computer where Odysseus is installed open PowerShell (Windows) or a terminal and run ipconfig (Windows) or hostname -I (Linux/Mac).',lan2:'Use the IPv4 address followed by the port, for example 192.168.X.Y:7860. It works on devices on the same network.',
+ cl1:'In your provider\'s console (for example Oracle Cloud → Compute → Instances) open the machine.',cl2:'Copy the “Public IP address”. If you installed with our guide, use the address the installer showed at the end (ends in .sslip.io).',
+ h_where:'Where do you want to install it?',pc:'On this computer',pc_d:'Simplest; only works while the computer is on.',srv:'On a server',srv_d:'Always on and reachable from your phone (recommended).',
+ h_srv:'Create a free server on Oracle Cloud',h_srv_d:'About 30 minutes. Follow the steps; the last one is pasting a single command.',
+ s1:'Create the account',s1d:'Open oracle.com/cloud/free and choose “Start for free”. You need an email, a phone and a card (only to verify identity; the free plan is not charged).',
+ s2:'Create the machine',s2d:'Compute → Instances → Create instance. Ubuntu 24.04 image, Ampere A1 shape with 2 OCPUs and 12 GB, and download the SSH key.',
+ s3:'Open ports 80 and 443',s3d:'On the instance: Subnet → Security List → Add Ingress Rules, source 0.0.0.0/0, TCP, ports 80,443.',
+ s4:'Connect to the machine',s4d:'In PowerShell/Terminal use the command in the picture with your machine\'s public IP and the key you downloaded.',
+ open_oracle:'Open Oracle Cloud',
+ h_pc:'Install on this computer',h_pc_d:'On Windows, Odysseus runs inside Ubuntu (WSL), which Windows installs in 2 minutes. On Linux/Mac skip to step 3.',
+ p1:'Install Ubuntu (WSL)',p1d:'Open PowerShell as administrator and run the command in the picture. Restart when asked.',
+ p2:'Install Docker',p2d:'On Windows install Docker Desktop (docker.com) and enable Ubuntu integration; on Linux the installer does it.',
+ p3:'Open Ubuntu',p3d:'Start menu → Ubuntu. Create a user and password. That is where you paste the command from the last step.',
+ h_keys:'Your AI keys',h_keys_d:'Everything is optional and stays on your machine: the installer sets them up in your Odysseus automatically. You can skip and add them later.',
+ models:'AI models (chat)',tabs:'Tab features',get:'Get a key',test:'Test',good:'Key is valid',bad:'Key rejected',
+ groq_w:'Fast, free chat + voice dictation, suggestions and receipt reading. No card.',gem_w:'Google model and photo reading. Free tier with limits.',
+ or_w:'Access to many models (Claude, GPT, Llama…) with one key.',oa_w:'OpenAI GPT models.',cu_w:'Any server compatible with the OpenAI API.',
+ deepl_w:'Fast, good-quality translation (500,000 characters free per month).',air_w:'Flight status and delays.',click_w:'ClickUp tasks inside Odysseus.',
+ key:'Key',url:'Base URL',team:'Team ID',
+ h_cmd:'Install',h_cmd_d:'Copy the command and paste it into the terminal. It installs Odysseus and configures everything automatically.',
+ admin:'Administrator name',copy:'Copy command',copied:'Copied!',
+ c_srv:'Paste it in your machine\'s terminal (the “Connect to the machine” step). Takes about 10 minutes. At the end it shows the address, user and password.',
+ c_pc:'Paste it in the Ubuntu terminal. At the end Odysseus is at http://localhost:8080.',
+ done:'Already installed: connect now',sens:'The command contains your keys: do not share it. After installing, the keys file is deleted from the machine.',
+ changesrv:'Change server'
+};
+const PROV=[
+ {id:'groq',name:'Groq',url:'https://api.groq.com/openai/v1',link:'https://console.groq.com/keys',w:'groq_w',test:'groq',step:{id:'ai_groq',f:'GROQ_API_KEY'}},
+ {id:'gemini',name:'Google Gemini',url:'https://generativelanguage.googleapis.com/v1beta/openai',link:'https://aistudio.google.com/apikey',w:'gem_w',test:'gemini',step:{id:'ai_gemini',f:'GEMINI_API_KEY'}},
+ {id:'openrouter',name:'OpenRouter',url:'https://openrouter.ai/api/v1',link:'https://openrouter.ai/keys',w:'or_w',test:'openrouter'},
+ {id:'openai',name:'OpenAI',url:'https://api.openai.com/v1',link:'https://platform.openai.com/api-keys',w:'oa_w',test:'openai'},
+ {id:'custom',name:'OpenAI-compatible',custom:true,w:'cu_w'}];
+const TABS=[
+ {id:'deepl',name:'DeepL',link:'https://www.deepl.com/pro-api',w:'deepl_w',test:'deepl',step:'translate',f:'DEEPL_API_KEY'},
+ {id:'airlabs',name:'AirLabs',link:'https://airlabs.co',w:'air_w',step:'flights',f:'AIRLABS_API_KEY'},
+ {id:'clickup',name:'ClickUp',link:'https://app.clickup.com/settings/apps',w:'click_w',step:'clickup',f:'CLICKUP_API_TOKEN',extra:{k:'clickup_team',l:'team'}}];
+let V='home',keys=JSON.parse(sessionStorage.getItem('keys')||'{}'),mode='srv',info={},tab='ts',res={},prefill='';
+const save=()=>sessionStorage.setItem('keys',JSON.stringify(keys));
+const go=v=>{V=v;render();scrollTo(0,0)};
+function img(n){return `<img src="img/${n}.svg" alt="">`}
+function render(){
+ ver.textContent='Odysseus Desktop '+(info.version||'');
+ const top=`<div class="top"><div class="logo"><b>O</b>dysseus</div>${langBar()}</div>`;let b='';
+ if(V=='home')b=`<h1>Odysseus</h1><p>${tr('sub')}</p><div class="cards"><button class="card" onclick="go('have')"><h3>${tr('have')}</h3><p>${tr('have_d')}</p></button><button class="card" onclick="go('where')"><h3>${tr('none')}</h3><p>${tr('none_d')}</p></button></div>${info.server?`<p style="margin-top:22px"><a class="lnk" onclick="inv('retry_server')">${esc(info.server)} →</a></p>`:''}`;
+ if(V=='have')b=`<h1>${tr('h_have')}</h1><p>${tr('h_have_d')}</p><label>${tr('addr')}</label><input type="text" id="addr" placeholder="${tr('ph')}" value="${esc(prefill)}" autofocus onkeydown="if(event.key=='Enter')verify()"><div class="row" style="margin-top:12px"><button class="btn" id="vb" onclick="verify()">${tr('verify')}</button></div><div id="vm"></div>
+ <h2>${tr('where_ip')}</h2><div class="tabs">${[['ts','w_ts'],['lan','w_lan'],['cl','w_cloud']].map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${tr(l)}</button>`).join('')}</div>
+ <div class="step"><p>1. ${tr(tab+'1')}</p><p>2. ${tr(tab+'2')}</p>${img({ts:'ip-tailscale',lan:'ip-local',cl:'ip-oracle'}[tab])}</div><div class="row end"><button class="btn sec" onclick="go('home')">${tr('back')}</button></div>`;
+ if(V=='where')b=`<h1>${tr('h_where')}</h1><div class="cards"><button class="card" onclick="mode='pc';go('guide')"><h3>${tr('pc')}</h3><p>${tr('pc_d')}</p></button><button class="card" onclick="mode='srv';go('guide')"><h3>${tr('srv')}</h3><p>${tr('srv_d')}</p></button></div><div class="row end"><button class="btn sec" onclick="go('home')">${tr('back')}</button></div>`;
+ if(V=='guide'){const S=mode=='srv'?[['s1','oracle-create',1],['s2','oracle-create',0],['s3','oracle-ports',0],['s4','ssh-connect',0]]:[['p1','wsl-install'],['p2'],['p3']];
+  b=`<h1>${tr(mode=='srv'?'h_srv':'h_pc')}</h1><p>${tr(mode=='srv'?'h_srv_d':'h_pc_d')}</p>`+
+  (mode=='srv'?`<div class="step"><h3><i>1</i>${tr('s1')}</h3><p>${tr('s1d')}</p><button class="btn sec" data-href="https://www.oracle.com/cloud/free/">${tr('open_oracle')}</button></div><div class="step"><h3><i>2</i>${tr('s2')}</h3><p>${tr('s2d')}</p>${img('oracle-create')}</div><div class="step"><h3><i>3</i>${tr('s3')}</h3><p>${tr('s3d')}</p>${img('oracle-ports')}</div><div class="step"><h3><i>4</i>${tr('s4')}</h3><p>${tr('s4d')}</p>${img('ssh-connect')}</div>`
+  :`<div class="step"><h3><i>1</i>${tr('p1')}</h3><p>${tr('p1d')}</p>${img('wsl-install')}</div><div class="step"><h3><i>2</i>${tr('p2')}</h3><p>${tr('p2d')}</p><button class="btn sec" data-href="https://www.docker.com/products/docker-desktop/">Docker Desktop</button></div><div class="step"><h3><i>3</i>${tr('p3')}</h3><p>${tr('p3d')}</p></div>`)+
+  `<div class="row end"><button class="btn sec" onclick="go('where')">${tr('back')}</button><button class="btn" onclick="go('keys')">${tr('next')}</button></div>`}
+ if(V=='keys'){const prov=p=>{const k=keys[p.id]||{};return `<div class="prov"><div class="h"><div><b>${p.name}</b><div class="why">${tr(p.w)}</div></div>${p.link?`<a class="lnk" data-href="${p.link}">${tr('get')}</a>`:''}</div>
+   ${p.custom?`<label>${tr('url')}</label><input type="text" value="${esc(k.url||'')}" placeholder="https://…/v1" oninput="setk('${p.id}','url',this.value)">`:''}
+   <label>${tr('key')}${p.step&&p.step.f?'':''}</label><div class="row" style="flex-wrap:nowrap"><input type="password" autocomplete="off" value="${esc(k.key||'')}" oninput="setk('${p.id}','key',this.value)">${p.test?`<button class="btn sec" onclick="tk('${p.id}','${p.test}')">${tr('test')}</button>`:''}</div>
+   ${p.extra?`<label>${tr(p.extra.l)}</label><input type="text" value="${esc(k.extra||'')}" oninput="setk('${p.id}','extra',this.value)">`:''}
+   <div id="t_${p.id}">${res[p.id]===true?`<div class="msg ok">${tr('good')}</div>`:res[p.id]===false?`<div class="msg bad">${tr('bad')}</div>`:''}</div></div>`};
+  b=`<h1>${tr('h_keys')}</h1><p>${tr('h_keys_d')}</p><h2>${tr('models')}</h2>${PROV.map(prov).join('')}<h2>${tr('tabs')}</h2>${TABS.map(prov).join('')}<div class="row end"><button class="btn sec" onclick="go('guide')">${tr('back')}</button><button class="btn" onclick="go('cmd')">${tr('next')}</button></div>`}
+ if(V=='cmd')b=`<h1>${tr('h_cmd')}</h1><p>${tr('h_cmd_d')}</p><label>${tr('admin')}</label><input type="text" id="adm" value="${esc(keys._admin||'admin')}" oninput="keys._admin=this.value.toLowerCase().replace(/[^a-z0-9_-]/g,'');save();showCmd()"><div class="step" style="margin-top:16px"><p>${tr(mode=='srv'?'c_srv':'c_pc')}</p>${img(mode=='srv'?'paste-install':'wsl-install')}<pre id="cmd"></pre><div class="row"><button class="btn" onclick="copyCmd()" id="cb">${tr('copy')}</button></div><p class="small" style="margin-top:10px">${tr('sens')}</p></div><div class="row end"><button class="btn sec" onclick="go('keys')">${tr('back')}</button><button class="btn" onclick="prefill=mode=='pc'?'http://localhost:8080':'';go('have')">${tr('done')}</button></div>`;
+ m.innerHTML=top+b;if(V=='cmd')showCmd();
+}
+function setk(id,f,v){(keys[id]=keys[id]||{})[f]=v;if(f=='key')delete res[id];save()}
+async function tk(id,kind){const v=(keys[id]||{}).key||'';const el=document.getElementById('t_'+id);el.innerHTML='<div class="msg info">…</div>';try{res[id]=await inv('test_key',{kind,value:v})}catch(e){res[id]=false}render()}
+function payload(){const steps={},models=[];
+ for(const p of PROV){const k=keys[p.id]||{};if(!(k.key||'').trim())continue;
+  const url=p.custom?(k.url||'').trim():p.url;if(url)models.push({name:p.name,base_url:url,api_key:k.key.trim()});
+  if(p.step)steps[p.step.id]={[p.step.f]:k.key.trim()}}
+ for(const p of TABS){const k=keys[p.id]||{};if(!(k.key||'').trim())continue;const s={[p.f]:k.key.trim()};if(p.extra&&k.extra)s[p.extra.k]=k.extra.trim();steps[p.step]=s}
+ let tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){}
+ return {timezone:tz,steps,models}}
+function command(){const adm=(keys._admin||'admin')||'admin';const tz=payload().timezone;
+ return `cat > ~/odysseus-keys.json <<'ODYSSEUS_KEYS'\n${JSON.stringify(payload(),null,2)}\nODYSSEUS_KEYS\nchmod 600 ~/odysseus-keys.json\n[ -d odysseus-kit ] || git clone https://github.com/Canoruss/odysseus-kit\nbash odysseus-kit/install/install.sh --keys-file ~/odysseus-keys.json --admin-user ${adm}${tz?' --timezone '+tz:''}${mode=='pc'?' --local':''}\nhistory -c`}
+function showCmd(){const e=document.getElementById('cmd');if(e)e.textContent=command()}
+async function copyCmd(){try{await navigator.clipboard.writeText(command())}catch(e){const r=document.createRange();r.selectNode(document.getElementById('cmd'));getSelection().removeAllRanges();getSelection().addRange(r);document.execCommand('copy')}const b=document.getElementById('cb');b.textContent=tr('copied');setTimeout(()=>b.textContent=tr('copy'),1500)}
+async function verify(){const v=document.getElementById('addr').value;const o=document.getElementById('vm'),b=document.getElementById('vb');b.disabled=true;o.innerHTML=`<div class="msg info">${tr('checking')}</div>`;
+ try{const r=await inv('check_server',{input:v});o.innerHTML=`<div class="msg ok">${tr('ok')}</div>`+(r.secure?'':`<div class="msg warn">${tr('insecure')}</div>`);setTimeout(()=>inv('save_server',{url:r.url}),r.secure?600:2600)}
+ catch(e){const k=String(e);o.innerHTML=`<div class="msg bad">${tr(k=='invalid'?'e_invalid':k=='not_odysseus'?'e_not_odysseus':'e_unreachable')}</div>`;b.disabled=false}}
+(async()=>{try{info=await inv('app_info')}catch(e){}if(info.server&&new URLSearchParams(location.search).get('change')==null){}render()})();
+</script>

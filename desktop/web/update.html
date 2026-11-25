@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>Odysseus</title><link rel="stylesheet" href="common.css"><body><main id="m" style="padding-top:26px"></main>
+<script src="common.js"></script><script>
+T.pt={h:'Atualizações',chk:'A procurar atualizações…',ok:'Está atualizado.',ver:'Versão instalada',new:'Nova versão disponível',go:'Baixar e instalar',later:'Mais tarde',close:'Fechar',dl:'A descarregar…',inst:'A instalar… a app vai reiniciar.',err:'Não foi possível atualizar. Verifique a ligação à Internet.',again:'Tentar de novo'};
+T.en={h:'Updates',chk:'Checking for updates…',ok:'You are up to date.',ver:'Installed version',new:'New version available',go:'Download and install',later:'Later',close:'Close',dl:'Downloading…',inst:'Installing… the app will restart.',err:'Could not update. Check your Internet connection.',again:'Try again'};
+let S={s:'chk'},info={};
+function render(){let b='';
+ if(S.s=='chk')b=`<p>${tr('chk')}</p>`;
+ else if(S.s=='ok')b=`<div class="msg ok">${tr('ok')}</div><p class="small">${tr('ver')}: ${info.version||''}</p><div class="row"><button class="btn sec" onclick="inv('close_win',{label:'update'})">${tr('close')}</button></div>`;
+ else if(S.s=='new')b=`<div class="msg info">${tr('new')}: <b>${esc(S.v)}</b></div><p class="small">${tr('ver')}: ${info.version||''}</p>${S.n?`<pre>${esc(S.n)}</pre>`:''}<div class="row"><button class="btn" onclick="go()">${tr('go')}</button><button class="btn sec" onclick="inv('close_win',{label:'update'})">${tr('later')}</button></div>`;
+ else if(S.s=='dl')b=`<p>${tr(S.p==2?'inst':'dl')}</p><div class="bar"><i style="width:${S.pct||0}%"></i></div><p class="small">${S.txt||''}</p>`;
+ else b=`<div class="msg bad">${tr('err')}</div><div class="row"><button class="btn" onclick="chk()">${tr('again')}</button></div>`;
+ m.innerHTML=`<div class="top" style="margin-bottom:16px"><div class="logo">${tr('h')}</div>${langBar()}</div>${b}`}
+async function chk(){S={s:'chk'};render();try{info=await inv('app_info');const r=await inv('check_update');S=r.available?{s:'new',v:r.version,n:r.notes}:{s:'ok'}}catch(e){S={s:'err'}}render()}
+async function go(){S={s:'dl',p:1,pct:0};render();let t=setInterval(async()=>{try{const p=await inv('update_progress');S.p=p.phase;S.pct=p.total?Math.min(100,Math.round(p.got*100/p.total)):0;S.txt=p.total?`${(p.got/1048576).toFixed(1)} / ${(p.total/1048576).toFixed(1)} MB`:'';render()}catch(e){}},300);
+ try{await inv('install_update')}catch(e){clearInterval(t);S={s:'err'};render()}}
+chk();</script>

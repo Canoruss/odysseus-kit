@@ -86,6 +86,17 @@
 
 The Android app is a shell around **your** Odysseus: it shows whatever your server serves. The KIT tabs appear once `ody-extras.js` and the tools are installed on that server.
 
+## Choose how to use Odysseus (4 options)
+
+| # | Option | What you get | Where |
+|---|---|---|---|
+| 1 | **Windows app (.exe)** | Desktop client with a setup wizard ("I have a server" / "I don't"), tray icon, auto-update | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
+| 2 | **Linux app (.AppImage)** | Same desktop client for Linux | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
+| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Releases](../../releases/latest) / [docs/APK.md](docs/APK.md) |
+| 4 | **Script install on a cloud server** | Full Odysseus + KIT in one command (Oracle Always Free, any Ubuntu/Debian VPS) | [Quick start](#quick-start) |
+
+The apps need an Odysseus server (option 4, or your own). Source for the desktop client is in [`desktop/`](desktop/); to run the installer on your own PC use `install/install.sh --local`. Desktop actions (update, reload, change server) are in **Settings → System → Odysseus Desktop** and in the tray menu.
+
 ## Quick start
 
 ### Option A: free server in one command (Oracle Cloud Always Free)
