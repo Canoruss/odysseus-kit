@@ -1,6 +1,6 @@
 {
   "productName": "Odysseus",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "identifier": "chat.odysseus.desktop",
   "build": {
     "frontendDist": "../web"
@@ -13,19 +13,33 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": [
       "deb",
-      "appimage"
+      "appimage",
+      "nsis"
     ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./windows/hooks.nsh"
+      }
+    }
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE1ODQxRkY2OTcxNzNDRUUKUldUdVBCZVg5aCtFcGFkZ2phS3VKUWhyUjJxNFJra3RnWFJaZXFuWEU1OWJYUGJEWjQweXNPSloK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE1ODQxRkY2OTcxNzNDRUUKUldUdVBCZVg5aCtFcGFkZ2phS3VKUWhyUjJxNFJra3RnWFJaZXFuWEU1OWJYUGJEWjQweXNPSloK",
+      "endpoints": [
+        "https://github.com/Canoruss/odysseus-kit/releases/download/desktop-latest/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

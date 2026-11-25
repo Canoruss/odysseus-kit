@@ -1,0 +1,39 @@
+name: Validate Desktop 0.3.5 on Windows
+on:
+  push:
+    branches: [test/desktop-035-windows]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: desktop
+      - run: cargo test --locked
+        working-directory: desktop/src-tauri
+      - run: npx --no-install tauri build --bundles nsis
+        working-directory: desktop
+      - name: Launch desktop and verify native window
+        shell: pwsh
+        run: |
+          $app = Start-Process desktop/src-tauri/target/release/odysseus-desktop.exe -PassThru
+          try {
+            foreach ($i in 1..60) {
+              Start-Sleep 1
+              $app.Refresh()
+              if ($app.HasExited) { throw "Desktop exited with $($app.ExitCode)" }
+              if ($app.MainWindowHandle -ne 0 -and $app.MainWindowTitle -eq 'Odysseus' -and $app.Responding) {
+                Write-Output "Odysseus window opened and responded"
+                return
+              }
+            }
+            throw "Window did not appear"
+          } finally {
+            if (!$app.HasExited) { $app.Kill() }
+          }
