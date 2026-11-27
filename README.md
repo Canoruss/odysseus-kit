@@ -48,8 +48,14 @@ The apps connect to **your** Odysseus server; they do not replace it. No server 
 
 | Prompts tool | Android app |
 |---|---|
-| ![Prompts tool](docs/img/prompts.png) | <img src="docs/img/app-icon.png" alt="Odysseus Android app icon" width="96"> |
+| ![Prompts tool](docs/img/prompts.png) | <img src="docs/img/android-setup.png" alt="Android 1.58 setup screen" width="220"> |
 | Turn an idea into a prompt. | Widgets, reminders, translator, voice, fingerprint lock and a phone agent that asks before sensitive actions. |
+
+### Browser extension
+
+<p align="center"><img src="docs/img/extension-panel.png" alt="Extension side panel with Page guide" width="260"></p>
+
+Side panel with Chat, Page guide and Agent mode.
 
 ## What's new
 

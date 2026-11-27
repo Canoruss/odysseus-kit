@@ -48,8 +48,14 @@ As apps ligam-se ao **teu** servidor Odysseus; não o substituem. Ainda não ten
 
 | Ferramenta de prompts | App Android |
 |---|---|
-| ![Ferramenta Prompts](docs/img/prompts.png) | <img src="docs/img/app-icon.png" alt="Ícone da app Android Odysseus" width="96"> |
+| ![Ferramenta Prompts](docs/img/prompts.png) | <img src="docs/img/android-setup.png" alt="Ecrã de configuração da app Android 1.58" width="220"> |
 | Transforma uma ideia num prompt. | Widgets, lembretes, tradutor, voz, bloqueio por impressão digital e um agente no telemóvel que pergunta antes de ações sensíveis. |
+
+### Extensão do browser
+
+<p align="center"><img src="docs/img/extension-panel.png" alt="Painel lateral da extensão com o Guia da página" width="260"></p>
+
+Painel lateral com Chat, Guia da página e modo Agente.
 
 ## Novidades
 
