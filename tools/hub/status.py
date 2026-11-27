@@ -23,12 +23,13 @@ def render(lang="pt", admin=False):
         out.append("</div>")
     if admin:
         disk = _sh("df -h / | tail -1 | awk '{print $3\" / \"$2\" (\"$5\")\"}'")
-        mem = _sh("free -m | awk '/Mem/{print $7\" MB \"}'") + T("livres", "free")
-        swap = _sh("free -m | awk '/Swap/{print $3\" MB / \"$2\" MB\"}'")
+        mem = _sh("free -m | awk '/Mem/{printf \"%.1fG / %.1fG (%d%%)\", $3/1024, $2/1024, $3*100/$2}'")
+        swap = _sh("free -m | awk '/Swap/{if($2>0)printf \"%.1fG / %.1fG (%d%%)\", $3/1024, $2/1024, $3*100/$2; else print \"0\"}'")
+        cpu = _sh("a=$(awk '/^cpu /{print $2+$3+$4+$7+$8, $2+$3+$4+$5+$6+$7+$8}' /proc/stat); sleep 0.5; b=$(awk '/^cpu /{print $2+$3+$4+$7+$8, $2+$3+$4+$5+$6+$7+$8}' /proc/stat); echo $a $b | awk '{d=$4-$2; if(d>0)printf \"%d%%\", ($3-$1)*100/d; else print \"0%\"}'") + f" · {_sh('nproc')} cores"
         load = _sh("cut -d' ' -f1-3 /proc/loadavg")
         ctrs = _sh("docker ps --format '{{.Names}}|{{.Status}}' | sort")
         rows = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td></tr>" for a, b in (l.split("|", 1) for l in ctrs.splitlines() if "|" in l))
-        out.append(f"<h2>{T('Servidor','Server')}</h2><div class='box'><b>{T('Disco','Disk')}:</b> {e(disk)}<br><b>RAM:</b> {e(mem)}<br><b>Swap:</b> {e(swap)}<br><b>{T('Carga','Load')}:</b> {e(load)}</div>")
+        out.append(f"<h2>{T('Servidor','Server')}</h2><div class='box'><b>{T('Disco','Disk')}:</b> {e(disk)}<br><b>RAM:</b> {e(mem)}<br><b>Swap:</b> {e(swap)}<br><b>CPU:</b> {e(cpu)}<br><b>{T('Carga','Load')}:</b> {e(load)}</div>")
         out.append(f"<div class='box'><b>{T('Contentores','Containers')}</b><table>{rows}</table></div>")
         out.append(f"<h2>{T('Atividade recente','Recent activity')}</h2><div class='box'><b>{T('Verificações','Checks')}</b><pre>{e(_sh('tail -6 ~/health-check.log'))}</pre><b>{T('Pós-deploy','Post-deploy')}</b><pre>{e(_sh('tail -3 ~/post-deploy.log'))}</pre><b>{T('Guarda de serviços','Service guard')}</b><pre>{e(_sh('tail -4 ~/guard-services.log'))}</pre></div>")
         bk = _sh("ls -lh --time-style=long-iso ~/backups/images/*.tar.gz 2>/dev/null | awk '{print $6\" \"$7\"  \"$5\"  \"$8}'")
