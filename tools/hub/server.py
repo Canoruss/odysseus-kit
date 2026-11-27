@@ -16,7 +16,7 @@ CATS = ["casa", "contas", "comida", "restaurantes", "transportes", "combustivel"
 import time, base64, re
 import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import glucose
-import quiet, search, period, period_ui, games, focus, dreams, health, bills
+import status as _status, quiet, search, period, period_ui, games, focus, dreams, health, bills
 import inbox
 import routine
 import study, extras, usage
@@ -102,7 +102,7 @@ body{{font-family:system-ui,sans-serif;background:#1d2026;color:#eee;margin:0;pa
 h1,h2{{font-weight:600}} table{{width:100%;border-collapse:collapse;margin:8px 0}} td,th{{padding:6px;border-bottom:1px solid #333;text-align:left}}
 input,select,button{{padding:8px;border-radius:6px;border:1px solid #444;background:#2a2e36;color:#eee;margin:3px}}
 button{{background:#4a7bd0;border:0;cursor:pointer}} .red{{color:#f07070}} .green{{color:#70d080}} .box{{background:#262a31;padding:12px;border-radius:10px;margin:10px 0}}
-</style></head><body>{'' if title in ('Pesquisa', 'Login', 'Private Browser live') else '<form method="get" action="/finance/search" style="text-align:right;margin:0"><input name="q" placeholder="🔎" style="width:110px"></form>'}{body}</body></html>"""
+</style></head><body>{'' if title in ('Pesquisa', 'Login', 'Private Browser live', 'Estado') else '<form method="get" action="/finance/search" style="text-align:right;margin:0"><input name="q" placeholder="🔎" style="width:110px"></form>'}{body}</body></html>"""
 
 def eur(v): return f"{v:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -1029,6 +1029,8 @@ class H(BaseHTTPRequestHandler):
         if u and self.path.split("?")[0].rstrip("/") == "/search":      # global search over the user's own tabs
             _q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
             return self.send(200, page(search.render(u, (_q.get("q") or [""])[0], i18n.from_cookie(self.headers.get("Cookie", "")), u == OWNER, u in MLIKE), "Pesquisa"))
+        if u and self.path.split("?")[0].rstrip("/") == "/status":
+            return self.send(200, page(_status.render(i18n.from_cookie(self.headers.get("Cookie", "")), u == OWNER), "Estado"))
         if u and self.path.split("?")[0].rstrip("/") == "/focus":
             return self.send(200, page(focus.render(u, i18n.from_cookie(self.headers.get("Cookie", "")), u in (OWNER,) + MLIKE) + quiet.box(u, i18n.from_cookie(self.headers.get("Cookie", "")), "/finance/focus"), "Foco"))
         if u and self.path.split("?")[0].rstrip("/") == "/period":   # Ciclo: every user, separate data per account

@@ -72,3 +72,7 @@ python3 pb close
 - Run `python3 scripts/scan.py` before publishing any fork: it looks for keys and personal data.
 - Keep API keys only in `~/.config/odysseus-kit/*.env` (never in the repository).
 - Medical tools are informational. Read the [health disclaimer](../README.md#health-disclaimer).
+
+## Status tab
+
+**Tools → Status** opens a floating window (drag it by the title, resize it from the corner; it does not block the chat). It shows live usage of your AI models (Claude, ChatGPT, Groq, DeepL, AirLabs) and, for the owner account only, server disk/RAM/swap, running containers and recent check logs. It refreshes every 30 s. Hide it under Appearance like any other tool.

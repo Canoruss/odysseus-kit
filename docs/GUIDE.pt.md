@@ -72,3 +72,7 @@ python3 pb close
 - Corre `python3 scripts/scan.py` antes de publicar qualquer fork: procura chaves e dados pessoais.
 - Guarda as chaves só em `~/.config/odysseus-kit/*.env` (nunca no repositório).
 - As ferramentas de saúde são informativas. Lê o [aviso de saúde](../README.pt.md#aviso-de-saúde).
+
+## Aba Estado
+
+**Ferramentas → Estado** abre uma janela flutuante (arrasta-se pelo título, redimensiona-se pelo canto; não bloqueia o chat). Mostra o uso em tempo real dos modelos de IA (Claude, ChatGPT, Groq, DeepL, AirLabs) e, só para a conta do dono, disco/RAM/swap do servidor, contentores e registos recentes. Atualiza a cada 30 s. Pode ser escondida em Aspeto, como as outras ferramentas.

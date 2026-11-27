@@ -35,6 +35,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   const ICON = {
     media: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9" r="1.5"/>',
     games: '<rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11" r="1"/><circle cx="18.5" cy="13.5" r="1"/>',
+    status: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
     dreams: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     focus: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
     cycle: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/><path d="M4 12h2M18 12h2"/>',
@@ -65,10 +66,10 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
   // Jogos grátis e Foco: abas próprias (todos os utilizadores).
   function addGamesFocusTools(sec) {
     if (!sec) return;
-    [['tool-focus-btn', 'Foco', ICON.focus, '/finance/focus'], ['tool-games-btn', 'Jogos grátis', ICON.games, '/finance/games'], ['tool-dreams-btn', 'Sonhos', ICON.dreams, '/finance/dreams']].forEach(([id, label, ic, url]) => {
+    [['tool-focus-btn', 'Foco', ICON.focus, '/finance/focus'], ['tool-games-btn', 'Jogos grátis', ICON.games, '/finance/games'], ['tool-dreams-btn', 'Sonhos', ICON.dreams, '/finance/dreams'], ['tool-status-btn', kitLang() === 'pt' ? 'Estado' : 'Status', ICON.status, '/finance/status', 'float']].forEach(([id, label, ic, url, mode]) => {
       if (document.getElementById(id)) return;
       const b = toolItem(id, label, ic);
-      b.addEventListener('click', () => openFrame(label, url));
+      b.addEventListener('click', () => mode === 'float' ? openFloat(label, url) : openFrame(label, url));
       const g = document.getElementById('tool-period-btn') || document.getElementById('tool-glucose-btn');
       if (g && g.parentNode === sec) g.after(b); else sec.appendChild(b);
     });
@@ -139,7 +140,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
 
   // Ordem da barra Tools: primeiro as usadas no dia a dia, depois o resto.
   const TOOL_ORDER = ['tool-email-btn', 'tool-calendar-btn', 'tool-tasks-btn', 'tool-notes-btn',
-    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-period-btn', 'tool-media-btn', 'tool-focus-btn', 'tool-games-btn', 'tool-dreams-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-prompt-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
+    'tool-finance-btn', 'tool-translate-btn', 'tool-gym-btn', 'tool-routine-btn', 'tool-glucose-btn', 'tool-period-btn', 'tool-media-btn', 'tool-focus-btn', 'tool-games-btn', 'tool-dreams-btn', 'tool-status-btn', 'tool-canva-btn', 'tool-news-btn', 'tool-compose-btn', 'tool-prompt-btn', 'tool-flight-btn', 'tool-emails-btn', 'tool-inbox-btn'];
 
   // ---- Idioma (i18n) ----
   // Dicionario PT -> EN servido pelo hub (/finance/i18n.json). O idioma escolhido fica em localStorage + cookie 'kitlang' (as paginas do hub seguem o cookie).
@@ -234,7 +235,7 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
 
   // ---- Appearance: mostrar/esconder as tools extra ----
   const EXTRA_TOOLS = [['tool-email-btn', 'Email (atalho)'], ['tool-finance-btn', 'Finanças'], ['tool-translate-btn', 'Tradução'],
-    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-period-btn', 'Ciclo'], ['tool-media-btn', 'Otimizar média'], ['tool-focus-btn', 'Foco'], ['tool-games-btn', 'Jogos grátis'], ['tool-dreams-btn', 'Sonhos'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-prompt-btn', 'Prompts'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
+    ['tool-gym-btn', 'Gym'], ['tool-routine-btn', 'Estudo'], ['tool-glucose-btn', 'Glicose'], ['tool-period-btn', 'Ciclo'], ['tool-media-btn', 'Otimizar média'], ['tool-focus-btn', 'Foco'], ['tool-games-btn', 'Jogos grátis'], ['tool-dreams-btn', 'Sonhos'], ['tool-status-btn', 'Estado'], ['tool-canva-btn', 'Canva'], ['tool-news-btn', 'Notícias'], ['tool-compose-btn', 'Compor'], ['tool-prompt-btn', 'Prompts'], ['tool-flight-btn', 'Voos'], ['tool-emails-btn', 'Emails'], ['tool-inbox-btn', 'Caixa de ideias'], ['tool-gemini-images-btn', 'Imagens (Gemini)']];
   const XT_KEY = 'ody-extra-tools-hidden';
   function xtHidden() { try { return JSON.parse(localStorage.getItem(XT_KEY) || '{}'); } catch (_) { return {}; } }
   function applyExtraTools() {
@@ -712,6 +713,33 @@ const KIT = Object.assign({ owner: 'owner', member: 'member', tester: 'kit-test'
     new MutationObserver(apply).observe(html, { attributes: true, attributeFilter: ['class'] });
     window.__odyThemeApply = apply;
   })();
+
+  // Janela flutuante (como o Notes): arrasta-se pelo título, redimensiona-se, não bloqueia o chat. Estado + uso dos modelos.
+  function openFloat(title, url) {
+    let w = document.getElementById('ody-float-status');
+    if (w) { w.style.display = 'flex'; w.querySelector('iframe').src = url; w.style.zIndex = 10001; return; }
+    w = document.createElement('div'); w.id = 'ody-float-status'; w.setAttribute('data-ody-tool', '1');
+    const mob = window.innerWidth < 768;
+    let pos = {}; try { pos = JSON.parse(localStorage.getItem('ody-float-status') || '{}'); } catch (_) { }
+    w.style.cssText = 'position:fixed;z-index:10001;display:flex;flex-direction:column;background:#282c34;border:1px solid rgba(255,255,255,.12);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;resize:' + (mob ? 'none' : 'both') + ';min-width:280px;min-height:240px;' +
+      (mob ? 'left:6px;right:6px;top:6px;bottom:6px;' : 'left:' + Math.min(pos.l ?? 120, innerWidth - 340) + 'px;top:' + Math.min(pos.t ?? 60, innerHeight - 200) + 'px;width:' + (pos.w || 420) + 'px;height:' + (pos.h || 560) + 'px;');
+    const bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;color:#fff;font:600 14px system-ui,sans-serif;cursor:move;user-select:none;background:rgba(255,255,255,.05)';
+    const h = document.createElement('span'); h.style.flex = '1'; h.textContent = title;
+    const mk = (t, lbl, f) => { const b = document.createElement('button'); b.textContent = t; b.setAttribute('aria-label', lbl); b.style.cssText = 'background:none;border:0;color:#fff;font-size:16px;cursor:pointer;padding:2px 6px'; b.addEventListener('click', f); return b; };
+    const save = () => { if (mob) return; const r = w.getBoundingClientRect(); try { localStorage.setItem('ody-float-status', JSON.stringify({ l: r.left, t: r.top, w: r.width, h: r.height })); } catch (_) { } };
+    bar.append(h, mk('⟳', 'Refresh', () => { fr.src = url; }), mk('✕', 'Close', () => { w.style.display = 'none'; }));
+    const fr = document.createElement('iframe'); fr.src = url; fr.style.cssText = 'flex:1;border:0;width:100%;background:#1d2026';
+    w.append(bar, fr); document.body.appendChild(w);
+    w.addEventListener('mousedown', () => { w.style.zIndex = 10001; });
+    let dx = 0, dy = 0, drag = false;
+    const mv = e => { if (!drag) return; const p = e.touches ? e.touches[0] : e; w.style.left = Math.max(0, Math.min(innerWidth - 80, p.clientX - dx)) + 'px'; w.style.top = Math.max(0, Math.min(innerHeight - 40, p.clientY - dy)) + 'px'; fr.style.pointerEvents = 'none'; };
+    const up = () => { if (drag) { drag = false; fr.style.pointerEvents = ''; save(); } };
+    bar.addEventListener('mousedown', e => { if (mob || e.target.tagName === 'BUTTON') return; drag = true; const r = w.getBoundingClientRect(); dx = e.clientX - r.left; dy = e.clientY - r.top; e.preventDefault(); });
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+    new ResizeObserver(() => { clearTimeout(w._rt); w._rt = setTimeout(save, 400); }).observe(w);
+  }
+
 
   function openFrame(title, url) {
     setTimeout(() => window.__odyThemeApply && window.__odyThemeApply(), 0);
