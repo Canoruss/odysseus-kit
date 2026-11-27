@@ -23,7 +23,7 @@
 | 🐧 | **Linux** | 0.3.5 | [AppImage](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.AppImage) · [.deb](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.deb) |
 | 🤖 | **Android** | 1.58 | [Odysseus-1.58.apk](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/Odysseus-1.58.apk) · [SHA-256](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/SHA256SUMS) |
 | 🧩 | **Extensão Chrome / Edge** | 0.13.1 | [ZIP](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/odysseus-extension-0.13.1.zip) · [guia](docs/EXTENSION.pt.md) |
-| 🖥️ | **Ferramentas do servidor (KIT)** | 1.7.0 | [Última release](../../releases/latest) · [instalação](docs/INSTALL.pt.md) |
+| 🖥️ | **Ferramentas do servidor (KIT)** | 1.7.1 | [Última release](../../releases/latest) · [instalação](docs/INSTALL.pt.md) |
 
 As apps ligam-se ao **teu** servidor Odysseus; não o substituem. Ainda não tens servidor? Segue o [guia gratuito para a cloud](docs/ORACLE.pt.md) ou [instala num servidor existente](docs/INSTALL.pt.md).
 
@@ -53,7 +53,7 @@ As apps ligam-se ao **teu** servidor Odysseus; não o substituem. Ainda não ten
 
 ## Novidades
 
-- **Aba Estado** (KIT 1.7.0): janela flutuante com o uso dos modelos para todos; disco, RAM, swap, CPU, contentores e backups para o dono.
+- **Aba Estado** (KIT 1.7.1): janela flutuante com o uso dos modelos para todos; disco, RAM, swap, CPU, contentores e backups para o dono.
 - **Android 1.58**: voz e política em Rust, agente que confirma ações sensíveis. Código em [`android/`](android/) e [`voice-core/`](voice-core/).
 - **Desktop 0.3.5**: versão testada em Windows, com menu na bandeja e atualização automática. Código em [`desktop/`](desktop/).
 - **Extensão 0.13.1**: Guia da página, modo agente e histórico. Código em [`extension/`](extension/).

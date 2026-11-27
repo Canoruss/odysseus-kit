@@ -23,7 +23,7 @@
 | 🐧 | **Linux** | 0.3.5 | [AppImage](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.AppImage) · [.deb](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.deb) |
 | 🤖 | **Android** | 1.58 | [Odysseus-1.58.apk](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/Odysseus-1.58.apk) · [SHA-256](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/SHA256SUMS) |
 | 🧩 | **Chrome / Edge extension** | 0.13.1 | [ZIP](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/odysseus-extension-0.13.1.zip) · [guide](docs/EXTENSION.md) |
-| 🖥️ | **Server tools (KIT)** | 1.7.0 | [Latest release](../../releases/latest) · [install](docs/INSTALL.md) |
+| 🖥️ | **Server tools (KIT)** | 1.7.1 | [Latest release](../../releases/latest) · [install](docs/INSTALL.md) |
 
 The apps connect to **your** Odysseus server; they do not replace it. No server yet? Follow the [free cloud guide](docs/ORACLE.md) or [install on an existing server](docs/INSTALL.md).
 
@@ -53,7 +53,7 @@ The apps connect to **your** Odysseus server; they do not replace it. No server 
 
 ## What's new
 
-- **Status tab** (KIT 1.7.0): floating window with model usage for everyone; disk, RAM, swap, CPU, containers and backups for the owner.
+- **Status tab** (KIT 1.7.1): floating window with model usage for everyone; disk, RAM, swap, CPU, containers and backups for the owner.
 - **Android 1.58**: voice and policy logic in Rust, agent that confirms sensitive actions. Source in [`android/`](android/) and [`voice-core/`](voice-core/).
 - **Desktop 0.3.5**: Windows-tested build with tray menu and auto-update. Source in [`desktop/`](desktop/).
 - **Extension 0.13.1**: Page guide, agent mode and history. Source in [`extension/`](extension/).
