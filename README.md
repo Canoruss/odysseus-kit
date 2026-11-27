@@ -4,39 +4,66 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Canoruss/odysseus-kit?include_prereleases)](../../releases)
-![Status](https://img.shields.io/badge/status-pre--release-orange)
+![Android](https://img.shields.io/badge/Android-1.58-3ddc84)
+![Desktop](https://img.shields.io/badge/Desktop-0.3.5-blue)
+![Extension](https://img.shields.io/badge/Extension-0.13.1-orange)
 ![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Portugu%C3%AAs-lightgrey)
 
-**Your AI assistant, on your own server.** Odysseus KIT brings together the server tools, apps for Windows, Linux and Android, and a browser extension. Chat, organise tasks, translate, track finances and use other optional tools from one place.
+<p align="center"><img src="docs/img/tools.png" alt="Odysseus with the KIT tool sidebar" width="85%"></p>
 
-**New here?** A server is the computer that runs Odysseus and stores its data. The apps connect to that server; they do not replace it. You can use a server you already have or install one on a compatible Linux machine or cloud server.
+**Your AI assistant, on your own server.** Server tools, apps for Windows, Linux and Android, and a browser extension in one kit: chat, tasks, translation, finances and more.
 
-### Get started
+> **Status:** pre-release. The downloads below are the latest published versions and match the source in this repository.
 
-1. **Set up a server:** follow the [cloud guide](docs/ORACLE.md), or [install the tools on an existing server](docs/INSTALL.md).
-2. **Choose an app:** [Windows and Linux downloads](../../releases/tag/desktop-latest) · [Android 1.49 download](../../releases/tag/desktop-v0.3.2) · [browser extension guide](docs/EXTENSION.md).
-3. **Connect:** open the app, enter the address of your own server and sign in. For remote access, your server must be reachable from your device.
-4. **Configure optional services:** use the setup assistant to add your own provider keys for features you want. Provider costs and free-tier limits vary.
+## Download
 
-> **Current status:** pre-release software. Desktop 0.3.3 is available for Windows and Linux; Android 1.49 is available in the 0.3.2 release. The Android source currently in this repository is version 1.4.0, so it does not represent the published 1.49 APK. Some installation paths and features still need broader testing.
+| | App | Version | Download |
+|---|---|---|---|
+| 🪟 | **Windows** | 0.3.5 | [Installer (.exe)](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_x64-setup.exe) |
+| 🐧 | **Linux** | 0.3.5 | [AppImage](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.AppImage) · [.deb](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/Odysseus_0.3.5_amd64.deb) |
+| 🤖 | **Android** | 1.58 | [Odysseus-1.58.apk](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/Odysseus-1.58.apk) · [SHA-256](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/SHA256SUMS) |
+| 🧩 | **Chrome / Edge extension** | 0.13.1 | [ZIP](https://github.com/Canoruss/odysseus-kit/releases/download/apps-0.3.5-android-1.55/odysseus-extension-0.13.1.zip) · [guide](docs/EXTENSION.md) |
+| 🖥️ | **Server tools (KIT)** | 1.7.0 | [Latest release](../../releases/latest) · [install](docs/INSTALL.md) |
 
-### A look inside
+The apps connect to **your** Odysseus server; they do not replace it. No server yet? Follow the [free cloud guide](docs/ORACLE.md) or [install on an existing server](docs/INSTALL.md).
+
+## Get started in 4 steps
+
+1. **Set up a server:** [cloud guide](docs/ORACLE.md) or [existing server](docs/INSTALL.md).
+2. **Install an app** from the table above.
+3. **Connect:** enter your server address and sign in (the server must be reachable from your device).
+4. **Add optional services** with the setup assistant. Provider costs and free-tier limits vary.
+
+## A look inside
 
 | Chat and tools | Setup assistant |
 |---|---|
 | ![Odysseus chat and tool sidebar](docs/img/tools.png) | ![KIT setup assistant](docs/img/wizard.png) |
-| Chat with your assistant and choose the tools you need. | Configure optional services step by step. |
+| Chat and pick the tools you need. | Configure optional services step by step. |
 
-| Prompts tool | Android setup example |
+| Status window (new) | Desktop app |
 |---|---|
-| ![Prompts tool](docs/img/prompts.png) | ![Android setup screen from an earlier KIT version](docs/img/app-setup.png) |
-| Turn an idea into a prompt. | Earlier KIT screen shown as an example; the 1.49 interface may differ. |
+| <img src="docs/img/status-mobile.png" alt="Status window with model usage" width="260"> | ![Odysseus Desktop sign-in](docs/img/desktop-login.png) |
+| Model usage at a glance; the server owner also sees disk, RAM, CPU and health. | Windows and Linux client with tray icon and auto-update. |
 
-[Features](#whats-included) · [Downloads and installation](#choose-how-to-use-odysseus-4-options) · [Extension](docs/EXTENSION.md) · [User guide](docs/GUIDE.md) · [Security](#security-and-privacy)
+| Prompts tool | Android app |
+|---|---|
+| ![Prompts tool](docs/img/prompts.png) | <img src="docs/img/app-icon.png" alt="Odysseus Android app icon" width="96"> |
+| Turn an idea into a prompt. | Widgets, reminders, translator, voice, fingerprint lock and a phone agent that asks before sensitive actions. |
+
+## What's new
+
+- **Status tab** (KIT 1.7.0): floating window with model usage for everyone; disk, RAM, swap, CPU, containers and backups for the owner.
+- **Android 1.58**: voice and policy logic in Rust, agent that confirms sensitive actions. Source in [`android/`](android/) and [`voice-core/`](voice-core/).
+- **Desktop 0.3.5**: Windows-tested build with tray menu and auto-update. Source in [`desktop/`](desktop/).
+- **Extension 0.13.1**: Page guide, agent mode and history. Source in [`extension/`](extension/).
+
+[Features](#whats-included) · [Install](#quick-start) · [Extension](docs/EXTENSION.md) · [User guide](docs/GUIDE.md) · [Security](#security-and-privacy)
 
 ## What's included
 
-### Assistant tools
+<details open>
+<summary><b>Assistant tools</b></summary>
 
 | Tool | What it does | Requires |
 |---|---|---|
@@ -50,7 +77,10 @@
 | **Canva** | create designs and export PNG | Canva developer account |
 | **Idea Box** | users submit ideas/bugs (text and screenshots), AI organizes them into tasks | Groq vision, Gemini fallback |
 
-### Personal tracking
+</details>
+
+<details open>
+<summary><b>Personal tracking</b></summary>
 
 | Tool | What it does | Requires |
 |---|---|---|
@@ -62,7 +92,10 @@
 | **Free games** | list of currently free games with end dates and prices, and optional alerts when a new one appears, **per store** (Epic, Steam, GOG, itch.io, Prime) | none |
 | **Dreams** | dream journal per account (text or voice), AI interpretation with a psychology-style guide, recurring themes and mood tags | Groq |
 
-### Interface and platform
+</details>
+
+<details open>
+<summary><b>Interface and platform</b></summary>
 
 | Feature | What it does |
 |---|---|
@@ -82,6 +115,8 @@
 
 <p align="center"><img src="docs/img/prompts.png" alt="The Prompts tool" width="80%"></p>
 
+</details>
+
 ## How it fits together
 
 ```
@@ -100,9 +135,9 @@ The Android app is a shell around **your** Odysseus: it shows whatever your serv
 
 | # | Option | What you get | Where |
 |---|---|---|---|
-| 1 | **Windows app (.exe)** | Desktop client with a setup wizard ("I have a server" / "I don't"), tray icon, auto-update | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
-| 2 | **Linux app (.AppImage)** | Same desktop client for Linux | [Release `desktop-latest`](../../releases/tag/desktop-latest) |
-| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Android 1.49](../../releases/tag/desktop-v0.3.2) / [docs/APK.md](docs/APK.md) |
+| 1 | **Windows app (.exe)** | Desktop client with a setup wizard ("I have a server" / "I don't"), tray icon, auto-update | [Release 0.3.5](https://github.com/Canoruss/odysseus-kit/releases/tag/apps-0.3.5-android-1.55) |
+| 2 | **Linux app (.AppImage / .deb)** | Same desktop client for Linux | [Release 0.3.5](https://github.com/Canoruss/odysseus-kit/releases/tag/apps-0.3.5-android-1.55) |
+| 3 | **Android app (.apk)** | Mobile client, in-app updates | [Android 1.58](../../releases/tag/android-v1.58) / [docs/APK.md](docs/APK.md) |
 | 4 | **Script install on a cloud server** | Full Odysseus + KIT in one command (Oracle Always Free, any Ubuntu/Debian VPS) | [Quick start](#quick-start) |
 
 The apps need an Odysseus server (option 4, or your own). Source for the desktop client is in [`desktop/`](desktop/); to run the installer on your own PC use `install/install.sh --local`. Desktop actions (update, reload, change server) are in **Settings → System → Odysseus Desktop** and in the tray menu.
@@ -147,7 +182,7 @@ A Chrome/Edge side panel that talks to your own server: chat with the current pa
 
 ## Download the Android app
 
-No compiling needed: download **[Odysseus-1.49.apk](../../releases/download/desktop-v0.3.2/Odysseus-1.49.apk)**. The Android source and build guide in this repository currently describe the older KIT 1.4.0 version.
+No compiling needed: download **[Odysseus-1.58.apk](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/Odysseus-1.58.apk)** ([SHA-256](https://github.com/Canoruss/odysseus-kit/releases/download/android-v1.58/SHA256SUMS)). Source and build guide: [`android/`](android/) and [docs/APK.md](docs/APK.md).
 
 1. Download it on your phone and install it (allow "install unknown apps" when Android asks).
 2. Open it, choose a language, enter your Odysseus address and tap **Test connection**.

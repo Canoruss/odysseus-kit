@@ -1,14 +1,13 @@
 {
-	"appId": "org.odysseuskit.app",
-	"appName": "Odysseus",
-	"webDir": "www",
-	"server": {
-		"url": "https://YOUR-SERVER.YOUR-TAILNET.ts.net",
-		"cleartext": false,
-		"errorPath": "error.html"
-	},
-	"android": {
-		"appendUserAgent": "OdysseusApp",
-		"backgroundColor": "#282c34"
-	}
+  "appId": "com.canorus.odysseus",
+  "appName": "Odysseus",
+  "webDir": "www",
+  "server": {
+    "cleartext": false,
+    "errorPath": "error.html"
+  },
+  "android": {
+    "appendUserAgent": "OdysseusApp",
+    "backgroundColor": "#282c34"
+  }
 }

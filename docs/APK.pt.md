@@ -14,12 +14,14 @@ O endereço do servidor **já não fica dentro do APK**: ao abrir a app pela pri
 
 ## Compilar
 
-Requisitos: JDK 21, Android SDK (platform 35 e build-tools), Node 20+.
+Versão do código: **1.58** (versionCode 63). Requisitos: JDK 21, Android SDK (platform 35 e build-tools), Node 20+ e Rust com o Android NDK 27 (para a biblioteca de voz/política em `voice-core/`).
+
+0a. `bash scripts/build-voice.sh` compila `voice-core/` e copia os `.so` para `android/app/src/main/jniLibs/`.
 
 0. `cd android && npm install && npx cap sync android` (descarrega o Capacitor e gera `capacitor-cordova-android-plugins`; o `package.json` está em `android/`).
 1. (Opcional, só para os textos de exemplo) os endereços `YOUR-SERVER...` nos ficheiros abaixo já não são usados no arranque; podes ignorá-los:
    - `android/app/src/main/assets/capacitor.config.json` (campo `server.url`);
-   - `android/app/src/main/java/org/odysseuskit/app/Updater.java` (`BASE`) e `NoteSync.java` (`SITE`);
+   - `android/app/src/main/java/com/canorus/odysseus/Updater.java` (`BASE`) e `NoteSync.java` (`SITE`);
    - `android/www/error.html`.
    Procura `YOUR-SERVER.YOUR-TAILNET.ts.net` e substitui em todos.
 2. Cria a tua chave de assinatura (guarda-a bem, sem ela não consegues atualizar a app):
@@ -36,5 +38,5 @@ Requisitos: JDK 21, Android SDK (platform 35 e build-tools), Node 20+.
 
 ## Notas
 
-- O identificador do pacote é `org.odysseuskit.app`. Se publicares a tua variante, muda-o.
+- O identificador do pacote é `com.canorus.odysseus`. Se publicares a tua variante, muda-o.
 - Permissões usadas: notificações, alarmes exatos, calendário, câmara, microfone, ler SMS (só para consultas SNS 24) e leitura de notificações. Podes removê-las do `AndroidManifest.xml` se não usares a função.

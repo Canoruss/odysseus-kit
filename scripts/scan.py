@@ -43,7 +43,7 @@ for dp, dn, fn in os.walk(ROOT):
                     print(f"{rel}:{i}: [{name}]")
                     hits += 1
             # o endereco publico do proprio repositorio e permitido
-            chk = line.replace("Canoruss/odysseus-kit", "")
+            chk = line.replace("Canoruss/odysseus-kit", "").replace("com.canorus.odysseus", "").replace("com_canorus_odysseus", "").replace("com/canorus/odysseus", "")  # package id of the published APK
             for term in priv:
                 if term.lower() in chk.lower():
                     print(f"{rel}:{i}: [termo privado]")

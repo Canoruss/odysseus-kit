@@ -2,7 +2,7 @@
 
 **English** · [Português](EXTENSION.pt.md)
 
-A side-panel assistant for Chrome, Edge and other Chromium browsers that talks to **your own Odysseus server**. Folder: [`extension/`](../extension). Version 0.12.20. No build step, no runtime dependencies, no third-party servers.
+A side-panel assistant for Chrome, Edge and other Chromium browsers that talks to **your own Odysseus server**. Folder: [`extension/`](../extension). Version 0.13.1. No build step, no runtime dependencies, no third-party servers.
 
 ## Install
 

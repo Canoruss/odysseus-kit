@@ -25,13 +25,22 @@ export function bindTabs(windowId) {
     if (await active() !== tabId || changes !== generation) throw new Problem('tabChanged');
     return { ...result, tabId, documentId };
   }
-  async function captureImage(expectedTab, quality) {
-    const generation = changes, before = await capture('meta', expectedTab);
+  async function captureImage(expectedTab, quality = 70) {
+    let targetWinId = windowId;
+    if (expectedTab != null) {
+      const tb = await chrome.tabs.get(expectedTab).catch(() => null);
+      if (tb?.windowId != null) targetWinId = tb.windowId;
+    }
+    const generation = changes, before = expectedTab != null
+      ? { ...(await inject(expectedTab, 'meta')).result, tabId: expectedTab }
+      : await capture('meta', expectedTab);
     let src;
-    try { src = await chrome.tabs.captureVisibleTab(windowId, { format: 'jpeg', quality }); }
+    try { src = await chrome.tabs.captureVisibleTab(targetWinId, { format: 'jpeg', quality }); }
     catch { throw new Problem('noShot'); }
-    const after = await capture('meta');
-    if (before.tabId !== after.tabId || before.documentId !== after.documentId || before.currentHref !== after.currentHref || changes !== generation) throw new Problem('tabChanged');
+    const after = expectedTab != null
+      ? { ...(await inject(expectedTab, 'meta')).result, tabId: expectedTab }
+      : await capture('meta');
+    if (before.tabId !== after.tabId || before.currentHref !== after.currentHref || (expectedTab == null && changes !== generation)) throw new Problem('tabChanged');
     if (!src.startsWith('data:image/jpeg;base64,')) throw new Problem('noShot');
     return { src, before };
   }

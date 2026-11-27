@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/w_sc_chat"
+        android:text="💬\nNovo chat"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -22,7 +22,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/w_sc_translate"
+        android:text="🌐\nTradutor"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -32,7 +32,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/w_sc_task"
+        android:text="✅\nTarefa"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -42,7 +42,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/w_sc_speak"
+        android:text="🎤\nFalar"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -52,7 +52,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="@string/w_sc_expense"
+        android:text="💶\nDespesa"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold" />

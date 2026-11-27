@@ -1,0 +1,14 @@
+[package]
+name = "odysseus_voice"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+base64 = "0.22.1"
+jni = "0.21.1"
+regex = { version = "1.13.2", default-features = false, features = ["std", "unicode-perl"] }
+serde_json = "1.0.154"
+unicode-normalization = "0.1.26"

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_extName__",
   "short_name": "Odysseus",
-  "version": "0.12.20",
+  "version": "0.13.1",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "minimum_chrome_version": "116",
@@ -46,5 +46,6 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'; img-src 'self' blob: data:; style-src 'self'; connect-src https: http:"
-  }
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqOkotVoEXJWuPH37+98tc4jbavS2A3Y1flVcKoNsqh/AYiepJuQaTg4xEE/g3HHuZIPUTCjojnapHjfxLNNRHs8zHW71yYG03519wn220whT7QlSRPjjluQhg2xpgAo3c6AFT/i4InxoEA3ukLMaU4rGe5Se74pzd7oWM6hJI9L1w97x5bTwK+D5PvppFg276kA9sjem2cFek1litxR8q2mUnSTTngbHxLrKiOOW1kBJ24O8tdw2UcIvURTEE8mBEdXNgzejoGXan6BMosGeqr9Cuz25Q1Qy5vGigjL00qdHI8TZQB6eMKLizDjBaoZzJp7WoPkKw9AsGq1EWCmQ4QIDAQAB"
 }

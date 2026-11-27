@@ -14,12 +14,14 @@ The server address **is no longer embedded in the APK**: when you open the app f
 
 ## Building
 
-Requirements: JDK 21, Android SDK (platform 35 and build-tools), Node 20+.
+Source version: **1.58** (versionCode 63). Requirements: JDK 21, Android SDK (platform 35 and build-tools), Node 20+, and Rust with the Android NDK 27 (for the voice/policy library in `voice-core/`).
+
+0a. `bash scripts/build-voice.sh` builds `voice-core/` and copies the `.so` files into `android/app/src/main/jniLibs/`.
 
 0. `cd android && npm install && npx cap sync android` (downloads Capacitor and generates `capacitor-cordova-android-plugins`; the `package.json` is in `android/`).
 1. (Optional, only for the sample texts) the `YOUR-SERVER...` addresses in the files below are no longer used at startup; you can ignore them:
    - `android/app/src/main/assets/capacitor.config.json` (`server.url` field);
-   - `android/app/src/main/java/org/odysseuskit/app/Updater.java` (`BASE`) and `NoteSync.java` (`SITE`);
+   - `android/app/src/main/java/com/canorus/odysseus/Updater.java` (`BASE`) and `NoteSync.java` (`SITE`);
    - `android/www/error.html`.
    Search for `YOUR-SERVER.YOUR-TAILNET.ts.net` and replace it in all locations.
 2. Create your signing key (keep it safe; without it, you cannot update the app):
@@ -36,5 +38,5 @@ Requirements: JDK 21, Android SDK (platform 35 and build-tools), Node 20+.
 
 ## Notes
 
-- The package identifier is `org.odysseuskit.app`. If you publish your variant, change it.
+- The package identifier is `com.canorus.odysseus`. If you publish your variant, change it.
 - Permissions used: notifications, exact alarms, calendar, camera, microphone, read SMS (only for SNS 24 queries), and read notifications. You can remove them from `AndroidManifest.xml` if you do not use the feature.

@@ -1,7 +1,7 @@
 import { agentModels, address, chat, getCfg, hasPerm, listModels, newSession, Problem, scopeOf, validate } from './api.js';
 import { applyUpdate, checkUpdate, getHandle } from './updater.js';
 import { guideTurn } from './guide.js';
-import { runAuto } from './auto.js';
+import { runAuto, cleanupOrphanedRun } from './auto.js';
 import { applyI18n, explain, lang, t } from './i18n.js';
 import { bindTabs } from './tabs.js';
 import { deleteArchived, downloadTranscript, durableConversation, historyEnabledKey, renameArchived, resumeArchived, saveArchived, setHistoryEnabled, titleFor } from './history.js';
@@ -460,7 +460,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && Object.keys(changes).some(k => Object.hasOwn(cfg, k))) configChanged();
   if (area === 'session' && changes[menuKey]?.newValue) { pendingMenu = changes[menuKey].newValue; takeMenu(); }
 });
-setHost(); restoreView(); sync(); loadModels(); loadAgentModels(); pendingMenu = initialState[menuKey]; takeMenu();
+setHost(); restoreView(); sync(); loadModels(); loadAgentModels(); cleanupOrphanedRun(); pendingMenu = initialState[menuKey]; takeMenu();
 
 // ---- auto-update ----
 (async () => {

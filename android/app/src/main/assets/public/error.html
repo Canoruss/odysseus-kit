@@ -25,7 +25,7 @@
   <button class="secondary" onclick="window.OdysseusNative && OdysseusNative.openTailscale()">Abrir Tailscale</button>
 </main>
 <script>
-  function retry(){ if (window.OdysseusNative) OdysseusNative.reload(); else location.href = 'https://YOUR-SERVER.YOUR-TAILNET.ts.net/'; }
+  function retry(){ if (window.OdysseusNative) OdysseusNative.reload(); else location.reload(); }
   setInterval(retry, 10000);
 </script>
 </body>

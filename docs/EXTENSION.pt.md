@@ -2,7 +2,7 @@
 
 [English](EXTENSION.md) · **Português**
 
-Assistente em painel lateral para Chrome, Edge e outros browsers Chromium que fala com o **teu próprio servidor Odysseus**. Pasta: [`extension/`](../extension). Versão 0.12.20. Sem compilação, sem dependências e sem servidores de terceiros.
+Assistente em painel lateral para Chrome, Edge e outros browsers Chromium que fala com o **teu próprio servidor Odysseus**. Pasta: [`extension/`](../extension). Versão 0.13.1. Sem compilação, sem dependências e sem servidores de terceiros.
 
 ## Instalar
 

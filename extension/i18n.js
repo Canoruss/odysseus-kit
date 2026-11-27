@@ -15,6 +15,26 @@ const messages = {
   aClick: ['Click', 'Clicar'], aType: ['Type', 'Escrever'], aSelect: ['Select', 'Escolher'], aScroll: ['Scroll', 'Deslizar'],
   aGoto: ['Go to', 'Ir para'], aSearch: ['Search', 'Pesquisar'], aLook: ['Look at the page', 'Ver a página'], aClickxy: ['Click at', 'Clicar em'], aRowicons: ['Read row icons', 'Ler ícones da linha'], aNewtab: ['New tab', 'Novo separador'], aKey: ['Key', 'Tecla'], aWait: ['Wait', 'Esperar'],
   aBack: ['Back', 'Voltar'], aExtract: ['Read page', 'Ler página'], aResult: ['done', 'feito'], aFail: ['failed', 'falhou'],
+  aHover: ['Hover', 'Passar rato'],
+  aClear: ['Clear', 'Limpar'],
+  aSwitchTab: ['Switch tab', 'Mudar separador'],
+  aListTabs: ['List tabs', 'Listar separadores'],
+  aInspect: ['Inspect region', 'Inspecionar região'],
+  aRemember: ['Remember', 'Guardar nota'],
+  aMemo: ['Scratchpad', 'Notas de progresso'],
+  agentLoopClick: ['Automation stopped: the same target was clicked repeatedly with no visible change on the page.', 'A automação parou: o mesmo alvo foi clicado repetidamente sem alteração visível na página.'],
+  agentLoopLook: ['Agent stopped: it used visual inspection 5 times in a row without acting.', 'O agente parou: usou a inspeção visual 5 vezes seguidas sem agir.'],
+  agentReplay: ['Saved recipe ({0} steps, used {1}×): replaying without the model', 'Receita guardada ({0} passos, usada {1}×): a repetir sem modelo'],
+  agentReplayFail: ['Recipe failed at step {0} ({1}); the agent continues from here', 'A receita falhou no passo {0} ({1}); o agente continua daqui'],
+  agentReplayDropped: [' and the old recipe was dropped', ' e a receita antiga foi apagada'],
+  agentRecipeSaved: ['Recipe saved ({0} steps): next time it runs without the model', 'Receita guardada ({0} passos): da próxima vez corre sem modelo'],
+  agentRecipeNotSaved: ['Recipe not saved: ', 'Receita não guardada: '],
+  agentElNotFound: ['element not found: ', 'elemento não encontrado: '],
+  agentResumedClean: ['Previous interrupted session cleaned up.', 'Sessão anterior interrompida foi limpa.'],
+  bpAuditStart: ['Boarding Pass audit (Enter details + Id upload): going to the top of the list', 'Auditoria Boarding Pass (Enter details + Id upload): a ir ao topo da lista'],
+  bpNoPass: ['no Boarding Pass (no booking?)', 'sem Boarding Pass (sem reserva?)'],
+  bpClosed: ['Boarding Pass dropdown did not open', 'o dropdown do Boarding Pass não abriu'],
+  bpNoChat: ['chat did not open', 'a conversa não abriu'],
   pageContext: ['Page context', 'Contexto da página'],
   focusContext: ['Relevant excerpts', 'Excertos relevantes'],
   fullContext: ['Full captures', 'Capturas completas'],
@@ -199,3 +219,5 @@ export function applyI18n() {
   for (const n of document.querySelectorAll('[data-i]')) n.textContent = t(n.dataset.i);
   for (const n of document.querySelectorAll('[data-label]')) { n.setAttribute('aria-label', t(n.dataset.label)); n.title = t(n.dataset.label); }
 }
+
+export function tf(key, ...args) { let s = t(key); args.forEach((v, i) => { s = s.replace('{' + i + '}', String(v)); }); return s; }

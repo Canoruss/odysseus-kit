@@ -2,27 +2,32 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut android:shortcutId="new_chat" android:enabled="true" android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/sc_new_chat">
-        <intent android:action="org.odysseuskit.app.NEW_CHAT" android:targetPackage="org.odysseuskit.app"
-            android:targetClass="org.odysseuskit.app.MainActivity" />
+        <intent android:action="com.canorus.odysseus.NEW_CHAT" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.MainActivity" />
     </shortcut>
     <shortcut android:shortcutId="new_task" android:enabled="true" android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/sc_new_task">
-        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
-            android:targetClass="org.odysseuskit.app.QuickTaskActivity" />
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.QuickTaskActivity" />
     </shortcut>
     <shortcut android:shortcutId="translate" android:enabled="true" android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/sc_translate">
-        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
-            android:targetClass="org.odysseuskit.app.TranslateActivity" />
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.TranslateActivity" />
     </shortcut>
     <shortcut android:shortcutId="gemini" android:enabled="true" android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/sc_gemini">
-        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
-            android:targetClass="org.odysseuskit.app.GeminiLauncher" />
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.GeminiLauncher" />
     </shortcut>
     <shortcut android:shortcutId="settings" android:enabled="true" android:icon="@mipmap/ic_launcher"
         android:shortcutShortLabel="@string/sc_settings">
-        <intent android:action="android.intent.action.VIEW" android:targetPackage="org.odysseuskit.app"
-            android:targetClass="org.odysseuskit.app.SettingsActivity" />
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.SettingsActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="agent_voice" android:enabled="true" android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/sc_agent">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.canorus.odysseus"
+            android:targetClass="com.canorus.odysseus.AgentPromptActivity" />
     </shortcut>
 </shortcuts>

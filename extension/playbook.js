@@ -8,24 +8,25 @@ export function sim(a, b) {
 }
 export const hostOf = (url) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
 export const RISKY = /\b(send|enviar|delete|apagar|eliminar|remove|remover|pay|pagar|submit|confirm|confirmar|cancel|cancelar|save|guardar|publish|publicar|buy|comprar|checkout|refund|reembolsar|approve|aprovar)\b/i;
-export const RECORDABLE = ['click', 'type', 'select', 'key', 'scroll', 'goto', 'newtab', 'search', 'back', 'wait', 'extract'];
+export const RECORDABLE = ['click', 'hover', 'type', 'clear', 'select', 'key', 'scroll', 'goto', 'newtab', 'search', 'back', 'wait', 'extract'];
 export const locOf = (el) => ({ tag: el.tag, label: el.label, testid: el.testid, role: el.role });
 export function findEl(els, loc) {
-  const L = (s) => String(s || '').trim().toLowerCase(), want = L(loc.label);
+  const L = (s) => String(s || '').replace(/\s*=\s*“.*”$/, '').trim().toLowerCase();
+  const want = L(loc.label);
   if (loc.testid) {
-    const m = els.filter((e) => e.testid === loc.testid);
+    const m = els.filter((e) => e.testid === loc.testid && !e.occluded);
     const exact = m.find((e) => L(e.label) === want);
     if (exact) return exact;
     if (m.length === 1) return m[0];
   }
-  const same = els.filter((e) => e.tag === loc.tag);
+  const same = els.filter((e) => (e.tag === loc.tag || (loc.role && e.role === loc.role)) && !e.occluded);
   const exact = same.find((e) => L(e.label) === want);
   if (exact) return exact;
   if (want.length >= 4) {
-    const part = same.filter((e) => e.label.length >= 4 && (L(e.label).includes(want) || want.includes(L(e.label))));
+    const part = same.filter((e) => L(e.label).length >= 4 && (L(e.label).includes(want) || want.includes(L(e.label))));
     if (part.length === 1) return part[0];
   }
-  if (want.length > 30) { // long labels (chat rows) contain changing previews: match on the stable start (the name)
+  if (want.length > 30) {
     const head = want.slice(0, 18), part = same.filter((e) => L(e.label).startsWith(head));
     if (part.length >= 1) return part[0];
   }

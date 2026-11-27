@@ -4,7 +4,7 @@ import { turnTiming } from './timing.js';
 function tool(name, description, properties, required = Object.keys(properties)) {
   return { type: 'function', function: { name, description, parameters: { type: 'object', properties, required, additionalProperties: false } } };
 }
-const id = { type: 'integer', minimum: 1, maximum: 80 };
+const id = { type: 'integer', minimum: 1, maximum: 200 };
 const str = { type: 'string' };
 export const TOOLS = [
   tool('click', 'Propose clicking a named control from the snapshot.', { id }),

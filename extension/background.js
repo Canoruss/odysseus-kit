@@ -10,7 +10,7 @@ async function configure() {
 }
 chrome.runtime.onInstalled.addListener(configure);
 chrome.runtime.onStartup.addListener(configure);
-chrome.windows.onRemoved.addListener(windowId => { chrome.storage.session.remove(['thread:' + windowId, 'menu:' + windowId]); });
+chrome.windows.onRemoved.addListener(windowId => { chrome.storage.session.remove(['thread:' + windowId, 'menu:' + windowId, 'activeAgentRun']); });
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (!Object.hasOwn(menus, info.menuItemId) || !tab?.id || info.editable || !info.selectionText?.trim()) return;
   let page; try { page = new URL(info.frameUrl || info.pageUrl || tab.url); } catch { return; }

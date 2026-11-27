@@ -1,4 +1,4 @@
-# Odysseus 0.12.20
+# Odysseus 0.13.1
 
 A Chrome and Edge side-panel assistant for a private Odysseus server. It opens in Chat and offers a Page guide for reviewed browser actions. The interface follows the browser language and includes English and European Portuguese. The extension runs directly from this folder, with no build step or runtime dependencies.
 

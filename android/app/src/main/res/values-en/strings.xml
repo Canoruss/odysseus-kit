@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="intent_new_chat">Odysseus (new chat)</string>
+    <string name="lbl_quick_expense">Quick expense</string>
+    <string name="lbl_translate_photo">Translate photo</string>
+    <string name="lbl_new_note">New note</string>
+    <string name="w_chat">Odysseus — chat</string>
+    <string name="w_translate">Odysseus — translation</string>
+    <string name="w_photo">Odysseus — translate photo</string>
+    <string name="w_notes">Odysseus — notes</string>
+    <string name="w_task">Odysseus — quick task</string>
+    <string name="w_expenses">Odysseus — expenses</string>
+    <string name="w_shortcuts">Odysseus — shortcuts</string>
+    <string name="w_tasks">Odysseus — tasks</string>
+    <string name="lbl_sns">Odysseus — SNS24 appointments</string>
+    <string name="widget_desc">Upcoming tasks and reminders from Odysseus</string>
+    <string name="sc_new_chat">New chat</string>
+    <string name="sc_new_task">New task</string>
+    <string name="sc_translate">Translator</string>
+    <string name="sc_gemini">Gemini</string>
+    <string name="sc_settings">App settings</string>
+    <string name="translate_with">Translate (Odysseus)</string>
+    <string name="widget_shortcuts_desc">Shortcuts: new chat, translator and new task</string>
+    <string name="w_glucose">Odysseus — glucose</string>
+    <string name="glucose_no_data">No data</string>
+    <string name="glucose_reading">Reading</string>
+    <string name="sc_agent">Odysseus Agent</string>
+    <string name="agent_a11y_desc">Allows Odysseus Agent to read the screen and control apps on your behalf, asking confirmation before critical actions.</string>
+</resources>
