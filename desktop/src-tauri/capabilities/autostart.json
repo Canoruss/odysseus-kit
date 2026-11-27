@@ -1,0 +1,6 @@
+{
+  "identifier": "local-autostart",
+  "description": "Allow the local desktop window to manage automatic startup.",
+  "windows": ["main"],
+  "permissions": ["autostart:default"]
+}
